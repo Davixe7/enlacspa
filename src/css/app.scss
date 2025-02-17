@@ -1,1 +1,64 @@
 // app global css in SCSS form
+body {
+  font-family: "DM Sans", serif;
+  font-size: 16px;
+  line-height: 1.3rem;
+  letter-spacing: 0;
+}
+.q-btn {
+  text-transform: initial;
+  font-size: 16px;
+  padding: 6px 16px;
+}
+.q-btn--rectangle {
+  border-radius: 4px;
+}
+.q-btn--rectangle .q-icon {
+  font-size: 1.25rem;
+  margin-right: 0.5rem;
+}
+.q-btn--outline::before {
+  border-width: 2px;
+}
+.q-checkbox__bg {
+  border-width: 1px;
+}
+.page-title {
+  font-weight: 500;
+  font-size: 25px;
+  line-height: 1.3em;
+  color: #111827;
+}
+
+//INPUTS
+.q-field--labeled {
+  padding-top: 26px;
+}
+.q-field--auto-height .q-field__control {
+  min-height: initial;
+}
+.q-field--labeled.q-field--auto-height .q-field__control-container {
+  padding-top: 0;
+}
+.q-field__control {
+  height: 40px;
+}
+.q-field__label {
+  top: -26px;
+  left: -12px;
+  color: #111827;
+  font-size: 14px;
+  transform: none !important;
+}
+.q-field--labeled .q-field__native {
+  height: 40px;
+  padding-top: 10px;
+  line-height: 10px;
+}
+.q-field__marginal {
+  height: 40px;
+}
+.q-checkbox__label {
+  font-size: 14px;
+  color: #111827;
+}
