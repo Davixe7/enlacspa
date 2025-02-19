@@ -47,7 +47,7 @@ export default defineConfig((/* ctx */) => {
       // publicPath: '/',
       // analyze: true,
       env: {
-        API_URL: "http://192.168.0.100:8000/api",
+        API_URL: "http://localhost:8000/api",
       },
       // rawDefine: {}
       // ignorePublicFolder: true,
@@ -75,7 +75,7 @@ export default defineConfig((/* ctx */) => {
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#devserver
     devServer: {
-      // https: true,
+      //https: true,
       open: true, // opens browser window automatically
     },
 

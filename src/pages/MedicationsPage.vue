@@ -2,46 +2,46 @@
 import { reactive, ref } from "vue";
 
 const props = defineProps({
-  medicamentos: {
+  medications: {
     type: Array,
     default: () => [],
   },
 });
-const medicamento = reactive({
-  nombre: "",
-  dosis: "",
-  frecuencia: "",
-  tiempo: "",
-  observaciones: "",
+
+const medication = reactive({
+  name: "",
+  dose: "",
+  frequency: "",
+  duration: "",
 });
 
-function addMedicamento() {
-  medicamento.nombre = "";
-  medicamento.dosis = "";
-  medicamento.frecuencia = "";
-  medicamento.tiempo = "";
-  medicamento.observaciones = "";
-  localMedicamentos.value.push({ ...medicamento });
+function addMedication() {
+  medication.name = "";
+  medication.dose = "";
+  medication.frequency = "";
+  medication.duration = "";
+  medication.observaciones = "";
+  localMedications.value.push({ ...medication });
 }
 
-const localMedicamentos = ref([...props.medicamentos]);
+const localMedications = ref([...props.medications]);
 const columns = ref([
   {
-    name: "nombre",
-    field: "nombre",
-    label: "Nombre del medicamento",
+    name: "name",
+    field: "name",
+    label: "Nombre del medication",
     align: "left",
   },
-  { name: "dosis", field: "dosis", label: "Dosis", align: "left" },
+  { name: "dosis", field: "dose", label: "Dosis", align: "left" },
   {
     name: "frecuencia",
-    field: "frecuencia",
+    field: "frequency",
     label: "Frecuencia",
     align: "left",
   },
   {
     name: "tiempo",
-    field: "tiempo",
+    field: "duration",
     label: "Tiempo de tomarlo",
     align: "left",
   },
@@ -67,7 +67,7 @@ const columns = ref([
     flat
     bordered
     :columns="columns"
-    :rows="localMedicamentos"
+    :rows="localMedications"
     :pagination="{ rowsPerPage: 0 }"
   >
     <template v-slot:body="props">
@@ -76,35 +76,35 @@ const columns = ref([
           <q-input
             outlined
             placeholder="Ej: Paracetamol"
-            v-model="props.row.nombre"
+            v-model="props.row.name"
           ></q-input>
         </q-td>
         <q-td>
           <q-input
             outlined
             placeholder="Ej: 500 mg"
-            v-model="props.row.dosis"
+            v-model="props.row.dose"
           ></q-input>
         </q-td>
         <q-td>
           <q-input
             outlined
             placeholder="Ej: 2 Veces al dia"
-            v-model="props.row.frecuencia"
+            v-model="props.row.frequency"
           ></q-input>
         </q-td>
         <q-td>
           <q-input
             outlined
             placeholder="Ej: 1 Semana"
-            v-model="props.row.tiempo"
+            v-model="props.row.duration"
           ></q-input>
         </q-td>
         <q-td>
           <q-input
             type="textarea"
             outlined
-            v-model="props.row.observaciones"
+            value="Lorem ipsum dolor sit amet"
           ></q-input>
         </q-td>
         <q-td>
@@ -113,16 +113,20 @@ const columns = ref([
             round
             icon="delete"
             @click="
-              localMedicamentos.splice(localMedicamentos.indexOf(props.row, 1))
-            "
+              localMedications.splice(localMedications.indexOf(props.row, 1))
+              "
           ></q-btn>
         </q-td>
       </q-tr>
     </template>
   </q-table>
   <div class="flex justify-end q-py-lg">
-    <q-btn color="primary" icon="add" @click="addMedicamento">
-      Agregar medicamento
+    <q-btn
+      color="primary"
+      icon="add"
+      @click="addMedication"
+    >
+      Agregar Medicamento
     </q-btn>
   </div>
 </template>
@@ -131,13 +135,16 @@ const columns = ref([
 .q-table td {
   vertical-align: middle;
 }
+
 .q-table td:nth-child(5) {
   font-size: 14px;
   width: 185px;
   padding: 10px;
   box-sizing: border-box;
 }
+
 .q-table tr:nth-child(even) {
-  background-color: #f3f4f6; /* Color de fondo para filas pares */
+  background-color: #f3f4f6;
+  /* Color de fondo para filas pares */
 }
 </style>

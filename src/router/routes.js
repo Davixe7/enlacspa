@@ -25,6 +25,12 @@ const routes = [
             meta: { label: "Nuevo Candidato", layout: "main" },
             component: () => import("pages/CandidatoForm.vue"),
           },
+          {
+            path: ":candidateId/editar",
+            meta: { label: "Editar Candidato", layout: "main" },
+            component: () => import("pages/CandidatoForm.vue"),
+            props: true,
+          },
         ],
       },
     ],

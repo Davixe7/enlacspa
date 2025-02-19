@@ -1,8 +1,10 @@
 <script setup>
 import { api } from "src/boot/axios";
 import { onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 const errors = ref({ email: "", password: "" });
 
+const router = useRouter()
 const baseUrl = new URL(api.defaults.baseURL).origin
 const loading = ref(false);
 const email = ref('');
@@ -19,9 +21,8 @@ async function attemptLogin() {
   try {
     loading.value = true
     await api.post(`${baseUrl}/login`, { email: email.value, password: password.value })
+    router.push('home')
   } catch (error) {
-    console.log('withCredentials: ' + api.defaults.withCredentials)
-    console.log('withXSRF: ' + api.defaults.withXSRFToken)
     console.log('Error al intentar loguear: ' + error)
   }
   loading.value = false

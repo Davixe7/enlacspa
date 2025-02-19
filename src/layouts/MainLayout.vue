@@ -1,8 +1,17 @@
 <template>
   <q-layout view="lHh Lpr lFf">
     <q-header>
-      <q-toolbar color="red" style="padding: 36px 32px">
-        <q-img src="/logo_header.png" width="72px" to="/home"></q-img>
+      <q-toolbar
+        color="red"
+        style="padding: 36px 32px"
+      >
+        <router-link to="/home">
+          <q-img
+            src="/logo_header.png"
+            width="72px"
+          ></q-img>
+        </router-link>
+
         <div class="q-toolbar__title-container">
           <q-toolbar-title> ENLAC </q-toolbar-title>
           <div class="q-toolbar__subtitle">
@@ -19,18 +28,39 @@
           v-model="span"
         >
           <template v-slot:prepend>
-            <q-icon name="event" color="white" />
+            <q-icon
+              name="event"
+              color="white"
+            />
           </template>
         </q-select>
-        <q-btn flat round icon="notifications"></q-btn>
-        <q-avatar rounded size="52px">
+        <q-btn
+          flat
+          round
+          icon="notifications"
+        ></q-btn>
+        <q-avatar
+          rounded
+          size="52px"
+        >
           <q-img src="/avatar.png"></q-img>
         </q-avatar>
 
-        <q-btn flat round color="white" icon="arrow_drop_down">
+        <q-btn
+          flat
+          round
+          color="white"
+          icon="arrow_drop_down"
+        >
           <q-menu :offset="[0, 15]">
-            <q-list style="min-width: 255px" dense>
-              <q-item clickable v-close-popup>
+            <q-list
+              style="min-width: 255px"
+              dense
+            >
+              <q-item
+                clickable
+                v-close-popup
+              >
                 <q-item-section avatar>
                   <q-icon name="notifications" />
                 </q-item-section>
@@ -42,7 +72,10 @@
                 icon="settings"
                 label="Configuración"
               >
-                <q-list dense style="padding-left: 22px">
+                <q-list
+                  dense
+                  style="padding-left: 22px"
+                >
                   <q-item clickable>
                     <q-item-section>Administración de usuarios</q-item-section>
                   </q-item>
@@ -57,7 +90,10 @@
                   </q-item>
                 </q-list>
               </q-expansion-item>
-              <q-item clickable v-close-popup>
+              <q-item
+                clickable
+                v-close-popup
+              >
                 <q-item-section avatar>
                   <q-icon name="logout" />
                 </q-item-section>
@@ -111,6 +147,7 @@ function printRoute() {
   padding: 0;
   flex: initial;
 }
+
 .q-toolbar__title-container {
   flex: 1 1 auto;
   align-self: stretch;
@@ -119,19 +156,24 @@ function printRoute() {
   justify-content: space-between;
   margin-left: 40px;
 }
+
 .q-toolbar__subtitle {
   font-weight: 500;
   font-size: 18px;
 }
+
 .q-item__section--avatar {
   min-width: fit-content;
 }
+
 .q-item__section--side {
   padding-right: 8px;
 }
-.q-item__section--side > .q-icon {
+
+.q-item__section--side>.q-icon {
   font-size: 16px;
 }
+
 .q-item__section--main {
   font-size: 14px;
 }

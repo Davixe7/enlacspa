@@ -1,57 +1,29 @@
 <script setup>
+import { api } from "src/boot/axios";
+import { onMounted } from "vue";
 import { ref } from "vue";
 
-const rows = ref([
-  {
-    name: "Pamela Guizar Mendoza",
-    sheet: "123456",
-    date: "2025-01-15",
-    evaluator: "Ana Martínez",
-    is_candidate: true,
-  },
-  {
-    name: "María Gómez",
-    sheet: "789012",
-    date: "2025-02-10",
-    evaluator: "Carlos Ruiz",
-    is_candidate: false,
-  },
-  {
-    name: "Luis Rodríguez",
-    sheet: "345678",
-    date: "2025-01-20",
-    evaluator: "Laura Sánchez",
-    is_candidate: true,
-  },
-  {
-    name: "Ana Fernández",
-    sheet: "901234",
-    date: "2025-02-25",
-    evaluator: "Pedro Ramírez",
-    is_candidate: false,
-  },
-  {
-    name: "José Martínez",
-    sheet: "567890",
-    date: "2025-01-30",
-    evaluator: "Sofía Torres",
-    is_candidate: true,
-  },
-]);
+onMounted(() => fetchCandidates())
+
+async function fetchCandidates() {
+  rows.value = (await api.get('candidates')).data.data
+}
+
+const rows = ref([]);
 
 const columns = ref([
   {
     name: "name",
     label: "Nombre de Candidato",
     align: "left",
-    field: "name",
+    field: "first_name",
     sortable: true,
   },
   {
     name: "sheet",
     label: "Folio",
     align: "left",
-    field: "sheet",
+    field: "id",
     sortable: true,
   },
   {
@@ -79,8 +51,7 @@ const columns = ref([
     name: "notes",
     label: "Observaciones",
     align: "left",
-    field: () =>
-      "Lörem ipsum orade kövis då antivaxxare. Sanys infrafede de stenosamma plagen. Klimatneutral hedersvåld, i valig demonomi, prepisagen. Makroll eldost parar tir. Antiren valadolig i kodokaska ibel. ",
+    field: () => "Lörem ipsum orade kövis då antivaxxare.",
     sortable: true,
   },
   {
@@ -96,11 +67,18 @@ const columns = ref([
   <q-page class="q-pa-lg">
     <h1 class="page-title">Candidatos y Evaluaciones</h1>
     <div class="flex q-mb-lg">
-      <q-btn color="primary" icon="description" outline="" class="q-mr-md"
-        >Reporte de candidatos
+      <q-btn
+        color="primary"
+        icon="description"
+        outline=""
+        class="q-mr-md"
+      >Reporte de candidatos
       </q-btn>
-      <q-btn color="primary" icon="calendar_today" outline=""
-        >Programar cita
+      <q-btn
+        color="primary"
+        icon="calendar_today"
+        outline=""
+      >Programar cita
       </q-btn>
       <q-btn
         color="primary"
@@ -112,13 +90,33 @@ const columns = ref([
         Nuevo Candidato
       </q-btn>
     </div>
-    <q-table wrap-cells :columns="columns" :rows="rows">
-      <template v-slot:body-cell-actions>
+    <q-table
+      wrap-cells
+      :columns="columns"
+      :rows="rows"
+    >
+      <template v-slot:body-cell-actions="props">
         <q-td>
           <div>
-            <q-btn dense flat round icon="edit" />
-            <q-btn dense flat round icon="chat" />
-            <q-btn dense flat round icon="list" />
+            <q-btn
+              dense
+              flat
+              round
+              icon="edit"
+              :to="`candidatos/${props.row.id}/editar`"
+            />
+            <q-btn
+              dense
+              flat
+              round
+              icon="chat"
+            />
+            <q-btn
+              dense
+              flat
+              round
+              icon="list"
+            />
           </div>
         </q-td>
       </template>
@@ -135,25 +133,32 @@ const columns = ref([
   padding: 16px;
   white-space: break-spaces;
 }
+
 .q-table thead {
   background: #e5e7eb;
 }
+
 .q-table tbody td {
   font-size: 16px;
 }
+
 .q-btn--dense .q-icon {
   font-size: 20px;
 }
+
 .q-table td {
   vertical-align: top;
   padding: 16px;
 }
+
 td:nth-child(6) {
   max-width: 221px;
 }
+
 th:nth-child(1) {
   padding-right: 10%;
 }
+
 th:nth-child(3) {
   max-width: 125px;
 }
