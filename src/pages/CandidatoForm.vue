@@ -1,47 +1,100 @@
 <script setup>
 import { onMounted, ref } from "vue";
-import MedicationsPage from "./MedicationsPage.vue";
 import { api } from "src/boot/axios";
+import ContactForm from "./ContactForm.vue";
+import AddressForm from "./AddressForm.vue";
+import MedicationsPage from "./MedicationsPage.vue";
+import { DateTime } from "luxon";
 
-const props = defineProps({
-  candidateId: {
-    type: String,
-    nullable: true,
-    default: null
-  }
+const props = defineProps(['candidateId'])
+
+function seed() {
+  candidate.value = { "sheet": 1, "first_name": "Jim", "middle_name": "Doe", "last_name": "Smith", "birth_date": "2025-01-01", "age": 1, "chronological_age": 1, "diagnosis": "Lorem ipsum" }
+  contact.value = { "first_name": "Maria", "middle_name": "Garcia", "last_name": "Salazar", "relationship": "Padre", "legal_guardian": 0, "enlac_responsible": 1, "email": "mariajoseguilarte@gmail.com", "whatsapp": '321123456', "home_phone": '321123456' }
+  address.value = { "street": "5", "neighborhood": "Villa Rosa", "state": "Nueva Esparta", "postal_code": "6301", "exterior_number": "0", "city": "Porlamar", "country": "Venezuela" }
+  medications.value = [{ "name": "Paracetamol", "dose": "500mg", "frequency": "1 cada 12 horas", "duration": "3 dias", "observations": "Lorem ipsum" }]
+  evaluation_schedule.value = { evaluator_id: 2, date: '2025-03-01 06:00:00' }
+}
+
+const evaluators = ref([])
+const evaluation_schedules = ref([])
+const evaluation_schedule = ref({
+  evaluator_id: null,
+  date: DateTime.now().toFormat('yyyy-MM-dd H:mm:s')
 })
-const errors = ref({});
-const medications = ref([{}]);
+const picture = ref(null)
 
 onMounted(async () => {
-  if (props.candidateId) {
-    await fetchCandidate()
-  }
+  props.candidateId ? await fetchCandidate() : null
+  fetchEvaluators()
 })
+
+async function fetchEvaluators() {
+  evaluators.value = (await api.get('evaluators')).data.data
+}
 
 async function fetchCandidate() {
   candidate.value = (await api.get(`candidates/${props.candidateId}`)).data.data
   contact.value = candidate.value.contact
   address.value = contact.value.addresses[0]
   medications.value = candidate.value.medications
+  evaluation_schedule.value = candidate.value.evaluation_schedule
+  evaluation_schedules.value = candidate.value.evaluation_schedules
+}
+
+function loadData() {
+  delete candidate.value.contact;
+  delete candidate.value.medications;
+  delete candidate.value.evaluation_schedules;
+  delete candidate.value.evaluation_schedule;
+  delete contact.value.addresses;
+  delete candidate.value.full_name;
+
+  let data = {
+    candidate: candidate.value,
+    contact: contact.value,
+    address: address.value,
+    evaluation_schedule: evaluation_schedule.value,
+  }
+
+  let formdata = new FormData()
+  formdata.append('picture', picture.value)
+
+  Object.keys(data).forEach(key => {
+    Object.keys(data[key]).forEach(subkey => {
+      formdata.append(`${key}[${subkey}]`, data[key][subkey])
+    })
+  })
+
+  medications.value.forEach((med, i) => {
+    Object.keys(med).forEach(medKey => {
+      formdata.append(`medications[${i}][${medKey}]`, medications.value[i][medKey])
+    })
+  })
+
+  if (candidate.value.id) {
+    formdata.append('_method', 'PUT')
+  }
+
+  return formdata;
 }
 
 async function storeCandidate() {
+  loading.value = true
   try {
-    delete candidate.value.contact;
-    let data = {
-      candidate: candidate.value,
-      contact: contact.value,
-      address: address.value,
-      medications: medications.value
-    }
-    let response = (await api.post('candidates', data)).data.data
-    console.log(response);
-
-  } catch (error) {
-    console.error(error);
+    let formdata = loadData()
+    let endpoint = candidate.value.id ? `candidates/${candidate.value.id}` : 'candidates'
+    await api.post(endpoint, formdata)
   }
+  catch (error) {
+    errors.value = error.status == 422 ? error.formatted : {}
+  }
+  loading.value = false
 }
+
+const loading = ref(false)
+const errors = ref({});
+const medications = ref([]);
 
 const candidate = ref({
   id: null,
@@ -52,7 +105,6 @@ const candidate = ref({
   age: null,
   chronological_age: null,
   diagnosis: 'Lorem ipsum',
-  photo: null,
 });
 
 const contact = ref({
@@ -90,6 +142,7 @@ const address = ref({
           style="border: 1px solid red"
         >
           Datos del Candidato
+          <q-btn @click="seed">llenar</q-btn>
         </div>
       </div>
       <div class="col-12 col-md-6 q-gutter-y-lg">
@@ -99,8 +152,8 @@ const address = ref({
           hide-bottom-space
           label="Nombre (s)"
           v-model="candidate.first_name"
-          :error="!!errors.nombre"
-          :error-message="errors.nombre"
+          :error="!!errors['candidate.first_name']"
+          :error-message="errors['candidate.first_name']"
         ></q-input>
         <q-input
           outlined
@@ -108,8 +161,8 @@ const address = ref({
           hide-bottom-space
           label="Apellido Materno"
           v-model="candidate.middle_name"
-          :error="!!errors.apellido_materno"
-          :error-message="errors.apellido_materno"
+          :error="!!errors['candidate.apellido_materno']"
+          :error-message="errors['candidate.apellido_materno']"
         ></q-input>
         <q-input
           outlined
@@ -117,8 +170,8 @@ const address = ref({
           hide-bottom-space
           label="Apellido Paterno"
           v-model="candidate.last_name"
-          :error="!!errors.apellido_paterno"
-          :error-message="errors.apellido_paterno"
+          :error="!!errors['candidate.last_name']"
+          :error-message="errors['candidate.last_name']"
         ></q-input>
       </div>
       <div class="col-12 col-md-6 q-gutter-y-lg">
@@ -128,8 +181,8 @@ const address = ref({
           hide-bottom-space
           label="Fecha de Nacimiento"
           v-model="candidate.birth_date"
-          :error="!!errors.fecha_nacimiento"
-          :error-message="errors.fecha_nacimiento"
+          :error="!!errors['candidate.birth_date']"
+          :error-message="errors['candidate.birth_date']"
           type="date"
         ></q-input>
         <q-input
@@ -138,8 +191,8 @@ const address = ref({
           hide-bottom-space
           label="Edad"
           v-model.number="candidate.age"
-          :error="!!errors.edad"
-          :error-message="errors.edad"
+          :error="!!errors['candidate.age']"
+          :error-message="errors['candidate.age']"
           type="number"
         ></q-input>
         <q-input
@@ -148,205 +201,12 @@ const address = ref({
           hide-bottom-space
           label="Edad Cronológica*"
           v-model.number="candidate.chronological_age"
-          :error="!!errors.cronologica"
-          :error-message="errors.cronologica"
+          :error="!!errors['cronologica']"
+          :error-message="errors['cronologica']"
           type="number"
         ></q-input>
       </div>
     </div>
-
-    <div class="row q-col-gutter-lg q-mb-xl">
-      <div class="col-12 q-pb-none">
-        <div
-          class="page-title"
-          style="border: 1px solid red"
-        >
-          Datos del Contacto
-        </div>
-      </div>
-      <div class="col-12 col-md-6 q-gutter-y-lg">
-        <q-input
-          outlined
-          stack-label
-          hide-bottom-space
-          label="Nombre (s)"
-          v-model="contact.first_name"
-          :error="!!errors.nombre"
-          :error-message="errors.nombre"
-        ></q-input>
-        <q-input
-          outlined
-          stack-label
-          hide-bottom-space
-          label="Apellido Materno"
-          v-model="contact.middle_name"
-          :error="!!errors.apellido_materno"
-          :error-message="errors.apellido_materno"
-        ></q-input>
-        <q-input
-          outlined
-          stack-label
-          hide-bottom-space
-          label="Apellido Paterno"
-          v-model="contact.last_name"
-          :error="!!errors.apellido_paterno"
-          :error-message="errors.apellido_paterno"
-        ></q-input>
-        <q-select
-          outlined
-          stack-label
-          hide-bottom-space
-          label="Parentesco"
-          v-model="contact.relationship"
-          :error="!!errors.parentesco"
-          :error-message="errors.parentesco"
-          :options="[{ label: 'Padre', value: 1 }]"
-          Debes
-          completar
-          las
-          opciones
-          map-options
-        ></q-select>
-      </div>
-      <div class="col-12 col-md-6 q-gutter-y-lg">
-        <q-input
-          outlined
-          stack-label
-          hide-bottom-space
-          label="Correo"
-          v-model="contact.email"
-          :error="!!errors.email"
-          :error-message="errors.email"
-          type="email"
-        ></q-input>
-        <q-input
-          outlined
-          stack-label
-          hide-bottom-space
-          label="Whatsapp"
-          v-model="contact.whatsapp"
-          :error="!!errors.whatsapp"
-          :error-message="errors.whatsapp"
-          type="tel"
-        ></q-input>
-        <q-input
-          outlined
-          stack-label
-          hide-bottom-space
-          label="Telefono casa"
-          v-model="contact.home_phone"
-          :error="!!errors.tel"
-          :error-message="errors.tel"
-          type="tel"
-        ></q-input>
-        <div class="flex">
-          <q-checkbox
-            label="Tutor legal"
-            v-model="contact.legal_guardian"
-          ></q-checkbox>
-          <q-checkbox
-            label="Responsable ENLAC"
-            v-model="contact.enlac_responsible"
-          ></q-checkbox>
-        </div>
-      </div>
-    </div>
-
-    <div class="row q-col-gutter-lg q-mb-xl">
-      <div class="col-12 q-pb-none">
-        <div
-          class="page-title q-mb-md"
-          style="border: 1px solid red"
-        >
-          Domicilio
-        </div>
-      </div>
-      <div class="col-12 col-md-6 q-gutter-y-lg">
-        <q-input
-          outlined
-          stack-label
-          hide-bottom-space
-          label="Calle"
-          v-model="address.street"
-          :error="!!errors.calle"
-          :error-message="errors.calle"
-        ></q-input>
-        <q-input
-          outlined
-          stack-label
-          hide-bottom-space
-          label="Colonia"
-          v-model="address.neighborhood"
-          :error="!!errors.colonia"
-          :error-message="errors.colonia"
-        ></q-input>
-        <q-input
-          outlined
-          stack-label
-          hide-bottom-space
-          label="Estado"
-          v-model="address.state"
-          :error="!!errors.estado"
-          :error-message="errors.estado"
-        ></q-input>
-        <q-input
-          outlined
-          stack-label
-          hide-bottom-space
-          label="Codigo Postal"
-          v-model="address.postal_code"
-          :error="!!errors.codigo_postal"
-          :error-message="errors.codigo_postal"
-          type="number"
-        ></q-input>
-      </div>
-      <div class="col-12 col-md-6 q-gutter-y-lg">
-        <q-input
-          outlined
-          stack-label
-          hide-bottom-space
-          label="Numero exterior"
-          v-model="address.exterior_number"
-          :error="!!errors.numero_exterior"
-          :error-message="errors.numero_exterior"
-          type="number"
-        ></q-input>
-        <q-input
-          outlined
-          stack-label
-          hide-bottom-space
-          label="Colonia"
-          v-model="address.neighborhood"
-          :error="!!errors.colonia"
-          :error-message="errors.colonia"
-        ></q-input>
-        <q-input
-          outlined
-          stack-label
-          hide-bottom-space
-          label="Ciudad"
-          v-model="address.city"
-          :error="!!errors.ciudad"
-          :error-message="errors.ciudad"
-        ></q-input>
-        <q-input
-          outlined
-          stack-label
-          hide-bottom-space
-          label="Pais"
-          v-model="address.country"
-          :error="!!errors.pais"
-          :error-message="errors.pais"
-        ></q-input>
-        <div class="flex justify-end">
-          <q-btn
-            color="primary"
-            icon="add"
-          > Agregar Domicilio </q-btn>
-        </div>
-      </div>
-    </div>
-
     <div class="row q-col-gutter-lg q-mb-xl">
       <div class="col-12 q-pb-none">
         <div class="page-title">Información Médica del Candidato</div>
@@ -358,45 +218,93 @@ const address = ref({
           stack-label
           hide-bottom-space
           label="Diagnostico Médico / Síntomas *"
-          :error="!!errors.diagnostico"
-          :error-message="errors.diagnostico"
+          v-model="candidate.diagnosis"
+          :error="!!errors.diagnosis"
+          :error-message="errors.diagnosis"
         ></q-input>
       </div>
     </div>
 
-    <div class="row q-col-gutter-lg q-mb-xl">
-      <div class="col-12 q-pb-none">
-        <div class="page-title">Tabla de medications</div>
-      </div>
-      <div class="col-12">
-        <MedicationsPage :medications="medications" />
-      </div>
-    </div>
+    <ContactForm
+      :contact="contact"
+      :errors="errors"
+    ></ContactForm>
+
+    <AddressForm
+      v-model="address"
+      :errors="errors"
+    ></AddressForm>
+
+    <MedicationsPage
+      v-model="medications"
+      :candidateId="candidate.id"
+      :errors="errors"
+    ></MedicationsPage>
 
     <div class="row q-col-gutter-lg q-mb-xl">
       <div class="col-12 q-pb-none">
         <div class="page-title">Programar Evaluación</div>
       </div>
+
       <div class="col-12 col-md-4">
         <q-select
           outlined
           stack-label
           label="Seleccione Evaluador"
-          :options="[{ label: 'Pamela Guizar', value: 1 }]"
+          :options="evaluators"
+          v-model="evaluation_schedule.evaluator_id"
+          emit-value
+          option-label="name"
+          option-value="id"
+          map-options
         ></q-select>
       </div>
-      <div class="col-4 col-md-4">
+      <div class="col-12 col-md-4">
         <q-input
-          type="date"
           outlined
           stack-label
           label="Fecha de evaluación"
+          v-model="evaluation_schedule.date"
+          mask="####-##-## ##:##"
         ></q-input>
       </div>
+      <div class="col-12 col-md-4">
+        <ul>
+          <li
+            v-for="schedule in evaluation_schedules"
+            :key="schedule.id"
+          >
+            {{ `${schedule.date} - ${schedule.evaluator.name}` }}
+          </li>
+        </ul>
+      </div>
+    </div>
 
+    <div class="row">
+      <div class="col-12 col-md-4">
+        <div
+          class="subtitle"
+          style="font-weight: 500; font-size: 18px; color: #000"
+        >Foto del candidato</div>
+        <q-file
+          outlined
+          stack-label
+          label="Adjuntar archivo"
+          icon="attach"
+          v-model="picture"
+        >
+          <template v-slot:append>
+            <q-icon name="attachment"></q-icon>
+          </template>
+        </q-file>
+      </div>
+    </div>
+
+    <div class="row">
       <div class="col-12 flex justify-end">
         <q-btn
-          color="primary        "
+          :loading="loading"
+          color="primary"
           @click="storeCandidate"
         >Guardar</q-btn>
       </div>

@@ -2,42 +2,42 @@
 import { api } from "src/boot/axios";
 import { onMounted } from "vue";
 import { ref } from "vue";
+import AppointmentForm from './../components/AppointmentForm.vue'
 
 onMounted(() => fetchCandidates())
 
 async function fetchCandidates() {
   rows.value = (await api.get('candidates')).data.data
 }
-
+const appointmentDialog = ref(false)
 const rows = ref([]);
-
 const columns = ref([
   {
     name: "name",
     label: "Nombre de Candidato",
     align: "left",
-    field: "first_name",
+    field: "full_name",
     sortable: true,
   },
   {
     name: "sheet",
     label: "Folio",
     align: "left",
-    field: "id",
+    field: "sheet",
     sortable: true,
   },
   {
     name: "date",
     label: "Fecha de Evaluación",
     align: "left",
-    field: "date",
+    field: (row) => row.evaluation_schedule ? row.evaluation_schedule.date : 'NO DISPONIBLE',
     sortable: true,
   },
   {
     name: "evaluator",
     label: "Evaluador",
     align: "left",
-    field: "evaluator",
+    field: (row) => row.evaluation_schedule ? row.evaluation_schedule.evaluator.name : 'No disponible',
     sortable: true,
   },
   {
@@ -72,12 +72,14 @@ const columns = ref([
         icon="description"
         outline=""
         class="q-mr-md"
+        to="/candidatos/reportes"
       >Reporte de candidatos
       </q-btn>
       <q-btn
         color="primary"
         icon="calendar_today"
         outline=""
+        @click="appointmentDialog = true"
       >Programar cita
       </q-btn>
       <q-btn
@@ -97,7 +99,7 @@ const columns = ref([
     >
       <template v-slot:body-cell-actions="props">
         <q-td>
-          <div>
+          <div class="flex justify-end">
             <q-btn
               dense
               flat
@@ -110,21 +112,30 @@ const columns = ref([
               flat
               round
               icon="chat"
+              :to="`candidatos/${props.row.id}/entrevistar`"
             />
             <q-btn
               dense
               flat
               round
               icon="list"
+              :to="`candidatos/${props.row.id}/evaluar`"
             />
           </div>
         </q-td>
       </template>
     </q-table>
+
+    <q-dialog v-model="appointmentDialog">
+      <AppointmentForm
+        :candidates="rows"
+        @close="appointmentDialog = false"
+      ></AppointmentForm>
+    </q-dialog>
   </q-page>
 </template>
 
-<style>
+<style scoped>
 .q-table th {
   font-size: 16px;
   font-weight: 700;

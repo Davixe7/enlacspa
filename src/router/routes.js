@@ -21,6 +21,11 @@ const routes = [
         component: () => import("pages/CandidatosPage.vue"),
         children: [
           {
+            path: "reportes",
+            meta: { label: "Reportes de candidatos", layout: "main" },
+            component: () => import("pages/CandidateReports.vue"),
+          },
+          {
             path: "registrar",
             meta: { label: "Nuevo Candidato", layout: "main" },
             component: () => import("pages/CandidatoForm.vue"),
@@ -29,6 +34,18 @@ const routes = [
             path: ":candidateId/editar",
             meta: { label: "Editar Candidato", layout: "main" },
             component: () => import("pages/CandidatoForm.vue"),
+            props: true,
+          },
+          {
+            path: ":candidateId/evaluar",
+            meta: { label: "Evaluacion", layout: "main" },
+            component: () => import("pages/EvaluationForm.vue"),
+            props: true,
+          },
+          {
+            path: ":candidateId/entrevistar",
+            meta: { label: "Entrevistar", layout: "main" },
+            component: () => import("pages/InterviewForm.vue"),
             props: true,
           },
         ],

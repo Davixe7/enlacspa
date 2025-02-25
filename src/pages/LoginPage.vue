@@ -1,75 +1,33 @@
 <script setup>
-import { api } from "src/boot/axios";
 import { onMounted, ref } from "vue";
-import { useRouter } from "vue-router";
-const errors = ref({ email: "", password: "" });
+import { useAuthStore } from "./../stores/user-store"
 
-const router = useRouter()
-const baseUrl = new URL(api.defaults.baseURL).origin
-const loading = ref(false);
+onMounted(() => authStore.csrfCookie())
+
+const authStore = useAuthStore();
 const email = ref('');
 const password = ref('');
 const remeberme = ref(false);
+const showPassword = ref(false)
 
-onMounted(() => csrfCookie())
-
-async function csrfCookie() {
-  await api.get(`${baseUrl}/sanctum/csrf-cookie`)
-}
-
-async function attemptLogin() {
-  try {
-    loading.value = true
-    await api.post(`${baseUrl}/login`, { email: email.value, password: password.value })
-    router.push('home')
-  } catch (error) {
-    console.log('Error al intentar loguear: ' + error)
-  }
-  loading.value = false
-}
-
-function putErrors() {
-  errors.value.email = "Nombre de usuario o contrasenia incorrectos";
-}
 </script>
 
 <template>
   <div class="row login-row">
-    <div style="
-        position: absolute;
-        right: 0;
-        bottom: 0;
-        z-index: 50000;
-        background: #000;
-        display: block;
-      ">
-      <q-btn
-        color="primary"
-        round
-        icon="error"
-        @click="putErrors()"
-      ></q-btn>
-      <q-btn
-        color="primary"
-        round
-        icon="delete"
-        @click="errors = {}"
-      ></q-btn>
-      <q-btn
-        color="primary"
-        round
-        icon="pin"
-        @click="loading = !loading"
-      ></q-btn>
+    <div class="col-12 col-md-6 login-brand-column">
+      <img
+        src="./../assets/logo_white.png"
+        alt=""
+      />
     </div>
-    <div class="col-12 col-md-6 flex items-center login-col-left">
+    <div class="col-12 col-md-6 flex items-center q-pa-md login-form-column">
       <div>
         <h1 class="title">ENLAC</h1>
         <div class="subtitle">Portal web para la administración y gestión</div>
         <div>
           <q-form
             class="q-gutter-y-lg"
-            @submit.prevent="attemptLogin"
+            @submit.prevent="attemptLogin({ email, password })"
           >
             <q-input
               outlined
@@ -78,21 +36,22 @@ function putErrors() {
               type="email"
               v-model="email"
               hide-bottom-space
-              :error="!!errors.email"
-              :error-message="errors.email"
+              :error="!!authStore.errors.email"
+              :error-message="authStore.errors.email"
             ></q-input>
             <q-input
               outlined
               stack-label
               label="Contraseña"
-              type="password"
+              :type="showPassword ? 'text' : 'password'"
               v-model="password"
               hide-bottom-space
-              :error="!!errors.email"
-              :error-message="errors.email"
+              :error="!!authStore.errors.email"
+              :error-message="authStore.errors.email"
             >
               <template v-slot:append="">
                 <q-btn
+                  @click="showPassword = !showPassword"
                   flat
                   round
                   icon="remove_red_eye"
@@ -118,31 +77,20 @@ function putErrors() {
         </div>
       </div>
     </div>
-    <div class="col-12 col-md-6 login-brand-column">
-      <img
-        src="./../assets/logo_white.png"
-        alt=""
-      />
-    </div>
   </div>
 </template>
 
 <style>
-.login-row {
-  height: 100vh;
-}
-
-@media (min-width: 991px) {
-  .login-col-left {
-    padding-left: 100px;
-  }
-}
-
 .login-brand-column {
   display: flex;
   justify-content: center;
   align-items: center;
+  height: calc(30vh) !important;
   background: radial-gradient(rgb(1, 119, 193), rgba(0, 43, 106));
+}
+
+.login-brand-column img {
+  height: 75%;
 }
 
 .title {
@@ -171,5 +119,26 @@ a {
   width: 32px !important;
   min-width: 32px;
   height: 32px !important;
+}
+
+@media (min-width: 1024px) {
+  .login-row {
+    height: 100vh;
+  }
+
+  .login-form-column {
+    order: 1;
+    padding-left: 100px;
+  }
+
+  .row .login-brand-column {
+    order: 2;
+    height: 100% !important;
+  }
+
+  .row .login-brand-column img {
+    height: auto;
+  }
+
 }
 </style>

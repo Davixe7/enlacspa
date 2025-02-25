@@ -114,7 +114,7 @@
             :key="rt.path"
             :label="rt.meta.label"
             :icon="rt.meta.icon"
-            @click="printRoute"
+            :to="rt.path"
           />
         </q-breadcrumbs>
       </div>
@@ -131,10 +131,6 @@ import { useRoute } from "vue-router";
 
 const route = useRoute();
 const span = ref({ label: "semanal", value: "1" });
-
-function printRoute() {
-  console.log(route.matched);
-}
 </script>
 
 <style>

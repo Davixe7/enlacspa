@@ -16,7 +16,26 @@ const api = axios.create({
   },
 });
 
-export default defineBoot(({ app }) => {
+export default defineBoot(({ app, router }) => {
+  api.interceptors.response.use(
+    (response) => {
+      return response;
+    },
+    (error) => {
+      if (error.status == 401) {
+        router.push("/login");
+      }
+      if (error.status == 422) {
+        Object.keys(error.response.data.errors).forEach((key) => {
+          error.response.data.errors[key] = error.response.data.errors[key][0];
+        });
+        let formatted = error.response.data.errors;
+        error.formatted = formatted;
+      }
+      return Promise.reject(error);
+    },
+  );
+
   // for use inside Vue files (Options API) through this.$axios and this.$api
 
   app.config.globalProperties.$axios = axios;

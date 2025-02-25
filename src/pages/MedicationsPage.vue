@@ -1,12 +1,29 @@
 <script setup>
-import { reactive, ref } from "vue";
+import { api } from "src/boot/axios";
+import { reactive, ref, watch } from "vue";
+
+const emits = defineEmits(['update:modelValue'])
 
 const props = defineProps({
-  medications: {
+  errors: { type: Object, required: false, default: () => ({}) },
+  candidateId: { type: Number, required: false, default: null },
+  modelValue: {
     type: Array,
     default: () => [],
+    required: true
   },
 });
+
+const loading = ref(false)
+const localMedications = ref([...props.modelValue]);
+
+watch(() => props.modelValue, (newValue) => {
+  localMedications.value = newValue
+}, { deep: true })
+
+watch(() => localMedications.value, (newValue) => {
+  emits('update:modelValue', newValue)
+}, { deep: true })
 
 const medication = reactive({
   name: "",
@@ -20,11 +37,39 @@ function addMedication() {
   medication.dose = "";
   medication.frequency = "";
   medication.duration = "";
-  medication.observaciones = "";
+  medication.observations = "";
   localMedications.value.push({ ...medication });
 }
 
-const localMedications = ref([...props.medications]);
+async function saveMedication(med) {
+  try {
+    loading.value = true
+    let route = med.id ? `/medications/${med.id}` : 'medications'
+    let data = { ...med, _method: med.id ? 'PUT' : 'POST' }
+    let response = (await api.post(route, data)).data.data
+    localMedications.value.splice(localMedications.value.indexOf(med), 1, response)
+  } catch (error) {
+    console.log(error)
+  }
+  loading.value = false
+}
+
+async function deleteMedication(med) {
+  if (!med.id) {
+    localMedications.value.splice(localMedications.value.indexOf(med, 1), 1)
+    return
+  }
+
+  try {
+    loading.value = true
+    await api.post(`medications/${med.id}`, { '_method': 'DELETE' })
+    localMedications.value.splice(localMedications.value.indexOf(med), 1)
+  } catch (error) {
+    console.log(error)
+  }
+  loading.value = false
+}
+
 const columns = ref([
   {
     name: "name",
@@ -61,73 +106,93 @@ const columns = ref([
 </script>
 
 <template>
-  <q-table
-    hide-bottom
-    wrap-cells
-    flat
-    bordered
-    :columns="columns"
-    :rows="localMedications"
-    :pagination="{ rowsPerPage: 0 }"
-  >
-    <template v-slot:body="props">
-      <q-tr :props="props">
-        <q-td>
-          <q-input
-            outlined
-            placeholder="Ej: Paracetamol"
-            v-model="props.row.name"
-          ></q-input>
-        </q-td>
-        <q-td>
-          <q-input
-            outlined
-            placeholder="Ej: 500 mg"
-            v-model="props.row.dose"
-          ></q-input>
-        </q-td>
-        <q-td>
-          <q-input
-            outlined
-            placeholder="Ej: 2 Veces al dia"
-            v-model="props.row.frequency"
-          ></q-input>
-        </q-td>
-        <q-td>
-          <q-input
-            outlined
-            placeholder="Ej: 1 Semana"
-            v-model="props.row.duration"
-          ></q-input>
-        </q-td>
-        <q-td>
-          <q-input
-            type="textarea"
-            outlined
-            value="Lorem ipsum dolor sit amet"
-          ></q-input>
-        </q-td>
-        <q-td>
-          <q-btn
-            flat
-            round
-            icon="delete"
-            @click="
-              localMedications.splice(localMedications.indexOf(props.row, 1))
-              "
-          ></q-btn>
-        </q-td>
-      </q-tr>
-    </template>
-  </q-table>
-  <div class="flex justify-end q-py-lg">
-    <q-btn
-      color="primary"
-      icon="add"
-      @click="addMedication"
-    >
-      Agregar Medicamento
-    </q-btn>
+  <div class="row q-col-gutter-lg q-mb-xl">
+    <div class="col-12 q-pb-none">
+      <div class="page-title">Tabla de Medicamentos</div>
+    </div>
+    <div class="col-12">
+      <q-table
+        hide-bottom
+        wrap-cells
+        flat
+        bordered
+        :columns="columns"
+        :rows="localMedications"
+        :pagination="{ rowsPerPage: 0 }"
+      >
+        <template v-slot:body="props">
+          <q-tr :props="props">
+            <q-td>
+              <q-input
+                outlined
+                placeholder="Ej: Paracetamol"
+                v-model="props.row.name"
+                :error="!!errors[`medications.${props.rowIndex}.name`]"
+                :error-message="errors[`medications.${props.rowIndex}.name`]"
+              ></q-input>
+            </q-td>
+            <q-td>
+              <q-input
+                outlined
+                placeholder="Ej: 500 mg"
+                v-model="props.row.dose"
+                :error="!!errors[`medications.${props.rowIndex}.dose`]"
+                :error-message="errors[`medications.${props.rowIndex}.dose`]"
+              ></q-input>
+            </q-td>
+            <q-td>
+              <q-input
+                outlined
+                placeholder="Ej: 2 Veces al dia"
+                v-model="props.row.frequency"
+                :error="!!errors[`medications.${props.rowIndex}.frequency`]"
+                :error-message="errors[`medications.${props.rowIndex}.frequency`]"
+              ></q-input>
+            </q-td>
+            <q-td>
+              <q-input
+                outlined
+                placeholder="Ej: 1 Semana"
+                v-model="props.row.duration"
+                :error="!!errors[`medications.${props.rowIndex}.duration`]"
+                :error-message="errors[`medications.${props.rowIndex}.duration`]"
+              ></q-input>
+            </q-td>
+            <q-td>
+              <q-input
+                type="textarea"
+                outlined
+                v-model="props.row.observations"
+              ></q-input>
+            </q-td>
+            <q-td>
+              <q-btn
+                flat
+                round
+                icon="delete"
+                @click="deleteMedication(props.row)"
+              ></q-btn>
+              <q-btn
+                v-if="candidateId"
+                flat
+                round
+                icon="save"
+                @click="saveMedication(props.row)"
+              ></q-btn>
+            </q-td>
+          </q-tr>
+        </template>
+      </q-table>
+      <div class="flex justify-end q-py-lg">
+        <q-btn
+          color="primary"
+          icon="add"
+          @click="addMedication"
+        >
+          Agregar Medicamento
+        </q-btn>
+      </div>
+    </div>
   </div>
 </template>
 
