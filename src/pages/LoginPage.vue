@@ -27,7 +27,7 @@ const showPassword = ref(false)
         <div>
           <q-form
             class="q-gutter-y-lg"
-            @submit.prevent="attemptLogin({ email, password })"
+            @submit.prevent="authStore.attemptLogin({ email, password })"
           >
             <q-input
               outlined
@@ -69,7 +69,7 @@ const showPassword = ref(false)
             </div>
             <q-btn
               unelevated
-              :loading="loading"
+              :loading="authStore.loading"
               color="primary"
               type="submit"
             >Iniciar sesión</q-btn>

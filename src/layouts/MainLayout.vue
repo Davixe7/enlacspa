@@ -97,7 +97,7 @@
                 <q-item-section avatar>
                   <q-icon name="logout" />
                 </q-item-section>
-                <q-item-section>Cerrar sesion</q-item-section>
+                <q-item-section @click="authStore.attemptLogout()">Cerrar sesion</q-item-section>
               </q-item>
               <q-separator />
             </q-list>
@@ -126,9 +126,11 @@
 </template>
 
 <script setup>
+import { useAuthStore } from "src/stores/user-store";
 import { ref } from "vue";
 import { useRoute } from "vue-router";
 
+const authStore = useAuthStore();
 const route = useRoute();
 const span = ref({ label: "semanal", value: "1" });
 </script>

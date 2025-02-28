@@ -44,6 +44,7 @@ async function fetchCandidate() {
 
 function loadData() {
   delete candidate.value.contact;
+  delete candidate.value.conctacts;
   delete candidate.value.medications;
   delete candidate.value.evaluation_schedules;
   delete candidate.value.evaluation_schedule;

@@ -1,6 +1,5 @@
 import { defineStore, acceptHMRUpdate } from "pinia";
 import { api } from "src/boot/axios";
-import { useRouter } from "vue-router";
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
@@ -12,17 +11,20 @@ export const useAuthStore = defineStore("auth", {
 
   actions: {
     async csrfCookie() {
-      await api.get(`${baseUrl}/sanctum/csrf-cookie`);
+      await api.get(`${this.baseUrl}/sanctum/csrf-cookie`);
+    },
+    async attemptLogout() {
+      await api.post(`${this.baseUrl}/logout`);
+      this.router.push("login");
     },
     async attemptLogin(data) {
-      let router = useRouter();
       try {
         this.loading = true;
-        await api.post(`${baseUrl}/login`, data);
-        router.push("home");
+        await api.post(`${this.baseUrl}/login`, data);
+        this.router.push("home");
       } catch (error) {
-        if (!error.formated) return;
-        this.errors = "Nombre de usuario o contrasenia incorrectos";
+        console.log(error);
+        this.errors = { email: "Nombre de usuario o contrasenia incorrectos" };
       }
       this.loading = false;
     },
@@ -33,5 +35,5 @@ export const useAuthStore = defineStore("auth", {
 });
 
 if (import.meta.hot) {
-  import.meta.hot.accept(acceptHMRUpdate(useUserStore, import.meta.hot));
+  import.meta.hot.accept(acceptHMRUpdate(useAuthStore, import.meta.hot));
 }
