@@ -64,7 +64,7 @@ const columns = ref([
 </script>
 
 <template>
-  <q-page class="q-pa-lg">
+  <q-page>
     <h1 class="page-title">Candidatos y Evaluaciones</h1>
     <div class="flex q-mb-lg">
       <q-btn

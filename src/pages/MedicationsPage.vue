@@ -45,7 +45,7 @@ async function saveMedication(med) {
   try {
     loading.value = true
     let route = med.id ? `/medications/${med.id}` : 'medications'
-    let data = { ...med, _method: med.id ? 'PUT' : 'POST' }
+    let data = { ...med, _method: med.id ? 'PUT' : 'POST', candidate_id: props.candidateId }
     let response = (await api.post(route, data)).data.data
     localMedications.value.splice(localMedications.value.indexOf(med), 1, response)
   } catch (error) {
@@ -106,92 +106,91 @@ const columns = ref([
 </script>
 
 <template>
-  <div class="row q-col-gutter-lg q-mb-xl">
-    <div class="col-12 q-pb-none">
-      <div class="page-title">Tabla de Medicamentos</div>
-    </div>
-    <div class="col-12">
-      <q-table
-        hide-bottom
-        wrap-cells
-        flat
-        bordered
-        :columns="columns"
-        :rows="localMedications"
-        :pagination="{ rowsPerPage: 0 }"
+  <div class="form-section">
+    <div class="page-title">Tabla de Medicamentos</div>
+
+    <q-table
+      class="q-mb-lg"
+      hide-bottom
+      wrap-cells
+      flat
+      bordered
+      :columns="columns"
+      :rows="localMedications"
+      :pagination="{ rowsPerPage: 0 }"
+    >
+      <template v-slot:body="props">
+        <q-tr :props="props">
+          <q-td>
+            <q-input
+              outlined
+              placeholder="Ej: Paracetamol"
+              v-model="props.row.name"
+              :error="!!errors[`medications.${props.rowIndex}.name`]"
+              :error-message="errors[`medications.${props.rowIndex}.name`]"
+            ></q-input>
+          </q-td>
+          <q-td>
+            <q-input
+              outlined
+              placeholder="Ej: 500 mg"
+              v-model="props.row.dose"
+              :error="!!errors[`medications.${props.rowIndex}.dose`]"
+              :error-message="errors[`medications.${props.rowIndex}.dose`]"
+            ></q-input>
+          </q-td>
+          <q-td>
+            <q-input
+              outlined
+              placeholder="Ej: 2 Veces al dia"
+              v-model="props.row.frequency"
+              :error="!!errors[`medications.${props.rowIndex}.frequency`]"
+              :error-message="errors[`medications.${props.rowIndex}.frequency`]"
+            ></q-input>
+          </q-td>
+          <q-td>
+            <q-input
+              outlined
+              placeholder="Ej: 1 Semana"
+              v-model="props.row.duration"
+              :error="!!errors[`medications.${props.rowIndex}.duration`]"
+              :error-message="errors[`medications.${props.rowIndex}.duration`]"
+            ></q-input>
+          </q-td>
+          <q-td>
+            <q-input
+              type="textarea"
+              outlined
+              v-model="props.row.observations"
+            ></q-input>
+          </q-td>
+          <q-td>
+            <q-btn
+              flat
+              round
+              icon="delete"
+              @click="deleteMedication(props.row)"
+            ></q-btn>
+            <q-btn
+              v-if="candidateId"
+              flat
+              round
+              icon="save"
+              @click="saveMedication(props.row)"
+            ></q-btn>
+          </q-td>
+        </q-tr>
+      </template>
+    </q-table>
+
+    <div class="flex justify-end">
+      <q-btn
+        color="primary"
+        icon="add"
+        @click="addMedication"
       >
-        <template v-slot:body="props">
-          <q-tr :props="props">
-            <q-td>
-              <q-input
-                outlined
-                placeholder="Ej: Paracetamol"
-                v-model="props.row.name"
-                :error="!!errors[`medications.${props.rowIndex}.name`]"
-                :error-message="errors[`medications.${props.rowIndex}.name`]"
-              ></q-input>
-            </q-td>
-            <q-td>
-              <q-input
-                outlined
-                placeholder="Ej: 500 mg"
-                v-model="props.row.dose"
-                :error="!!errors[`medications.${props.rowIndex}.dose`]"
-                :error-message="errors[`medications.${props.rowIndex}.dose`]"
-              ></q-input>
-            </q-td>
-            <q-td>
-              <q-input
-                outlined
-                placeholder="Ej: 2 Veces al dia"
-                v-model="props.row.frequency"
-                :error="!!errors[`medications.${props.rowIndex}.frequency`]"
-                :error-message="errors[`medications.${props.rowIndex}.frequency`]"
-              ></q-input>
-            </q-td>
-            <q-td>
-              <q-input
-                outlined
-                placeholder="Ej: 1 Semana"
-                v-model="props.row.duration"
-                :error="!!errors[`medications.${props.rowIndex}.duration`]"
-                :error-message="errors[`medications.${props.rowIndex}.duration`]"
-              ></q-input>
-            </q-td>
-            <q-td>
-              <q-input
-                type="textarea"
-                outlined
-                v-model="props.row.observations"
-              ></q-input>
-            </q-td>
-            <q-td>
-              <q-btn
-                flat
-                round
-                icon="delete"
-                @click="deleteMedication(props.row)"
-              ></q-btn>
-              <q-btn
-                v-if="candidateId"
-                flat
-                round
-                icon="save"
-                @click="saveMedication(props.row)"
-              ></q-btn>
-            </q-td>
-          </q-tr>
-        </template>
-      </q-table>
-      <div class="flex justify-end q-py-lg">
-        <q-btn
-          color="primary"
-          icon="add"
-          @click="addMedication"
-        >
-          Agregar Medicamento
-        </q-btn>
-      </div>
+        Agregar Medicamento
+      </q-btn>
     </div>
   </div>
 </template>

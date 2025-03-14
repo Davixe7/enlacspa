@@ -8,6 +8,8 @@ body {
 .q-btn {
   text-transform: initial;
   font-size: 16px;
+}
+.q-btn:not(.q-btn--round) {
   padding: 6px 16px;
 }
 .q-btn--rectangle {
@@ -24,10 +26,12 @@ body {
   border-width: 1px;
 }
 .page-title {
+  color: #111827;
   font-weight: 500;
   font-size: 25px;
   line-height: 1.3em;
-  color: #111827;
+  margin: 0 0 2rem;
+  border: 1px solid red;
 }
 
 //INPUTS
@@ -61,4 +65,18 @@ body {
 .q-checkbox__label {
   font-size: 14px;
   color: #111827;
+}
+
+//TABLES
+.q-table th {
+  font-size: 16px;
+  font-weight: 700;
+  color: #374151;
+  vertical-align: top;
+  padding: 16px;
+  white-space: break-spaces;
+}
+
+.q-table thead {
+  background: #e5e7eb;
 }

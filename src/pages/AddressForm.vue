@@ -21,10 +21,7 @@ watch(() => props.modelValue, (newValue) => {
 <template>
   <div class="row q-col-gutter-lg q-mb-xl">
     <div class="col-12 q-pb-none">
-      <div
-        class="page-title q-mb-md"
-        style="border: 1px solid red"
-      >
+      <div class="page-title q-mb-md">
         Domicilio
       </div>
     </div>

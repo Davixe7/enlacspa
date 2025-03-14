@@ -1,5 +1,5 @@
 <template>
-  <q-page style="padding: 36px">
+  <q-page>
     <q-carousel
       v-model="slide"
       transition-prev="scale"
@@ -19,7 +19,10 @@
         class="column no-wrap flex-center"
         style="width: calc(100vw - 40px)"
       >
-        <q-icon name="style" size="56px" />
+        <q-icon
+          name="style"
+          size="56px"
+        />
         <div class="q-mt-md text-center">
           {{ lorem }}
         </div>
@@ -112,17 +115,21 @@ const modules = ref([
   margin-left: -36px;
   margin-top: -36px;
 }
-.q-col-gutter-xl > * {
+
+.q-col-gutter-xl>* {
   padding-left: 36px;
   padding-top: 36px;
 }
+
 .module-card {
   text-align: center;
   border-radius: 8px;
 }
+
 .module-card .q-img {
   margin-bottom: 8px;
 }
+
 .module-card a {
   color: #111827;
   font-size: 16px;

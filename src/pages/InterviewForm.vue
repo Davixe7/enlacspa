@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue';
+import { ref } from 'vue';
 import CandidateProfile from './../components/CandidateProfile.vue'
 import { onMounted } from 'vue';
 import { api } from 'src/boot/axios';
@@ -17,33 +17,25 @@ const errors = ref({})
 const interview = ref({
   candidate_id: props.candidateId,
   observation: '',
+  content: '',
   signed_at: null,
 })
 const interviewAnswers = ref([])
 
 async function fetchInterview() {
-  try {
-    interview.value = (await api.get(`/interviews/?candidate_id=${props.candidateId}`)).data.data
-  }
-  catch (error) {
-    console.log(error);
-  }
+  try { interview.value = (await api.get(`/interviews/?candidate_id=${props.candidateId}`)).data.data }
+  catch (error) { if (error.status == 404) return }
 }
 
 async function fetchAnswers() {
   let route = interview.value.id ? `interview_answers/?interview_id=${interview.value.id}` : '/interview_answers'
-  try {
-    interviewAnswers.value = (await api.get(route)).data.data
-  }
-  catch (error) {
-    console.log(error)
-  }
+  interviewAnswers.value = (await api.get(route)).data.data
 }
 
 
 async function storeInterview(sign = false) {
   loading.value = true
-  let data = { ...interview.value, answers: formAnswers.value }
+  let data = { ...interview.value }
   let route = interview.value.id ? `interviews/${interview.value.id}` : 'interviews'
   data = interview.value.id ? { ...data, _method: 'PUT' } : data
   if (sign) {
@@ -61,21 +53,13 @@ async function storeInterview(sign = false) {
   loading.value = false
 }
 
-const formAnswers = computed(() => {
-  return interviewAnswers.value
-    .filter(answer => answer.content)
-    .map(answer => ({ content: answer.content, interview_question_id: answer.interview_question_id }))
-})
-
 const selectedIndex = ref(0)
 
 </script>
 
 <template>
   <q-page>
-    <h1 class="page-title">
-      Entrevista
-    </h1>
+    <div class="page-title">Entrevista</div>
 
     <CandidateProfile :candidate-id="candidateId">
     </CandidateProfile>
@@ -89,7 +73,7 @@ const selectedIndex = ref(0)
       <div class="col-6">
         <q-list dense>
           <q-item
-            :clickable="!interview.signed_at"
+            :clickable="!Boolean(interview.signed_at)"
             @click="() => { selectedIndex = n }"
             v-for="(question, n) in interviewAnswers"
             v-show="n < 28"
@@ -100,7 +84,7 @@ const selectedIndex = ref(0)
               top
             >
               <q-checkbox
-                :disabled="!!interview.signed_at"
+                :disable="Boolean(interview.signed_at)"
                 v-model="question.checked"
                 :true-value="1"
                 :false-value="0"
@@ -115,17 +99,9 @@ const selectedIndex = ref(0)
       <div class="col-6">
         <q-editor
           dense
-          v-if="interviewAnswers.length"
-          v-model="interviewAnswers[selectedIndex].content"
-          :disabled="!!interview.signed_at"
+          v-model="interview.content"
+          :disable="Boolean(interview.signed_at)"
         ></q-editor>
-        <q-input
-          v-if="interviewAnswers.length"
-          bordered
-          stack-label
-          v-model="interviewAnswers[selectedIndex].content"
-          :disabled="!!interview.signed_at"
-        ></q-input>
       </div>
     </div>
 
@@ -205,7 +181,7 @@ const selectedIndex = ref(0)
           :loading="loading"
           outline
           color="primary"
-          @click="storeInterview"
+          @click="storeInterview(false)"
         >
           Guardar
         </q-btn>
@@ -246,7 +222,7 @@ const selectedIndex = ref(0)
 .q-list--dense .q-item {
   min-height: 0;
   padding-left: 0;
-  margin-bottom: 40px;
+  margin-bottom: 24px;
 }
 
 .q-item__section--side {
@@ -262,6 +238,14 @@ const selectedIndex = ref(0)
 .q-item__section--side .q-checkbox {
   margin-left: -10px;
   padding-right: 0;
+}
+
+.q-checkbox__inner {
+  font-size: 32px;
+}
+
+.q-checkbox__bg {
+  border: 1px solid #4B5563;
 }
 
 .btn-rank {
