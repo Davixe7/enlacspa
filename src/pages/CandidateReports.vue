@@ -5,12 +5,37 @@ import { onMounted, ref } from 'vue';
 onMounted(() => fetchCandidates())
 
 async function fetchCandidates() {
-  candidates.value = (await api.get('candidates')).data.data
+  errors.value = {}
+  let params = { ...query.value }
+  let fields = ['name', 'birth_date', 'date_from', 'date_to']
+
+  fields.forEach(key => {
+    if (!query[key]) { delete query[key] }
+  })
+
+  if (params.date_from && !params.date_to) {
+    errors.value = { date_to: 'Debes seleccionar una fecha de fin' }
+    return
+  }
+
+  if (params.date_to && !params.date_from) {
+    errors.value = { date_from: 'Debes seleccionar una fecha de inicio' }
+    return
+  }
+
+  loading.value = true
+  let response = (await api.get('candidates', { params })).data
+  candidates.value = response.data
+  counts.value = response.counts
+  loading.value = false
 }
 
+const errors = ref({})
+const loading = ref(false)
 const rows = ref([{}])
 const query = ref({})
 const candidates = ref([])
+const counts = ref({})
 const candidateColumns = ref([
   {
     name: "name",
@@ -44,17 +69,22 @@ const candidateColumns = ref([
     name: "is_candidate",
     label: "Candidato",
     align: "left",
-    field: (row) => (row.is_candidate ? "Sí" : "No"),
+    field: (row) => {
+      if (row.acceptance_status === 1) { return 'Si' }
+      if (row.acceptance_status === 0) { return 'No' }
+      if (row.acceptance_status === null) { return 'Pendiente' }
+    },
     sortable: true,
   },
   {
     name: "notes",
     label: "Observaciones",
-    align: "left",
-    field: () => "Lörem ipsum orade kövis då antivaxxare.",
+    align: "right",
+    field: (row) => row.acceptance_status == 0 ? row.rejection_comment : row.program.name,
     sortable: true,
   },
 ]);
+
 const columns = ref([
   { align: 'center', label: 'Candidatos en proceso' },
   { align: 'center', label: 'No fueron aceptados' },
@@ -66,7 +96,7 @@ const columns = ref([
 
 <template>
   <q-page>
-    <h1 class="page-title q-pb-lg">Reporte de candidatos</h1>
+    <h1 class="page-title q-mb-lg">Reporte de candidatos</h1>
 
     <div class="row q-col-gutter-lg items-end q-mb-xl">
       <div class="col-12 col-md-auto">
@@ -77,9 +107,10 @@ const columns = ref([
           outlined
           stack-label
           label="Desde"
+          type="date"
           v-model="query.date_from"
-          mask="##/##/####"
-          icon-prepend="calendar_today"
+          :error="!!errors.date_from"
+          :error-message="errors.date_from"
         >
           <template v-slot:prepend>
             <q-icon name="calendar_today"></q-icon>
@@ -90,13 +121,12 @@ const columns = ref([
           outlined
           stack-label
           label="Hasta"
+          type="date"
           v-model="query.date_to"
-          mask="##/##/####"
-          icon-prepend="calendar_today"
+          :error="!!errors.date_to"
+          :error-message="errors.date_to"
         >
-          <template v-slot:prepend>
-            <q-icon name="calendar_today"></q-icon>
-          </template></q-input>
+        </q-input>
       </div>
       <div class="col-12 col-md-auto">
         <div class="label-alt-2">
@@ -107,7 +137,8 @@ const columns = ref([
           stack-label
           label="Nombre"
           v-model="query.name"
-          mask="##/##/####"
+          :error="!!errors.name"
+          :error-message="errors.name"
         >
           <template v-slot:prepend>
             <q-icon name="search"></q-icon>
@@ -117,10 +148,11 @@ const columns = ref([
         <q-input
           outlined
           stack-label
-          label="Hasta"
-          v-model="query.date_to"
-          mask="##/##/####"
-          icon-prepend="calendar_today"
+          label="Fecha de nacimiento"
+          v-model="query.birth_date"
+          type="date"
+          :error="!!errors.birth_date"
+          :error-message="errors.birth_date"
         >
           <template v-slot:prepend>
             <q-icon name="calendar_today"></q-icon>
@@ -128,7 +160,12 @@ const columns = ref([
         </q-input>
       </div>
       <div class="col-12 col-md-auto">
-        <q-btn color="primary">Buscar</q-btn>
+        <q-btn
+          :loading="loading"
+          color="primary"
+          style="margin-bottom: 20px"
+          @click="fetchCandidates"
+        >Buscar</q-btn>
       </div>
     </div>
 
@@ -137,18 +174,20 @@ const columns = ref([
     </div>
 
     <q-table
-      class="q-mb-lg"
+      flat
+      bordered
+      class="q-mb-xl"
       :rows="rows"
       :columns="columns"
       hide-bottom
     >
       <template v-slot:body="">
         <q-tr>
-          <q-td class="number">10</q-td>
-          <q-td class="number">10</q-td>
-          <q-td class="number">05</q-td>
-          <q-td class="number">75</q-td>
-          <q-td class="number">100</q-td>
+          <q-td class="number">{{ counts.en_proceso }}</q-td>
+          <q-td class="number">{{ counts.rechazados }}</q-td>
+          <q-td class="number">{{ counts.aceptados_no_ingresados }}</q-td>
+          <q-td class="number">{{ counts.aceptados_ingresados }}</q-td>
+          <q-td class="number">{{ counts.total }}</q-td>
         </q-tr>
       </template>
     </q-table>
@@ -158,6 +197,8 @@ const columns = ref([
     </div>
 
     <q-table
+      flat
+      bordered
       wrap-cells
       :columns="candidateColumns"
       :rows="candidates"

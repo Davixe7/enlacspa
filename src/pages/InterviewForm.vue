@@ -7,54 +7,49 @@ import { api } from 'src/boot/axios';
 const props = defineProps(['candidateId'])
 
 onMounted(async () => {
+  await fetchQuestions()
   await fetchInterview()
-  await fetchAnswers()
 })
 
 const loading = ref(false)
 const errors = ref({})
+const interviewQuestions = ref([])
 
 const interview = ref({
+  id: null,
+  interviewee_name: 'John Doe',
+  interviewee_relationship: 'father',
   candidate_id: props.candidateId,
-  observation: '',
   content: '',
+  observation: '',
+  apgar_rank: 1,
+  sphincters_control: 1,
   signed_at: null,
+  answers: []
 })
-const interviewAnswers = ref([])
 
 async function fetchInterview() {
   try { interview.value = (await api.get(`/interviews/?candidate_id=${props.candidateId}`)).data.data }
   catch (error) { if (error.status == 404) return }
 }
 
-async function fetchAnswers() {
-  let route = interview.value.id ? `interview_answers/?interview_id=${interview.value.id}` : '/interview_answers'
-  interviewAnswers.value = (await api.get(route)).data.data
+async function fetchQuestions() {
+  interviewQuestions.value = (await api.get('interview_questions')).data.data
 }
 
-
-async function storeInterview(sign = false) {
+async function storeInterview() {
   loading.value = true
-  let data = { ...interview.value }
   let route = interview.value.id ? `interviews/${interview.value.id}` : 'interviews'
-  data = interview.value.id ? { ...data, _method: 'PUT' } : data
-  if (sign) {
-    data.sign = 1;
-  }
-
-  try {
-    interview.value = (await api.post(route, data)).data.data
-  }
-  catch (error) {
-    if (error.formatted) {
-      errors.value = errors.value.formatted
-    }
-  }
+  let data = interview.value.id ? { ...interview.value, _method: 'PUT' } : { ...interview.value }
+  try { interview.value = (await api.post(route, data)).data.data }
+  catch (error) { errors.value = error.formatted ? error.formatted : errors.value.formatted }
   loading.value = false
 }
 
-const selectedIndex = ref(0)
-
+async function signInterview() {
+  interview.value.signed_at = new Date();
+  await storeInterview()
+}
 </script>
 
 <template>
@@ -66,17 +61,12 @@ const selectedIndex = ref(0)
 
     <div class="label-alt-2">Lista de preguntas</div>
 
-    <div
-      class="row"
-      style="margin-bottom: 56px;"
-    >
+    <div class="row q-mb-xl">
       <div class="col-6">
         <q-list dense>
           <q-item
             :clickable="!Boolean(interview.signed_at)"
-            @click="() => { selectedIndex = n }"
-            v-for="(question, n) in interviewAnswers"
-            v-show="n < 28"
+            v-for="(question, n) in interviewQuestions"
             :key="question.id"
           >
             <q-item-section
@@ -85,9 +75,8 @@ const selectedIndex = ref(0)
             >
               <q-checkbox
                 :disable="Boolean(interview.signed_at)"
-                v-model="question.checked"
-                :true-value="1"
-                :false-value="0"
+                v-model="interview.answers"
+                :val="question.id"
               ></q-checkbox>
             </q-item-section>
             <q-item-section>
@@ -105,61 +94,55 @@ const selectedIndex = ref(0)
       </div>
     </div>
 
-    <template v-if="interviewAnswers.length > 0">
-      <div class="label-alt">
-        29 - Que calificacion APGAR tuvo al nacer? Seleccione una opcion
-      </div>
+    <div class="label-alt">
+      29 - Que calificacion APGAR tuvo al nacer? Seleccione una opcion
+    </div>
+    <div class="flex q-mb-xl">
       <div
-        class="flex"
-        style="margin-bottom: 56px;"
+        v-for="n in 10"
+        :key="n"
+        class="btn-rank"
+        :class="{ 'btn-rank--active': interview.apgar_rank == n }"
+        @click="!interview.signed_at ? interview.apgar_rank = n : ''"
       >
-        <div
-          v-for="n in 10"
-          :key="n"
-          class="btn-rank"
-          :class="{ 'btn-rank--active': interviewAnswers[28].content == n }"
-          @click="!interview.signed_at ? interviewAnswers[28].content = n : ''"
-        >
-          {{ n }}
-        </div>
+        {{ n }}
       </div>
+    </div>
 
-      <div class="label-alt">
-        31 - ¿Controla esfínteres?
-      </div>
-      <div style="margin-bottom: 56px;">
-        <q-radio
-          v-model="interviewAnswers[29].content"
-          label="Si"
-          val="1"
-          :disabled="!!interview.signed_at"
-        ></q-radio>
-        <q-radio
-          v-model="interviewAnswers[29].content"
-          label="No"
-          val="0"
-          :disabled="!!interview.signed_at"
-        ></q-radio>
-      </div>
+    <div class="label-alt">
+      31 - ¿Controla esfínteres?
+    </div>
+    <div class="q-mb-xl">
+      <q-radio
+        v-model="interview.sphincters_control"
+        label="Si"
+        :val="1"
+        :disable="!!interview.signed_at"
+      ></q-radio>
+      <q-radio
+        v-model="interview.sphincters_control"
+        label="No"
+        :val="0"
+        :disable="!!interview.signed_at"
+      ></q-radio>
+    </div>
 
-      <div class="label-alt">
-        32 - Observaciones adicionales por parte del evaluador:
-      </div>
-      <div style="margin-bottom: 56px;">
-        <q-input
-          outlined
-          type="textarea"
-          v-model="interview.observation"
-          :disabled="!!interview.signed_at"
-          :readonly="!!interview.signed_at"
-        ></q-input>
-      </div>
-    </template>
+    <div class="label-alt">
+      32 - Observaciones adicionales por parte del evaluador:
+    </div>
+    <div class="q-mb-xl">
+      <q-input
+        outlined
+        type="textarea"
+        v-model="interview.observation"
+        :disable="!!interview.signed_at"
+        :readonly="!!interview.signed_at"
+      ></q-input>
+    </div>
 
     <div
       v-if="!interview.signed_at"
-      class="flex justify-end items-center"
-      style="padding: 50px 0;"
+      class="flex justify-end items-center q-py-xl"
     >
       <div class="q-mr-lg">
         <q-tooltip
@@ -181,13 +164,16 @@ const selectedIndex = ref(0)
           :loading="loading"
           outline
           color="primary"
-          @click="storeInterview(false)"
+          @click="storeInterview()"
         >
           Guardar
         </q-btn>
       </div>
 
-      <div class="q-mr-lg">
+      <div
+        class="q-mr-lg"
+        v-if="interview.id"
+      >
         <q-tooltip
           anchor="top right"
           self="bottom end"
@@ -206,12 +192,13 @@ const selectedIndex = ref(0)
         <q-btn
           :loading="loading"
           color="primary"
-          @click="storeInterview(true)"
+          @click="signInterview()"
         >
           Firmar
         </q-btn>
       </div>
     </div>
+
     <div v-else>
       <div class="label-alt">Firmado el: {{ interview.signed_at }}</div>
     </div>

@@ -2,24 +2,24 @@
 import { api } from 'src/boot/axios';
 import { onMounted, ref } from 'vue';
 
-const props = defineProps(['candidateId'])
+const props = defineProps(['candidate', 'candidateId'])
 const emits = defineEmits(['close'])
 const loading = ref(false)
 const localCandidate = ref({ ...props.candidate })
 const programs = ref([])
-const forPrograms = ref([])
 
 onMounted(async () => {
   await fetchCandidate()
   await fetchPrograms()
 })
+
 async function updateAcceptance() {
   loading.value = true
   try {
     let data = {
       acceptance_status: localCandidate.value.acceptance_status,
       rejection_comment: localCandidate.value.rejection_comment,
-      programs: [...forPrograms.value],
+      program_id: localCandidate.value.program_id,
       _method: 'PUT'
     }
     localCandidate.value = (await api.post(`candidates/${props.candidateId}/admission`, data)).data.data
@@ -29,11 +29,11 @@ async function updateAcceptance() {
   }
   loading.value = false
 }
+
 async function fetchCandidate() {
   try {
     localCandidate.value = (await api.get(`candidates/${props.candidateId}`)).data.data
     localCandidate.value.acceptance_status = localCandidate.value.acceptance_status == null ? 1 : localCandidate.value.acceptance_status;
-    forPrograms.value = [...localCandidate.value.programs]
   } catch (error) {
     console.log(error);
   }
@@ -68,14 +68,14 @@ async function fetchPrograms() {
       <template v-if="localCandidate.acceptance_status">
         <div class="text-weight-bold q-pb-lg">Seleccione las opciones del programa</div>
         <div class="row q-col-gutter-lg">
-          <q-checkbox
+          <q-radio
             class="col-6"
             v-for="program in programs"
             :key="program.id"
             :label="program.name"
             :val="program.id"
-            v-model="forPrograms"
-          ></q-checkbox>
+            v-model="localCandidate.program_id"
+          ></q-radio>
         </div>
       </template>
       <template v-else>

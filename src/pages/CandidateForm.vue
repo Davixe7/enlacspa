@@ -7,11 +7,11 @@ import MedicationsPage from "./MedicationsPage.vue";
 
 const props = defineProps(['candidateId'])
 
-/* function seed() {
+function seed() {
   candidate.value = { "sheet": 1, "first_name": "Jim", "middle_name": "Doe", "last_name": "Smith", "birth_date": "2025-01-01", "age": 1, "chronological_age": 1, "diagnosis": "Lorem ipsum" }
   medications.value = [{ "name": "Paracetamol", "dose": "500mg", "frequency": "1 cada 12 horas", "duration": "3 dias", "observations": "Lorem ipsum" }]
   evaluation_schedule.value = { evaluator_id: 2, date: '2025-03-01 06:00:00' }
-} */
+}
 
 onMounted(async () => {
   evaluators.value = (await api.get('evaluators')).data.data
@@ -23,7 +23,7 @@ onMounted(async () => {
 })
 
 function loadData() {
-  let foreignColumns = ['first_name', 'middle_name', 'last_name', 'birth_date', 'info_channel', 'diagnosis'];
+  let foreignColumns = ['first_name', 'middle_name', 'last_name', 'birth_date', 'info_channel', 'diagnosis', 'sheet'];
 
   let formdata = new FormData()
 
@@ -114,6 +114,9 @@ const chronological_age = computed(() => {
 
 <template>
   <q-page>
+    <div class="flex justify-end">
+      <q-btn @click="seed">Autocompletar</q-btn>
+    </div>
     <div class="form-section">
       <div class="page-title">Datos del Candidato</div>
       <div class="row q-col-gutter-lg">

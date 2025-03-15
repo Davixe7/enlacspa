@@ -4,6 +4,7 @@ import { computed, onMounted, ref } from 'vue';
 import RankForm from './../components/RankForm.vue'
 import CandidateProfile from './../components/CandidateProfile.vue'
 import AdmissionForm from './../components/AdmissionForm.vue'
+import { watch } from 'vue';
 
 const props = defineProps(['candidateId'])
 const brainFunctions = ref([])
@@ -16,7 +17,10 @@ const rows = ref([])
 const dialog = ref(false)
 const dialog2 = ref(false)
 
+const candidate = ref({})
+
 onMounted(async () => {
+  candidate.value = (await (api.get(`candidates/${props.candidateId}`))).data.data
   evaluationFields.value = (await (api.get('evaluation_fields', { params: { candidate_id: props.candidateId } }))).data.data
   brainFunctions.value = (await (api.get('brain_functions'))).data.data
   setColumns()
@@ -61,6 +65,54 @@ function setColumns() {
   columns.value = [...cols]
   rows.value = Object.values(evaluationFields.value)
 }
+const neurologicalAge = ref(0)
+const damageExtensions = ref({
+  0: 'No hay daño',
+  1: 'Focal',
+  2: 'Relativamente Focal',
+  3: 'Semifocal',
+  4: 'Semidifusa',
+  5: 'Relativamente Difusa',
+  6: 'Difusa',
+})
+const damageExtension = ref(0)
+const laterality = ref('Ninguna')
+const developmentRate = computed(() => ((neurologicalAge.value / candidate.value.chronological_age) * 100).toFixed(4))
+const damageRates = ref({
+  "Completa": [0],
+  "Profunda": [0.0001, 25],
+  "Severa": [25.0001, 50],
+  "Moderada": [50.0001, 75],
+  "Leve": [75.0001, 99]
+});
+const damageRate = computed(() => {
+  for (const clave in damageRates.value) {
+    const rango = damageRates.value[clave];
+    if (rango.length === 1 && developmentRate.value === rango[0]) {
+      return clave;
+    } else if (rango.length === 2 && developmentRate.value >= rango[0] && developmentRate.value <= rango[1]) {
+      return clave;
+    }
+  }
+  return null;
+});
+
+watch(() => evaluationFields.value, () => {
+  neurologicalAge.value = 0
+  var brainFunctions = { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false }
+  var lateralities = { "l": false, "r": false }
+  evaluationFields.value.forEach(level => {
+    if (level.P > candidate.value.chronological_age) { return }
+    Object.values(level.ranks)
+      .forEach(rank => {
+        ['F', 'P'].includes(rank.caracteristic) ? neurologicalAge.value++ : '';
+        ['F', '0'].includes(rank.caracteristic) ? brainFunctions[rank.brain_function_id] = true : '';
+        ['F', '0'].includes(rank.caracteristic) ? lateralities[rank.laterality_impact] = true : '';
+      })
+    damageExtension.value = Object.values(brainFunctions).filter(val => val).length;
+    laterality.value = Object.values(lateralities).filter(val => val).length > 1 ? 'Bilateral' : 'Unilateral';
+  })
+}, { deep: true })
 
 function updateRank(updatedRank) {
   let level = rows.value.find(field => field.id == updatedRank.brain_level_id)
@@ -89,6 +141,7 @@ function editRank(param) {
       :rows="rows"
       :columns="columns"
       :pagination="{ rowsPerPage: -1 }"
+      class="q-mb-xl"
       wrap-cells
       hide-bottom
     >
@@ -112,16 +165,100 @@ function editRank(param) {
           </template>
           <template v-else>
             <q-btn
-              @click="editRank(props.value)"
+              v-if="props.row.P <= candidate.chronological_age"
               flat
               round
-            >
-              {{ props.value.brain_function_id }}
-            </q-btn>
+              :icon="!props.value.caracteristic ? 'edit' : 'check'"
+              @click="editRank(props.value)"
+            ></q-btn>
+            <q-btn
+              v-else
+              flat
+              round
+              @click="editRank(props.value)"
+              label="N/A"
+            ></q-btn>
           </template>
         </q-td>
       </template>
     </q-table>
+
+    <div class="page-title">Diagnostico Funcional</div>
+    <div class="row q-col-gutter-xl q-mb-xl">
+      <div class="col-12 col-md-3">
+        <q-input
+          outlined
+          stack-label
+          label="Edad cronologica (meses)"
+          :modelValue="candidate.chronological_age + ' meses'"
+          readonly
+        ></q-input>
+      </div>
+
+      <div class="col-12 col-md-3">
+        <q-input
+          outlined
+          stack-label
+          label="Edad neurologica (meses)(*)"
+          :modelValue="neurologicalAge + ' meses'"
+        ></q-input>
+      </div>
+
+      <div class="col-12 col-md-3">
+        <q-input
+          outlined
+          stack-label
+          label="Extension de la lesion(*)"
+          :modelValue="damageExtensions[damageExtension]"
+        ></q-input>
+      </div>
+
+      <div class="col-12 col-md-3">
+        <q-input
+          outlined
+          stack-label
+          label="Grado de la lesion(*)"
+          :modelValue="damageRate"
+        ></q-input>
+      </div>
+
+      <div class="col-12 col-md-3">
+        <q-input
+          outlined
+          stack-label
+          label="Tasa de desarrollo (por formula)(*)"
+          :value="developmentRate"
+        ></q-input>
+      </div>
+
+      <div class="col-12 col-md-3">
+        <q-input
+          outlined
+          stack-label
+          label="Tasa de desarrollo (por conteo)(*)"
+          :modelValue="developmentRate + '%'"
+        ></q-input>
+      </div>
+    </div>
+
+    <div class="row q-col-gutter-xl q-mb-xl">
+      <div class="col-12 col-md-3">
+        <q-input
+          outlined
+          stack-label
+          label="Lateralidad"
+          :modelValue="laterality"
+        ></q-input>
+      </div>
+      <div class="col-12 col-md-3">
+        <q-input
+          outlined
+          stack-label
+          label="Nivel de la lesion"
+          :value="candidate.chronological_age"
+        ></q-input>
+      </div>
+    </div>
 
     <div class="page-title">Comentarios de la evaluacion</div>
     <div class="q-gutter-y-xl">
