@@ -1,8 +1,11 @@
 <script setup>
-import { onMounted, ref } from 'vue';
+import { watch, onMounted, ref } from 'vue';
 import { api } from 'src/boot/axios';
 import ContactForm from './ContactForm.vue';
+import { useContactStore } from 'src/stores/contact-store';
 
+const contactStore = useContactStore();
+const firstContactErrors = ref({})
 const emits = defineEmits(['update:modelValue'])
 const props = defineProps({
   candidateId: {
@@ -23,6 +26,16 @@ onMounted(async () => {
   contact.value = contacts.value[0]
 })
 
+watch(() => props.errors, newValue => {
+  let errors = {}
+  if (newValue.contacts) { errors.contacts = 'Debe incluir al menos 1 contacto.' }
+  Object.keys(props.errors)
+    .filter(errorKey => errorKey.includes(`contacts.0.`))
+    .map(errorKey => ({ old: errorKey, new: errorKey.replace(`contacts.0.`, '') }))
+    .map(errorKey => errors[errorKey.new] = props.errors[errorKey.old])
+  firstContactErrors.value = { ...errors };
+})
+
 async function fetchContacts() {
   loading.value = true
   try {
@@ -34,12 +47,30 @@ async function fetchContacts() {
   loading.value = false
 }
 
-function setContact(target = null) {
-  contact.value = target ? target : { ...defaultContact.value }
+async function addContact() {
+  if (contacts.value.length != 1) {
+    contact.value = { ...defaultContact.value }
+    dialog.value = true
+    return
+  }
+
+  firstContactErrors.value = {};
+  if (!(await contactStore.validate(contacts.value[0]))) {
+    firstContactErrors.value = { ...contactStore.errors };
+    contactStore.errors = {}
+    return;
+  }
+
+  contact.value = { ...defaultContact.value }
   dialog.value = true
 }
 
-function saveContact(newValue) {
+async function setContact(target) {
+  contact.value = target
+  dialog.value = true
+}
+
+async function saveContact(newValue) {
   if (contacts.value.includes(contact.value)) {
     contacts.value.splice(contacts.value.indexOf(contact.value), 1, newValue)
   } else {
@@ -50,9 +81,22 @@ function saveContact(newValue) {
   dialog.value = false
 }
 
+async function removeContact(target) {
+  if (!target.id) {
+    contacts.value.splice(contacts.value.indexOf(target), 1)
+    return
+  }
+
+  try {
+    await api.post(`contacts/${target.id}`, { _method: 'DELETE' })
+    contacts.value.splice(contacts.value.indexOf(target), 1)
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 const loading = ref(false)
 const dialog = ref(false)
-
 const contacts = ref([])
 const contact = ref(null)
 const defaultContact = ref({
@@ -126,7 +170,8 @@ const columns = ref([
 <template>
   <ContactForm
     v-if="contacts.length <= 1 && contact && !dialog"
-    :model-value="contact"
+    :model-value="contacts[0]"
+    :errors="firstContactErrors"
     @update:modelValue="saveContact"
     hide-bottom-space
   >
@@ -152,6 +197,7 @@ const columns = ref([
             flat
             round
             icon="delete"
+            @click="removeContact(contacts[props.rowIndex])"
           ></q-btn>
         </q-td>
       </template>
@@ -174,7 +220,7 @@ const columns = ref([
     <q-btn
       color="primary"
       icon="add"
-      @click="setContact()"
+      @click="addContact()"
     >Agregar nuevo contacto</q-btn>
   </div>
 </template>

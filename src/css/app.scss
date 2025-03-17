@@ -32,6 +32,9 @@ body {
   line-height: 1.3em;
   margin: 0 0 2rem;
   border: 1px solid red;
+  &--no-margin {
+    margin: 0;
+  }
 }
 
 //INPUTS

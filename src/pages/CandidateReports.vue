@@ -80,7 +80,7 @@ const candidateColumns = ref([
     name: "notes",
     label: "Observaciones",
     align: "right",
-    field: (row) => row.acceptance_status == 0 ? row.rejection_comment : row.program.name,
+    field: (row) => row.acceptance_status == 0 ? row.rejection_comment : (row.program ? row.program.name : 'Pendiente'),
     sortable: true,
   },
 ]);

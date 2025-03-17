@@ -114,7 +114,7 @@
             :key="rt.path"
             :label="rt.meta.label"
             :icon="rt.meta.icon"
-            :to="rt.path"
+            :to="rt.path ?? null"
           />
         </q-breadcrumbs>
       </div>

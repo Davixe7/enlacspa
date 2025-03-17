@@ -39,7 +39,6 @@
           <q-card
             class="module-card"
             :style="{ background: module.color }"
-            :to="module.path"
           >
             <router-link :to="module.path">
               <q-card-section style="padding: 36px">
@@ -76,36 +75,43 @@ const modules = ref([
     label: "Beneficiarios",
     color: "#DD004A80",
     icon: "beneficiarios",
+    path: "/",
   },
   {
     label: "Modulo 3",
     color: "#8DAF1280",
     icon: "rectangle",
+    path: "/",
   },
   {
     label: "Padrinos",
     color: "#00659180",
     icon: "padrinos",
+    path: "/",
   },
   {
     label: "Administración de Programas",
     color: "#98007780",
     icon: "administracion",
+    path: "/",
   },
   {
     label: "Capacitaciones",
     color: "#D4242980",
     icon: "capacitaciones",
+    path: "/",
   },
   {
     label: "Procuración de Fondos",
     color: "#36087680",
     icon: "fondos",
+    path: "/",
   },
   {
     label: "Personal ENLAC",
     color: "#A3B8FF",
     icon: "personal",
+    path: "/",
   },
 ]);
 </script>

@@ -47,7 +47,7 @@ onMounted(async () => {
     <div class="flex column justify-between q-px-md">
       <div>
         <label class="text-weight-bold">Edad cronologica</label>
-        {{ candidate.chronological_age }}
+        {{ candidate.chronological_age }} meses
       </div>
       <div>
         <label for="">text</label>

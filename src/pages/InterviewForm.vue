@@ -1,8 +1,10 @@
 <script setup>
-import { ref } from 'vue';
+import { nextTick, ref } from 'vue';
 import CandidateProfile from './../components/CandidateProfile.vue'
 import { onMounted } from 'vue';
 import { api } from 'src/boot/axios';
+import { Notify } from 'quasar';
+import { scrollToFirstError } from 'src/utils/focusError';
 
 const props = defineProps(['candidateId'])
 
@@ -41,8 +43,16 @@ async function storeInterview() {
   loading.value = true
   let route = interview.value.id ? `interviews/${interview.value.id}` : 'interviews'
   let data = interview.value.id ? { ...interview.value, _method: 'PUT' } : { ...interview.value }
-  try { interview.value = (await api.post(route, data)).data.data }
-  catch (error) { errors.value = error.formatted ? error.formatted : errors.value.formatted }
+
+  try {
+    interview.value = (await api.post(route, data)).data.data
+    Notify.create({ caption: 'Guardado con exito', icon: 'sym_o_check_circle', iconColor: 'positive' })
+  }
+  catch (error) {
+    Notify.create({ caption: 'Error. Revise la informacion', icon: 'sym_o_info', iconColor: 'negative' })
+    errors.value = error.formatted ? error.formatted : errors.value.formatted
+    nextTick(() => scrollToFirstError())
+  }
   loading.value = false
 }
 
@@ -90,6 +100,9 @@ async function signInterview() {
           dense
           v-model="interview.content"
           :disable="Boolean(interview.signed_at)"
+          :class="{ 'q-field--error': !!errors.content }"
+          :error-message="errors.content"
+          style="height: 100%;"
         ></q-editor>
       </div>
     </div>

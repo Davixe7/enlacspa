@@ -54,7 +54,7 @@ const showPassword = ref(false)
                   @click="showPassword = !showPassword"
                   flat
                   round
-                  icon="remove_red_eye"
+                  :icon="!showPassword ? 'visibility' : 'visibility_off'"
                   dense
                 />
               </template>
@@ -80,7 +80,11 @@ const showPassword = ref(false)
   </div>
 </template>
 
-<style>
+<style lang="scss">
+.login-form-column>div {
+  flex: 1 1 auto;
+}
+
 .login-brand-column {
   display: flex;
   justify-content: center;
@@ -129,6 +133,10 @@ a {
   .login-form-column {
     order: 1;
     padding-left: 100px;
+
+    >div {
+      max-width: 370px;
+    }
   }
 
   .row .login-brand-column {

@@ -1,19 +1,23 @@
 <script setup>
+import { Notify } from 'quasar';
 import { api } from 'src/boot/axios';
 import { onMounted, ref } from 'vue';
 
 const props = defineProps(['candidate', 'candidateId'])
 const emits = defineEmits(['close'])
+
 const loading = ref(false)
-const localCandidate = ref({ ...props.candidate })
+const errors = ref({})
 const programs = ref([])
+const localCandidate = ref({ ...props.candidate })
 
 onMounted(async () => {
-  await fetchCandidate()
   await fetchPrograms()
+  await fetchCandidate()
 })
 
 async function updateAcceptance() {
+  errors.value = {}
   loading.value = true
   try {
     let data = {
@@ -23,9 +27,11 @@ async function updateAcceptance() {
       _method: 'PUT'
     }
     localCandidate.value = (await api.post(`candidates/${props.candidateId}/admission`, data)).data.data
+    Notify.create({ caption: 'Guardado con exito', icon: 'sym_o_check_circle', iconColor: 'positive' })
     emits('close')
   } catch (error) {
-    console.log(error);
+    errors.value = error.formatted ? error.formatted : {}
+    Notify.create({ caption: 'Por favor, valide la informacion', icon: 'sym_o_info', iconColor: 'negative' })
   }
   loading.value = false
 }
@@ -50,7 +56,7 @@ async function fetchPrograms() {
 <template>
   <q-card>
     <q-card-section>
-      <div class="page-title">Es candidato para formar parte del instituto ENLAC?</div>
+      <div class="page-title page-title--no-margin">Es candidato para formar parte del instituto ENLAC?</div>
     </q-card-section>
     <q-card-section>
       <div style="padding-bottom: 40px; margin-left: -10px;">
@@ -85,6 +91,8 @@ async function fetchPrograms() {
           type="textarea"
           label="¿Por qué no?"
           v-model="localCandidate.rejection_comment"
+          :error="!!errors.rejection_comment"
+          :error-message="errors.rejection_comment"
         ></q-input>
       </template>
     </q-card-section>

@@ -1,9 +1,12 @@
 <script setup>
+import { Notify } from 'quasar';
 import { api } from 'src/boot/axios';
 import { onMounted, ref } from 'vue';
 
 const emits = defineEmits(['rankUpdated', 'close'])
 const props = defineProps(['rank'])
+const errors = ref({})
+const loading = ref(false)
 const brainFunction = ref({})
 const localRank = ref({ ...props.rank })
 
@@ -12,15 +15,20 @@ onMounted(async () => {
 })
 
 async function storeRank() {
+  loading.value = true
+  errors.value = {}
   let route = props.rank.id ? `brain_function_ranks/${props.rank.id}` : 'brain_function_ranks'
   let data = props.rank.id ? { ...localRank.value, '_method': 'PUT' } : { ...localRank.value }
   try {
     let response = (await api.post(route, data)).data.data
+    Notify.create({ caption: 'Guardado con exito', icon: 'sym_o_check_circle', iconColor: 'positive' })
     emits('rankUpdated', response)
   }
   catch (error) {
-    console.log(error);
+    errors.value = error.formatted ? error.formatted : {}
+    Notify.create({ caption: 'No se pudo guardar', icon: 'sym_o_info', iconColor: 'negative' })
   }
+  loading.value = false
 }
 </script>
 <template>
@@ -29,7 +37,7 @@ async function storeRank() {
     v-if="rank"
   >
     <q-card-section class="flex justify-between items-center q-pr-sm">
-      <div class="page-title">
+      <div class="page-title page-title--no-margin">
         {{ rank.brain_level_id }}
         {{ brainFunction.name }}
       </div>
@@ -70,9 +78,14 @@ async function storeRank() {
         label="Comentarios"
         type="textarea"
         v-model="localRank.comments"
+        :error="!!errors.comments"
+        :error-message="errors.comments"
       ></q-input>
 
-      <div class="q-pt-lg q-pl-none">
+      <div
+        class="q-pt-lg q-pl-none"
+        v-if="localRank.caracteristic != 'P'"
+      >
         <label
           for="#"
           style="margin-bottom: 14px; display: block;"
@@ -89,16 +102,25 @@ async function storeRank() {
             label="Derecha"
           />
         </div>
+        <div
+          v-show="!!errors.laterality_impact"
+          class="q-field__bottom text-negative"
+        >
+          Seleccione lateralidad del impacto
+        </div>
       </div>
     </q-card-section>
     <q-card-section class="flex justify-end">
       <q-btn
+        :loading="loading"
+        @click="emits('close')"
         class="q-mr-sm"
         unelevated
         outline
         color="primary"
       >Cerrar</q-btn>
       <q-btn
+        :loading="loading"
         @click="storeRank"
         unelevated
         color="primary"

@@ -23,8 +23,11 @@ export const useAuthStore = defineStore("auth", {
         await api.post(`${this.baseUrl}/login`, data);
         this.router.push("home");
       } catch (error) {
-        console.log(error);
-        this.errors = { email: "Nombre de usuario o contrasenia incorrectos" };
+        if (error.status == 422) {
+          this.errors = {
+            email: "Nombre de usuario o contrasenia incorrectos",
+          };
+        }
       }
       this.loading = false;
     },

@@ -1,16 +1,26 @@
 <script setup>
-import { computed, onMounted, ref } from "vue";
+import { computed, nextTick, onMounted, ref } from "vue";
 import { api } from "src/boot/axios";
 import { DateTime } from "luxon";
 import ContactsPage from "./ContactsPage.vue";
 import MedicationsPage from "./MedicationsPage.vue";
+import { Notify } from "quasar";
+import { scrollToFirstError } from "src/utils/focusError";
 
 const props = defineProps(['candidateId'])
 
 function seed() {
-  candidate.value = { "sheet": 1, "first_name": "Jim", "middle_name": "Doe", "last_name": "Smith", "birth_date": "2025-01-01", "age": 1, "chronological_age": 1, "diagnosis": "Lorem ipsum" }
+  candidate.value = {
+    "sheet": 1,
+    "first_name": "Jim",
+    "middle_name": "Doe",
+    "last_name": "Smith",
+    "birth_date": "2025-01-01",
+    "info_channel": 'Otro',
+    "diagnosis": "Lorem ipsum"
+  }
   medications.value = [{ "name": "Paracetamol", "dose": "500mg", "frequency": "1 cada 12 horas", "duration": "3 dias", "observations": "Lorem ipsum" }]
-  evaluation_schedule.value = { evaluator_id: 2, date: '2025-03-01 06:00:00' }
+  evaluation_schedule.value = { evaluator_id: evaluators.value[0].id, date: '2025-03-01 06:00:00' }
 }
 
 onMounted(async () => {
@@ -60,37 +70,33 @@ function loadData() {
 
 async function storeCandidate() {
   loading.value = true
+  errors.value = {}
   try {
     let endpoint = candidate.value.id ? `candidates/${candidate.value.id}` : 'candidates'
     await api.post(endpoint, loadData())
+    Notify.create({ caption: 'Guardado con exito', icon: 'sym_o_check_circle', iconColor: 'positive' })
   }
   catch (error) {
     errors.value = error.status == 422 ? error.formatted : {}
+    Notify.create({ caption: 'Por favor, valide la informacion', icon: 'sym_o_info', iconColor: 'negative' })
+    nextTick(() => scrollToFirstError())
   }
   loading.value = false
 }
 
 const loading = ref(false)
 const errors = ref({});
+
+const infoChannels = ref(['Publicidad impresa', 'Publicidad en radio', 'Recomendacion de escuela', 'Recomendacion de personal medico', 'Recomendacion de otra persona', 'Otro'])
+const evaluation_schedules = ref([])
+
+const candidate = ref({ id: null, first_name: '', middle_name: '', last_name: '', birth_date: null, age: null, chronological_age: null, diagnosis: '', info_channel: infoChannels.value[infoChannels.value.length - 1], sheet: 1 })
 const contacts = ref([])
 const medications = ref([]);
-const infoChannels = ref(['Publicidad impresa', 'Publicidad en radio', 'Recomendacion de escuela', 'Recomendacion de personal medico', 'Recomendacion de otra persona', 'Otro'])
 const evaluators = ref([])
-const evaluation_schedules = ref([])
 const evaluation_schedule = ref({ evaluator_id: null, date: DateTime.now().toFormat('yyyy-MM-dd H:mm:s') })
 const picture = ref(null)
-
-const candidate = ref({
-  id: null,
-  first_name: '',
-  middle_name: '',
-  last_name: '',
-  birth_date: null,
-  age: null,
-  chronological_age: null,
-  diagnosis: 'Lorem ipsum',
-  info_channel: 'Otro'
-});
+const recepient = ref({ name: '', phone: '' })
 
 const age = computed(() => {
   if (!candidate.value.birth_date) { return null }
@@ -136,8 +142,8 @@ const chronological_age = computed(() => {
             hide-bottom-space
             label="Apellido Materno"
             v-model="candidate.middle_name"
-            :error="!!errors['candidate.apellido_materno']"
-            :error-message="errors['candidate.apellido_materno']"
+            :error="!!errors['candidate.middle_name']"
+            :error-message="errors['candidate.middle_name']"
           ></q-input>
           <q-input
             outlined
@@ -167,8 +173,6 @@ const chronological_age = computed(() => {
             hide-bottom-space
             label="Edad"
             v-model.number="age"
-            :error="!!errors['candidate.age']"
-            :error-message="errors['candidate.age']"
           ></q-input>
           <q-input
             readonly
@@ -177,8 +181,6 @@ const chronological_age = computed(() => {
             hide-bottom-space
             label="Edad Cronológica*"
             v-model="chronological_age"
-            :error="!!errors['cronologica']"
-            :error-message="errors['cronologica']"
           ></q-input>
         </div>
       </div>
@@ -266,6 +268,53 @@ const chronological_age = computed(() => {
           <span style="font-family: monospace;">{{ schedule.evaluator.name }}</span>
         </li>
       </ul>
+    </div>
+
+    <div class="form-section">
+      <div class="page-title">Herramientas Adicionales</div>
+      <div class="subtitle">Envio de Formato Inicial por WhatsApp</div>
+      <div class="flex q-gutter-x-md q-mb-lg">
+        <q-input
+          outlined
+          stack-label
+          label="Nombre de la persona"
+          type="text"
+          v-model="recepient.name"
+        ></q-input>
+        <q-input
+          outlined
+          stack-label
+          label="Celular"
+          type="tel"
+          v-model="recepient.phone"
+        ></q-input>
+        <q-btn
+          style="width: 100px; height: 48px; align-self: flex-end"
+          color="primary"
+        >Enviar</q-btn>
+      </div>
+
+      <div class="subtitle q-mt-md">Envio de Encuesta de Satisfaccion</div>
+      <div class="flex q-gutter-x-md">
+        <q-input
+          outlined
+          stack-label
+          label="Nombre de la persona"
+          type="text"
+          v-model="recepient.name"
+        ></q-input>
+        <q-input
+          outlined
+          stack-label
+          label="Celular"
+          type="tel"
+          v-model="candidate.phone"
+        ></q-input>
+        <q-btn
+          style="width: 100px; height: 48px; align-self: flex-end"
+          color="primary"
+        >Enviar</q-btn>
+      </div>
     </div>
 
     <div class="form-section">
