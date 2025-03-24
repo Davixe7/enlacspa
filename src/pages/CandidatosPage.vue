@@ -92,10 +92,12 @@ const columns = ref([
         Nuevo Candidato
       </q-btn>
     </div>
+
     <q-table
       wrap-cells
       :columns="columns"
       :rows="rows"
+      :pagination="{ rowsPerPage: 0 }"
     >
       <template v-slot:body-cell-actions="props">
         <q-td>

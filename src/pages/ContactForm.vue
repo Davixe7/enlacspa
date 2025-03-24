@@ -9,7 +9,23 @@ const props = defineProps({
   modelValue: { type: Object, required: true },
   errors: { type: Object, required: false, default: () => ({}) },
 })
-
+const relationships = [
+  { label: "Abuelo(a)", value: "abuelo" },
+  { label: "Cuñado(a)", value: "cunado" },
+  { label: "Esposo(a)", value: "esposo" },
+  { label: "Hermano(a)", value: "hermano" },
+  { label: "Hijo(a)", value: "hijo" },
+  { label: "Hermanastro(a)", value: "hermanastro" },
+  { label: "Madre/Padre", value: "madre_padre" },
+  { label: "Nieto(a)", value: "nieto" },
+  { label: "Padrastro/Madrastra", value: "padrastro_madrastra" },
+  { label: "Pareja", value: "pareja" },
+  { label: "Primo(a)", value: "primo" },
+  { label: "Sobrino(a)", value: "sobrino" },
+  { label: "Suegro(a)", value: "suegro" },
+  { label: "Tío(a)", value: "tio" },
+  { label: "Yerno/Nuera", value: "yerno_nuera" }
+];
 const contact = ref({ ...props.modelValue })
 const localErrors = ref({ ...props.errors })
 
@@ -29,10 +45,6 @@ async function save() {
       localErrors.value = error.response.data.errors
     }
   }
-}
-
-function seed() {
-  Object.assign(contact.value, { "first_name": "John", "middle_name": "Garcia", "last_name": "Salazar", "relationship": "Padre", "legal_guardian": 0, "enlac_responsible": 1, "email": "mariajoseguilarte@gmail.com", "whatsapp": '321123456', "home_phone": '321123456', "street": "5", "neighborhood": "Villa Rosa", "state": "Nueva Esparta", "postal_code": "6301", "exterior_number": "0", "city": "Porlamar", "country": "Venezuela" })
 }
 </script>
 
@@ -92,7 +104,7 @@ function seed() {
         v-model="contact.relationship"
         :error="!!localErrors[`relationship`]"
         :error-message="localErrors[`relationship`]"
-        :options="[{ label: 'Padre', value: 1 }]"
+        :options="relationships"
       ></q-select>
     </div>
     <div class="col-12 col-md-6 q-gutter-y-lg">
@@ -144,10 +156,6 @@ function seed() {
   </div>
   <div class="page-title">
     Domicilio
-    <q-btn
-      @click="seed"
-      flat
-    >llenar</q-btn>
   </div>
   <div class="row q-col-gutter-lg">
     <div class="col-12 col-md-6 q-gutter-y-md">

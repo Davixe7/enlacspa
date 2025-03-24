@@ -9,10 +9,10 @@ import { scrollToFirstError } from "src/utils/focusError";
 
 const props = defineProps(['candidateId'])
 
-function seed() {
+/* function seed() {
   candidate.value = {
     "sheet": 1,
-    "first_name": "Jim",
+    "first_name": "John",
     "middle_name": "Doe",
     "last_name": "Smith",
     "birth_date": "2025-01-01",
@@ -20,8 +20,8 @@ function seed() {
     "diagnosis": "Lorem ipsum"
   }
   medications.value = [{ "name": "Paracetamol", "dose": "500mg", "frequency": "1 cada 12 horas", "duration": "3 dias", "observations": "Lorem ipsum" }]
-  evaluation_schedule.value = { evaluator_id: evaluators.value[0].id, date: '2025-03-01 06:00:00' }
-}
+  evaluation_schedule.value = { evaluator_id: evaluators.value[0].id, date: '2025-04-01 06:00:00' }
+} */
 
 onMounted(async () => {
   evaluators.value = (await api.get('evaluators')).data.data
@@ -120,9 +120,6 @@ const chronological_age = computed(() => {
 
 <template>
   <q-page>
-    <div class="flex justify-end">
-      <q-btn @click="seed">Autocompletar</q-btn>
-    </div>
     <div class="form-section">
       <div class="page-title">Datos del Candidato</div>
       <div class="row q-col-gutter-lg">

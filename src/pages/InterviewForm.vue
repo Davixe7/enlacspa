@@ -5,10 +5,14 @@ import { onMounted } from 'vue';
 import { api } from 'src/boot/axios';
 import { Notify } from 'quasar';
 import { scrollToFirstError } from 'src/utils/focusError';
+import { useCandidateStore } from 'src/stores/candidate-store';
 
 const props = defineProps(['candidateId'])
+const store = useCandidateStore()
 
 onMounted(async () => {
+  store.id = props.candidateId
+  await store.fetchCandidate()
   await fetchQuestions()
   await fetchInterview()
 })
@@ -20,7 +24,7 @@ const interviewQuestions = ref([])
 const interview = ref({
   id: null,
   interviewee_name: 'John Doe',
-  interviewee_relationship: 'father',
+  interviewee_relationship: 'padre',
   candidate_id: props.candidateId,
   content: '',
   observation: '',
@@ -42,7 +46,8 @@ async function fetchQuestions() {
 async function storeInterview() {
   loading.value = true
   let route = interview.value.id ? `interviews/${interview.value.id}` : 'interviews'
-  let data = interview.value.id ? { ...interview.value, _method: 'PUT' } : { ...interview.value }
+  let data = { ...interview.value, interviewee: store.interviewee }
+  if (interview.value.id) { data._method = 'PUT' }
 
   try {
     interview.value = (await api.post(route, data)).data.data
@@ -67,6 +72,7 @@ async function signInterview() {
     <div class="page-title">Entrevista</div>
 
     <CandidateProfile :candidate-id="candidateId">
+      Here goes the other one
     </CandidateProfile>
 
     <div class="label-alt-2">Lista de preguntas</div>

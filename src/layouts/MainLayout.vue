@@ -108,7 +108,7 @@
 
     <q-page-container>
       <div style="padding: 32px">
-        <q-breadcrumbs style="border: 1px solid grey">
+        <q-breadcrumbs>
           <q-breadcrumbs-el
             v-for="rt in route.matched"
             :key="rt.path"
@@ -119,7 +119,7 @@
         </q-breadcrumbs>
       </div>
       <div style="padding: 15px 32px">
-        <router-view style="border: 1px solid grey" />
+        <router-view />
       </div>
     </q-page-container>
   </q-layout>
