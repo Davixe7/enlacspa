@@ -118,6 +118,7 @@ const chronological_age = computed(() => {
             hide-bottom-space
             label="Nombre (s)"
             v-model="candidate.first_name"
+            class="q-field--required"
             :error="!!errors['candidate.first_name']"
             :error-message="errors['candidate.first_name']"
           ></q-input>
@@ -127,6 +128,7 @@ const chronological_age = computed(() => {
             hide-bottom-space
             label="Apellido Materno"
             v-model="candidate.middle_name"
+            class="q-field--required"
             :error="!!errors['candidate.middle_name']"
             :error-message="errors['candidate.middle_name']"
           ></q-input>
@@ -136,6 +138,7 @@ const chronological_age = computed(() => {
             hide-bottom-space
             label="Apellido Paterno"
             v-model="candidate.last_name"
+            class="q-field--required"
             :error="!!errors['candidate.last_name']"
             :error-message="errors['candidate.last_name']"
           ></q-input>
@@ -147,6 +150,7 @@ const chronological_age = computed(() => {
             hide-bottom-space
             label="Fecha de Nacimiento"
             v-model="candidate.birth_date"
+            class="q-field--required"
             :error="!!errors['candidate.birth_date']"
             :error-message="errors['candidate.birth_date']"
             type="date"

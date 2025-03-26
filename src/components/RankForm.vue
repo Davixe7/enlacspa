@@ -89,7 +89,8 @@ async function storeRank() {
         <label
           for="#"
           style="margin-bottom: 14px; display: block;"
-        >¿Impacto en Lateridad? (*)</label>
+        >¿Impacto en Lateridad? (<span class="text--negative">*</span>)
+        </label>
         <div style="margin-left: -10px;">
           <q-radio
             v-model="localRank.laterality_impact"

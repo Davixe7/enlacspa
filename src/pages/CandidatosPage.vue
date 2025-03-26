@@ -7,7 +7,7 @@ import AppointmentForm from './../components/AppointmentForm.vue'
 onMounted(() => fetchCandidates())
 
 async function fetchCandidates() {
-  rows.value = (await api.get('candidates')).data.data
+  rows.value = (await api.get('candidates/dashboard')).data.data
 }
 const appointmentDialog = ref(false)
 const rows = ref([]);

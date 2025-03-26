@@ -75,6 +75,7 @@ async function save() {
         hide-bottom-space
         label="Nombre (s)"
         v-model="contact.first_name"
+        class="q-field--required"
         :error="!!localErrors[`first_name`]"
         :error-message="localErrors[`first_name`]"
       ></q-input>
@@ -102,6 +103,7 @@ async function save() {
         hide-bottom-space
         label="Parentesco"
         v-model="contact.relationship"
+        class="q-field--required"
         :error="!!localErrors[`relationship`]"
         :error-message="localErrors[`relationship`]"
         :options="relationships"

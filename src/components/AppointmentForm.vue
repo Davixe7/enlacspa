@@ -59,6 +59,7 @@ async function storeAppointment() {
       <q-select
         outlined
         stack-label
+        class="q-field--required"
         label="Candidatos"
         :options="candidates"
         v-model="appointment.candidate_id"
@@ -72,6 +73,7 @@ async function storeAppointment() {
         outlined
         stack-label
         label="Tipo de cita"
+        class="q-field--required"
         :options="[{ name: 'Unico tipo de cita', id: 1 }]"
         v-model="appointment.type_id"
         emit-value
@@ -84,6 +86,7 @@ async function storeAppointment() {
         outlined
         stack-label
         label="Atendera"
+        class="q-field--required"
         :options="evaluators"
         v-model="appointment.evaluator_id"
         emit-value
@@ -96,6 +99,7 @@ async function storeAppointment() {
         outlined
         stack-label
         v-model="date"
+        class="q-field--required"
         label="Seleccione fecha"
       >
         <template v-slot:append>
@@ -130,6 +134,7 @@ async function storeAppointment() {
         outlined
         stack-label
         v-model="time"
+        class="q-field--required"
         label="Horario"
       >
         <template v-slot:append>
