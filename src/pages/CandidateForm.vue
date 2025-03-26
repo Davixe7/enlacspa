@@ -9,26 +9,13 @@ import { scrollToFirstError } from "src/utils/focusError";
 
 const props = defineProps(['candidateId'])
 
-/* function seed() {
-  candidate.value = {
-    "sheet": 1,
-    "first_name": "John",
-    "middle_name": "Doe",
-    "last_name": "Smith",
-    "birth_date": "2025-01-01",
-    "info_channel": 'Otro',
-    "diagnosis": "Lorem ipsum"
-  }
-  medications.value = [{ "name": "Paracetamol", "dose": "500mg", "frequency": "1 cada 12 horas", "duration": "3 dias", "observations": "Lorem ipsum" }]
-  evaluation_schedule.value = { evaluator_id: evaluators.value[0].id, date: '2025-04-01 06:00:00' }
-} */
-
 onMounted(async () => {
   evaluators.value = (await api.get('evaluators')).data.data
+  evaluation_schedule.value = { evaluator_id: evaluators.value[0].id, date: DateTime.now().toFormat('yyyy-MM-dd H:mm:s') }
   if (!props.candidateId) { return }
   candidate.value = (await api.get(`candidates/${props.candidateId}`)).data.data
   medications.value = candidate.value.medications
-  evaluation_schedule.value = candidate.value.evaluation_schedule ? candidate.value.evaluation_schedule : { evaluator_id: null, date: DateTime.now().toFormat('yyyy-MM-dd H:mm:s') }
+  evaluation_schedule.value = candidate.value.evaluation_schedule ? candidate.value.evaluation_schedule : evaluation_schedule.value
   evaluation_schedules.value = candidate.value.evaluation_schedules ? candidate.value.evaluation_schedules : []
 })
 
@@ -48,7 +35,8 @@ function loadData() {
   })
 
   Object.keys(evaluation_schedule.value).forEach(attr => {
-    formdata.append(`evaluation_schedule[${attr}]`, evaluation_schedule.value[attr])
+    let value = evaluation_schedule.value[attr] === null ? '' : evaluation_schedule.value[attr];
+    formdata.append(`evaluation_schedule[${attr}]`, value)
   })
 
   contacts.value.forEach((contact, i) => {
@@ -215,8 +203,8 @@ const chronological_age = computed(() => {
         hide-bottom-space
         label="Diagnostico Médico / Síntomas *"
         v-model="candidate.diagnosis"
-        :error="!!errors.diagnosis"
-        :error-message="errors.diagnosis"
+        :error="!!errors['candidate.diagnosis']"
+        :error-message="errors['candidate.diagnosis']"
       ></q-input>
     </div>
 
@@ -241,6 +229,8 @@ const chronological_age = computed(() => {
             option-label="name"
             option-value="id"
             map-options
+            :error="!!errors['evaluation_schedule.evaluator_id']"
+            :error-message="errors['evaluation_schedule.evaluator_id']"
           ></q-select>
         </div>
         <div class="col-12 col-md-4">

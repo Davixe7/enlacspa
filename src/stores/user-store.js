@@ -2,12 +2,15 @@ import { defineStore, acceptHMRUpdate } from "pinia";
 import { api } from "src/boot/axios";
 
 export const useAuthStore = defineStore("auth", {
-  state: () => ({
-    loading: false,
-    errors: {},
-    baseUrl: new URL(api.defaults.baseURL).origin,
-    data: {},
-  }),
+  state: () => {
+    let url = new URL(api.defaults.baseURL).origin;
+    return {
+      loading: false,
+      errors: {},
+      baseUrl: url,
+      data: {},
+    };
+  },
 
   actions: {
     async csrfCookie() {
