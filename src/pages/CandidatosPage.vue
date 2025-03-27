@@ -51,8 +51,8 @@ const columns = ref([
     name: "notes",
     label: "Observaciones",
     align: "left",
-    field: () => "Lörem ipsum orade kövis då antivaxxare.",
-    sortable: true,
+    field: 'diagnosis',
+    sortable: false,
   },
   {
     name: "actions",

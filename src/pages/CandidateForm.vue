@@ -6,17 +6,23 @@ import ContactsPage from "./ContactsPage.vue";
 import MedicationsPage from "./MedicationsPage.vue";
 import { Notify } from "quasar";
 import { scrollToFirstError } from "src/utils/focusError";
+import { useRouter } from "vue-router";
 
+
+const router = useRouter()
 const props = defineProps(['candidateId'])
 
 onMounted(async () => {
   evaluators.value = (await api.get('evaluators')).data.data
-  evaluation_schedule.value = { evaluator_id: evaluators.value[0].id, date: DateTime.now().toFormat('yyyy-MM-dd H:mm:s') }
-  if (!props.candidateId) { return }
-  candidate.value = (await api.get(`candidates/${props.candidateId}`)).data.data
-  medications.value = candidate.value.medications
-  evaluation_schedule.value = candidate.value.evaluation_schedule ? candidate.value.evaluation_schedule : evaluation_schedule.value
-  evaluation_schedules.value = candidate.value.evaluation_schedules ? candidate.value.evaluation_schedules : []
+  if (props.candidateId) {
+    candidate.value = (await api.get(`candidates/${props.candidateId}`)).data.data
+    medications.value = candidate.value.medications
+    evaluation_schedule.value = candidate.value.evaluation_schedule ? candidate.value.evaluation_schedule : evaluation_schedule.value
+    evaluation_schedules.value = candidate.value.evaluation_schedules ? candidate.value.evaluation_schedules : []
+  }
+  let datetime = DateTime.fromFormat(evaluation_schedule.value.date, 'yyyy-MM-dd HH:mm:ss')
+  evaluationDate.value = datetime.toFormat('dd/MM/yyyy')
+  evaluationTime.value = datetime.toFormat('HH:mm')
 })
 
 function loadData() {
@@ -34,6 +40,7 @@ function loadData() {
     }
   })
 
+  evaluation_schedule.value.date = fulldatetime.value
   Object.keys(evaluation_schedule.value).forEach(attr => {
     let value = evaluation_schedule.value[attr] === null ? '' : evaluation_schedule.value[attr];
     formdata.append(`evaluation_schedule[${attr}]`, value)
@@ -41,7 +48,7 @@ function loadData() {
 
   contacts.value.forEach((contact, i) => {
     Object.keys(contact).forEach(contactAttr => {
-      formdata.append(`contacts[${i}][${contactAttr}]`, contacts.value[i][contactAttr])
+      formdata.append(`contacts[${i}][${contactAttr}]`, contacts.value[i][contactAttr] ? contacts.value[i][contactAttr] : '')
     })
   })
 
@@ -62,7 +69,8 @@ async function storeCandidate() {
   try {
     let endpoint = candidate.value.id ? `candidates/${candidate.value.id}` : 'candidates'
     await api.post(endpoint, loadData())
-    Notify.create({ caption: 'Guardado con exito', icon: 'sym_o_check_circle', iconColor: 'positive' })
+    Notify.create({ caption: 'Guardado con exito', icon: 'sym_o_check_circle', iconColor: 'positive', timeout: 3000, progress: true })
+    setTimeout(() => router.push('/candidatos'), 3000)
   }
   catch (error) {
     errors.value = error.status == 422 ? error.formatted : {}
@@ -74,6 +82,12 @@ async function storeCandidate() {
 
 const loading = ref(false)
 const errors = ref({});
+const evaluationDate = ref(null)
+const evaluationTime = ref(null)
+const fulldatetime = computed(() => {
+  let newDate = DateTime.fromFormat(evaluationDate.value + ' ' + evaluationTime.value, 'dd/MM/yyyy HH:mm')
+  return newDate.toFormat('yyyy-MM-dd HH:mm:ss')
+})
 
 const infoChannels = ref(['Publicidad impresa', 'Publicidad en radio', 'Recomendacion de escuela', 'Recomendacion de personal medico', 'Recomendacion de otra persona', 'Otro'])
 const evaluation_schedules = ref([])
@@ -82,7 +96,7 @@ const candidate = ref({ id: null, first_name: '', middle_name: '', last_name: ''
 const contacts = ref([])
 const medications = ref([]);
 const evaluators = ref([])
-const evaluation_schedule = ref({ evaluator_id: null, date: DateTime.now().toFormat('yyyy-MM-dd H:mm:s') })
+const evaluation_schedule = ref({ evaluator_id: null, date: DateTime.now().toFormat('yyyy-MM-dd HH:mm:ss') })
 const picture = ref(null)
 const recepient = ref({ name: '', phone: '' })
 
@@ -126,21 +140,21 @@ const chronological_age = computed(() => {
             outlined
             stack-label
             hide-bottom-space
-            label="Apellido Materno"
-            v-model="candidate.middle_name"
-            class="q-field--required"
-            :error="!!errors['candidate.middle_name']"
-            :error-message="errors['candidate.middle_name']"
-          ></q-input>
-          <q-input
-            outlined
-            stack-label
-            hide-bottom-space
             label="Apellido Paterno"
             v-model="candidate.last_name"
             class="q-field--required"
             :error="!!errors['candidate.last_name']"
             :error-message="errors['candidate.last_name']"
+          ></q-input>
+          <q-input
+            outlined
+            stack-label
+            hide-bottom-space
+            label="Apellido Materno"
+            v-model="candidate.middle_name"
+            class="q-field--required"
+            :error="!!errors['candidate.middle_name']"
+            :error-message="errors['candidate.middle_name']"
           ></q-input>
         </div>
         <div class="col-12 col-md-6 q-gutter-y-lg">
@@ -237,14 +251,74 @@ const chronological_age = computed(() => {
             :error-message="errors['evaluation_schedule.evaluator_id']"
           ></q-select>
         </div>
-        <div class="col-12 col-md-4">
+        <div class="col-12 col-md-2">
           <q-input
             outlined
             stack-label
-            label="Fecha de evaluación"
-            v-model="evaluation_schedule.date"
-            mask="####-##-## ##:##:00"
-          ></q-input>
+            v-model="evaluationDate"
+            class="q-field--required"
+            label="Seleccione fecha"
+          >
+            <template v-slot:append>
+              <q-icon
+                name="event"
+                class="cursor-pointer"
+              >
+                <q-popup-proxy
+                  cover
+                  transition-show="scale"
+                  transition-hide="scale"
+                >
+                  <q-date
+                    v-model="evaluationDate"
+                    mask="DD/MM/YYYY"
+                  >
+                    <div class="row items-center justify-end">
+                      <q-btn
+                        v-close-popup
+                        label="Cerrar"
+                        color="primary"
+                        flat
+                      />
+                    </div>
+                  </q-date>
+                </q-popup-proxy>
+              </q-icon>
+            </template>
+          </q-input>
+        </div>
+        <div class="col-12 col-md-2">
+          <q-input
+            outlined
+            stack-label
+            v-model="evaluationTime"
+            class="q-field--required"
+            label="Horario"
+          >
+            <template v-slot:append>
+              <q-icon
+                name="access_time"
+                class="cursor-pointer"
+              >
+                <q-popup-proxy
+                  cover
+                  transition-show="scale"
+                  transition-hide="scale"
+                >
+                  <q-time v-model="evaluationTime">
+                    <div class="row items-center justify-end">
+                      <q-btn
+                        v-close-popup
+                        label="Cerrar"
+                        color="primary"
+                        flat
+                      />
+                    </div>
+                  </q-time>
+                </q-popup-proxy>
+              </q-icon>
+            </template>
+          </q-input>
         </div>
       </div>
 
@@ -263,7 +337,7 @@ const chronological_age = computed(() => {
 
     <div class="form-section">
       <div class="page-title">Herramientas Adicionales</div>
-      <div class="subtitle">Envio de Formato Inicial por WhatsApp</div>
+      <div class="subtitle q-my-md">Envio de Formato Inicial por WhatsApp</div>
       <div class="flex q-gutter-x-md q-mb-lg">
         <q-input
           outlined
@@ -277,6 +351,7 @@ const chronological_age = computed(() => {
           stack-label
           label="Celular"
           type="tel"
+          mask="##########"
           v-model="recepient.phone"
         ></q-input>
         <q-btn
@@ -285,7 +360,7 @@ const chronological_age = computed(() => {
         >Enviar</q-btn>
       </div>
 
-      <div class="subtitle q-mt-md">Envio de Encuesta de Satisfaccion</div>
+      <div class="subtitle q-my-md">Envio de Encuesta de Satisfaccion</div>
       <div class="flex q-gutter-x-md">
         <q-input
           outlined
@@ -299,7 +374,8 @@ const chronological_age = computed(() => {
           stack-label
           label="Celular"
           type="tel"
-          v-model="candidate.phone"
+          mask="##########"
+          v-model="recepient.phone"
         ></q-input>
         <q-btn
           style="width: 100px; height: 48px; align-self: flex-end"
@@ -309,8 +385,16 @@ const chronological_age = computed(() => {
     </div>
 
     <div class="form-section">
-      <div class="subtitle">Foto del candidato</div>
+      <div class="subtitle q-mb-md">Foto del candidato</div>
       <div class="row">
+        <q-avatar
+          v-if="candidate.picture"
+          size="64px"
+          rounded
+          class="q-mr-sm"
+        >
+          <q-img :src="candidate.picture"></q-img>
+        </q-avatar>
         <div class="col-12 col-md-4">
           <q-file
             outlined

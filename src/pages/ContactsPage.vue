@@ -9,7 +9,7 @@ const firstContactErrors = ref({})
 const emits = defineEmits(['update:modelValue'])
 const props = defineProps({
   candidateId: {
-    type: [Number, null],
+    type: [Number, String, null],
     required: true,
     default: null,
     nullable: true,
@@ -24,6 +24,7 @@ const props = defineProps({
 onMounted(async () => {
   await fetchContacts()
   contact.value = contacts.value[0]
+  emits('update:modelValue', [...contacts.value])
 })
 
 watch(() => props.errors, newValue => {
@@ -170,6 +171,7 @@ const columns = ref([
 <template>
   <ContactForm
     v-if="contacts.length <= 1 && contact && !dialog"
+    :candidate-id="props.candidateId"
     :model-value="contacts[0]"
     :errors="firstContactErrors"
     @update:modelValue="saveContact"
@@ -208,6 +210,7 @@ const columns = ref([
     <q-card>
       <q-card-section>
         <ContactForm
+          :candidate-id="props.candidateId"
           :model-value="contact"
           @update:modelValue="saveContact"
         >

@@ -5,26 +5,19 @@ import { ref, watch } from 'vue';
 const emits = defineEmits(['update:modelValue'])
 
 const props = defineProps({
+  candidateId: { default: null },
   hideBottomSpace: { type: Boolean, default: false },
   modelValue: { type: Object, required: true },
   errors: { type: Object, required: false, default: () => ({}) },
 })
 const relationships = [
   { label: "Abuelo(a)", value: "abuelo" },
-  { label: "Cuñado(a)", value: "cunado" },
-  { label: "Esposo(a)", value: "esposo" },
   { label: "Hermano(a)", value: "hermano" },
-  { label: "Hijo(a)", value: "hijo" },
   { label: "Hermanastro(a)", value: "hermanastro" },
   { label: "Madre/Padre", value: "madre_padre" },
-  { label: "Nieto(a)", value: "nieto" },
   { label: "Padrastro/Madrastra", value: "padrastro_madrastra" },
-  { label: "Pareja", value: "pareja" },
   { label: "Primo(a)", value: "primo" },
-  { label: "Sobrino(a)", value: "sobrino" },
-  { label: "Suegro(a)", value: "suegro" },
   { label: "Tío(a)", value: "tio" },
-  { label: "Yerno/Nuera", value: "yerno_nuera" }
 ];
 const contact = ref({ ...props.modelValue })
 const localErrors = ref({ ...props.errors })
@@ -83,19 +76,19 @@ async function save() {
         outlined
         stack-label
         hide-bottom-space
-        label="Apellido Materno"
-        v-model="contact.middle_name"
-        :error="!!localErrors[`middle_name`]"
-        :error-message="localErrors[`middle_name`]"
+        label="Apellido Paterno"
+        v-model="contact.last_name"
+        :error="!!localErrors[`last_name`]"
+        :error-message="localErrors[`last_name`]"
       ></q-input>
       <q-input
         outlined
         stack-label
         hide-bottom-space
-        label="Apellido Paterno"
-        v-model="contact.last_name"
-        :error="!!localErrors[`last_name`]"
-        :error-message="localErrors[`last_name`]"
+        label="Apellido Materno"
+        v-model="contact.middle_name"
+        :error="!!localErrors[`middle_name`]"
+        :error-message="localErrors[`middle_name`]"
       ></q-input>
       <q-select
         outlined
@@ -107,6 +100,8 @@ async function save() {
         :error="!!localErrors[`relationship`]"
         :error-message="localErrors[`relationship`]"
         :options="relationships"
+        emit-value
+        map-options
       ></q-select>
     </div>
     <div class="col-12 col-md-6 q-gutter-y-lg">
@@ -124,20 +119,22 @@ async function save() {
         outlined
         stack-label
         hide-bottom-space
-        label="Whatsapp"
+        label="WhatsApp"
         v-model="contact.whatsapp"
         :error="!!localErrors[`whatsapp`]"
         :error-message="localErrors[`whatsapp`]"
+        mask="##########"
         type="tel"
       ></q-input>
       <q-input
         outlined
         stack-label
         hide-bottom-space
-        label="Telefono casa"
+        label="Teléfono casa"
         v-model="contact.home_phone"
         :error="!!localErrors[`home_phone`]"
         :error-message="localErrors[`home_phone`]"
+        mask="##########"
         type="tel"
       ></q-input>
       <div class="flex">

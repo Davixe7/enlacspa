@@ -19,20 +19,12 @@ const errors = ref({})
 
 const relationships = [
   { label: "Abuelo(a)", value: "abuelo" },
-  { label: "Cuñado(a)", value: "cunado" },
-  { label: "Esposo(a)", value: "esposo" },
   { label: "Hermano(a)", value: "hermano" },
-  { label: "Hijo(a)", value: "hijo" },
   { label: "Hermanastro(a)", value: "hermanastro" },
   { label: "Madre/Padre", value: "madre_padre" },
-  { label: "Nieto(a)", value: "nieto" },
   { label: "Padrastro/Madrastra", value: "padrastro_madrastra" },
-  { label: "Pareja", value: "pareja" },
   { label: "Primo(a)", value: "primo" },
-  { label: "Sobrino(a)", value: "sobrino" },
-  { label: "Suegro(a)", value: "suegro" },
   { label: "Tío(a)", value: "tio" },
-  { label: "Yerno/Nuera", value: "yerno_nuera" }
 ];
 </script>
 
@@ -91,6 +83,7 @@ const relationships = [
           :error-message="errors.relationship"
           :options="relationships"
           emit-value
+          map-options
         ></q-select>
       </div>
       <div style="margin-left: -8px;">
