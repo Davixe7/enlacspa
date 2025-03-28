@@ -5,7 +5,9 @@ import RankForm from './../components/RankForm.vue'
 import CandidateProfile from './../components/CandidateProfile.vue'
 import AdmissionForm from './../components/AdmissionForm.vue'
 import { watch } from 'vue';
+import { useCandidateStore } from 'src/stores/candidate-store';
 
+const store = useCandidateStore()
 const props = defineProps(['candidateId'])
 const brainFunctions = ref([])
 const evaluationFields = ref([])
@@ -17,10 +19,9 @@ const rows = ref([])
 const dialog = ref(false)
 const dialog2 = ref(false)
 
-const candidate = ref({})
-
 onMounted(async () => {
-  candidate.value = (await (api.get(`candidates/${props.candidateId}`))).data.data
+  store.id = props.candidateId
+  await store.fetchCandidate()
   evaluationFields.value = (await (api.get('evaluation_fields', { params: { candidate_id: props.candidateId } }))).data.data
   brainFunctions.value = (await (api.get('brain_functions'))).data.data
   setColumns()
@@ -49,7 +50,7 @@ function setColumns() {
   },
   {
     name: 'growth',
-    label: 'Tiempo de Formacion',
+    label: 'Tiempo de Formación',
     align: 'left',
     sortable: false
   }]
@@ -77,7 +78,7 @@ const damageExtensions = ref({
 })
 const damageExtension = ref(0)
 const laterality = ref('Ninguna')
-const developmentRate = computed(() => ((neurologicalAge.value / candidate.value.chronological_age) * 100).toFixed(4))
+const developmentRate = computed(() => ((neurologicalAge.value / store.chronological_age) * 100).toFixed(2))
 const damageRates = ref({
   "Completa": [0],
   "Profunda": [0.0001, 25],
@@ -102,7 +103,7 @@ watch(() => evaluationFields.value, () => {
   var brainFunctions = { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false }
   var lateralities = { "l": false, "r": false }
   evaluationFields.value.forEach(level => {
-    if (level.P > candidate.value.chronological_age) { return }
+    if (level.P > store.chronological_age) { return }
     Object.values(level.ranks)
       .forEach(rank => {
         ['F', 'P'].includes(rank.caracteristic) ? neurologicalAge.value++ : '';
@@ -134,7 +135,10 @@ function editRank(param) {
   <q-page>
     <h1 class="page-title">Evaluación</h1>
 
-    <CandidateProfile :candidateId="candidateId">
+    <CandidateProfile
+      :candidateId="candidateId"
+      type="evaluation"
+    >
     </CandidateProfile>
 
     <q-table
@@ -165,12 +169,17 @@ function editRank(param) {
           </template>
           <template v-else>
             <q-btn
-              v-if="props.row.P <= candidate.chronological_age"
+              v-if="props.row.P <= store.chronological_age"
               flat
               round
-              :icon="!props.value.caracteristic ? 'edit' : 'check'"
+              :label="props.value.caracteristic ? props.value.caracteristic : ''"
               @click="editRank(props.value)"
-            ></q-btn>
+            >
+              <q-icon
+                v-if="!props.value.caracteristic"
+                name="edit"
+              ></q-icon>
+            </q-btn>
             <q-btn
               v-else
               flat
@@ -189,9 +198,8 @@ function editRank(param) {
         <q-input
           outlined
           stack-label
-          label="Edad cronologica (meses)"
-          :modelValue="candidate.chronological_age + ' meses'"
-          readonly
+          label="Edad cronológica (meses)"
+          :modelValue="store ? store.chronological_age.split('.')[0] + ' meses' : ''"
         ></q-input>
       </div>
 
@@ -199,7 +207,7 @@ function editRank(param) {
         <q-input
           outlined
           stack-label
-          label="Edad neurologica (meses)(*)"
+          label="Edad neurológica (meses)(*)"
           :modelValue="neurologicalAge + ' meses'"
         ></q-input>
       </div>
@@ -255,12 +263,12 @@ function editRank(param) {
           outlined
           stack-label
           label="Nivel de la lesion"
-          :value="candidate.chronological_age"
+          :value="store.chronological_age"
         ></q-input>
       </div>
     </div>
 
-    <div class="page-title">Comentarios de la evaluacion</div>
+    <div class="page-title">Comentarios de la evaluación</div>
     <div class="q-gutter-y-xl">
       <q-input
         v-for="brainFunctionId in Object.keys(commentsByFunction)"

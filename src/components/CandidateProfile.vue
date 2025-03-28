@@ -6,15 +6,19 @@ const props = defineProps({
   candidateId: {
     type: String,
     required: true
+  },
+  type: {
+    type: String,
+    required: true,
+    default: 'interview'
   }
 })
-
-const store = useCandidateStore();
 
 onMounted(async () => {
   if (!props.candidateId) { return }
 })
 
+const store = useCandidateStore();
 const errors = ref({})
 
 const relationships = [
@@ -38,7 +42,7 @@ const relationships = [
       height="169px"
       color="grey"
       class="bg-grey-4"
-      style="margin-right: 20px;"
+      style="margin-right: 20px; object-fit: cover;"
       :src="store.picture"
     ></q-img>
 
@@ -52,7 +56,7 @@ const relationships = [
         {{ store.birth_date }}
       </div>
       <div>
-        <label class="text-weight-bold">Edad cronologica</label>
+        <label class="text-weight-bold">Edad cronológica</label>
         {{ store.chronological_age }} meses
       </div>
       <div>
@@ -61,7 +65,10 @@ const relationships = [
       </div>
     </div>
 
-    <div class="flex column justify-between q-px-md q-gutter-y-md">
+    <div
+      v-if="type == 'interview'"
+      class="flex column justify-between q-px-md q-gutter-y-md"
+    >
       <div>
         <q-input
           label="Nombre del entrevistado"
@@ -99,6 +106,18 @@ const relationships = [
           label="Hijo Adoptivo"
         ></q-radio>
       </div>
+    </div>
+
+    <div
+      v-else-if="store.evaluation_schedule"
+      class="flex column justify-between q-px-md q-gutter-y-md"
+    >
+      <q-input
+        label="Nombre del Evaluador"
+        outlined
+        stack-label
+        v-model="store.evaluation_schedule.evaluator.name"
+      ></q-input>
     </div>
   </div>
 

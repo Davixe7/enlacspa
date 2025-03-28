@@ -38,7 +38,7 @@ const routes = [
           },
           {
             path: ":candidateId/evaluar",
-            meta: { label: "Evaluacion", layout: "main" },
+            meta: { label: "Evaluación", layout: "main" },
             component: () => import("pages/EvaluationForm.vue"),
             props: true,
           },

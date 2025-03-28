@@ -71,8 +71,10 @@ async function signInterview() {
   <q-page>
     <div class="page-title">Entrevista</div>
 
-    <CandidateProfile :candidate-id="candidateId">
-      Here goes the other one
+    <CandidateProfile
+      :candidate-id="candidateId"
+      type="interview"
+    >
     </CandidateProfile>
 
     <div class="label-alt-2">Lista de preguntas</div>
@@ -114,7 +116,7 @@ async function signInterview() {
     </div>
 
     <div class="label-alt">
-      29 - Que calificacion APGAR tuvo al nacer? Seleccione una opcion
+      29 - Que calificacion APGAR tuvo al nacer? Seleccione una opción
     </div>
     <div class="flex q-mb-xl">
       <div

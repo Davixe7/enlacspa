@@ -15,6 +15,14 @@ onMounted(async () => {
   evaluators.value = (await api.get('evaluators')).data.data
 })
 
+const appointmentTypes = ref([
+  { label: 'Médico', value: 'medico' },
+  { label: 'Nutrición', value: 'nutricion' },
+  { label: 'Psicología', value: 'psicologia' },
+  { label: 'Comunicación', value: 'comunicacion' },
+  { label: 'Programa Escucha', value: 'programa_escucha' },
+])
+
 const fulldatetime = computed(() => {
   let newDate = DateTime.fromFormat(date.value + ' ' + time.value, 'dd/MM/yyyy hh:mm')
   return newDate.toISO()
@@ -74,11 +82,9 @@ async function storeAppointment() {
         stack-label
         label="Tipo de cita"
         class="q-field--required"
-        :options="[{ name: 'Unico tipo de cita', id: 1 }]"
+        :options="appointmentTypes"
         v-model="appointment.type_id"
         emit-value
-        option-label="name"
-        option-value="id"
         map-options
       ></q-select>
 

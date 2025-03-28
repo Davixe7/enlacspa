@@ -16,6 +16,8 @@ export const useCandidateStore = defineStore("candidate", {
     sheet: 1,
     loading: false,
     contacts: [],
+    picture: null,
+    evaluation_schedule: null,
     interviewee: {},
     errors: {},
   }),

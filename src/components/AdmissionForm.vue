@@ -1,19 +1,24 @@
 <script setup>
 import { Notify } from 'quasar';
 import { api } from 'src/boot/axios';
+import { useCandidateStore } from 'src/stores/candidate-store';
 import { onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 const props = defineProps(['candidate', 'candidateId'])
 const emits = defineEmits(['close'])
 
+const store = useCandidateStore()
+const router = useRouter()
 const loading = ref(false)
 const errors = ref({})
 const programs = ref([])
 const localCandidate = ref({ ...props.candidate })
 
 onMounted(async () => {
-  await fetchPrograms()
-  await fetchCandidate()
+  programs.value = (await api.get('programs')).data.data
+  localCandidate.value = { ...store.$state }
+  localCandidate.value.acceptance_status = localCandidate.value.acceptance_status == null ? 1 : localCandidate.value.acceptance_status;
 })
 
 async function updateAcceptance() {
@@ -27,29 +32,14 @@ async function updateAcceptance() {
       _method: 'PUT'
     }
     localCandidate.value = (await api.post(`candidates/${props.candidateId}/admission`, data)).data.data
-    Notify.create({ caption: 'Guardado con exito', icon: 'sym_o_check_circle', iconColor: 'positive' })
+    Notify.create({ caption: 'Guardado con exito', icon: 'sym_o_check_circle', iconColor: 'positive', progress: true, timeout: 3000 })
     emits('close')
+    setTimeout(() => router.push('/candidates'), 2500)
   } catch (error) {
     errors.value = error.formatted ? error.formatted : {}
     Notify.create({ caption: 'Por favor, valide la informacion', icon: 'sym_o_info', iconColor: 'negative' })
   }
   loading.value = false
-}
-
-async function fetchCandidate() {
-  try {
-    localCandidate.value = (await api.get(`candidates/${props.candidateId}`)).data.data
-    localCandidate.value.acceptance_status = localCandidate.value.acceptance_status == null ? 1 : localCandidate.value.acceptance_status;
-  } catch (error) {
-    console.log(error);
-  }
-}
-async function fetchPrograms() {
-  try {
-    programs.value = (await api.get('programs')).data.data
-  } catch (error) {
-    console.log(error);
-  }
 }
 </script>
 
