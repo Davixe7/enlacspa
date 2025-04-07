@@ -80,13 +80,13 @@
                     <q-item-section>Administración de usuarios</q-item-section>
                   </q-item>
                   <q-item clickable>
-                    <q-item-section>Catalogo de areas</q-item-section>
+                    <q-item-section>Catálogo de áreas</q-item-section>
                   </q-item>
                   <q-item clickable>
-                    <q-item-section>Catalogo de puestos</q-item-section>
+                    <q-item-section>Catálogo de puestos</q-item-section>
                   </q-item>
                   <q-item clickable>
-                    <q-item-section>Administracion de carrusel</q-item-section>
+                    <q-item-section>Administración de carrusel</q-item-section>
                   </q-item>
                 </q-list>
               </q-expansion-item>

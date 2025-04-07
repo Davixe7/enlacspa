@@ -1,11 +1,10 @@
 <script setup>
 import { api } from 'src/boot/axios';
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
+import { useCandidateStore } from 'src/stores/candidate-store';
 import RankForm from './../components/RankForm.vue'
 import CandidateProfile from './../components/CandidateProfile.vue'
 import AdmissionForm from './../components/AdmissionForm.vue'
-import { watch } from 'vue';
-import { useCandidateStore } from 'src/stores/candidate-store';
 
 const store = useCandidateStore()
 const props = defineProps(['candidateId'])
@@ -86,6 +85,7 @@ const damageRates = ref({
   "Moderada": [50.0001, 75],
   "Leve": [75.0001, 99]
 });
+
 const damageRate = computed(() => {
   for (const clave in damageRates.value) {
     const rango = damageRates.value[clave];
@@ -97,6 +97,40 @@ const damageRate = computed(() => {
   }
   return null;
 });
+
+const allRanks = computed(() => {
+  let newRanks = []
+  evaluationFields.value.map(level => {
+    if (level.P > store.chronological_age) return
+    newRanks.concat(Object.values(level.ranks))
+  })
+  return newRanks;
+})
+
+const damageExtension = computed(() => {
+  let brainFunctions = { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false }
+  allRanks.value.map(rank => {
+    if (!['F', '0'].includes(rank.caracteristic)) return
+    brainFunctions[rank.brain_function_id] = true
+  })
+  return Object.values(brainFunctions).filter(val => val).length;
+})
+
+const damageLaterality = computed(() => {
+  var lateralities = { "l": false, "r": false }
+  allRanks.value.map(rank => {
+    if (!['F', '0'].includes(rank.caracteristic)) return
+    lateralities[rank.laterality_impact] = true
+  })
+  return Object.values(lateralities).filter(val => val).length > 1 ? 'Bilateral' : 'Unilateral';
+})
+
+const neurologicalAge = computed(() => {
+  return allRanks.value.reduce((age, rank) => {
+    if (!['F', 'P'].includes(rank.caracteristic)) return age
+    return age + 1
+  }, 0)
+})
 
 watch(() => evaluationFields.value, () => {
   neurologicalAge.value = 0

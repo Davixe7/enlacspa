@@ -189,7 +189,7 @@ async function save() {
         outlined
         stack-label
         hide-bottom-space
-        label="Codigo Postal"
+        label="Código Postal"
         v-model="contact.postal_code"
         :error="!!localErrors[`postal_code`]"
         :error-message="localErrors[`postal_code`]"
@@ -202,7 +202,7 @@ async function save() {
         outlined
         stack-label
         hide-bottom-space
-        label="Numero exterior"
+        label="Número exterior"
         v-model="contact.exterior_number"
         :error="!!localErrors[`exterior_number`]"
         :error-message="localErrors[`exterior_number`]"
@@ -221,7 +221,7 @@ async function save() {
         outlined
         stack-label
         hide-bottom-space
-        label="Pais"
+        label="País"
         v-model="contact.country"
         :error="!!localErrors[`country`]"
         :error-message="localErrors[`country`]"
@@ -235,7 +235,7 @@ async function save() {
       <q-btn
         color="primary"
         @click="save"
-      >Guardar Informacion</q-btn>
+      >Guardar Información</q-btn>
     </div>
   </div>
 </template>

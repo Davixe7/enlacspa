@@ -337,7 +337,7 @@ const chronological_age = computed(() => {
 
     <div class="form-section">
       <div class="page-title">Herramientas Adicionales</div>
-      <div class="subtitle q-my-md">Envio de Formato Inicial por WhatsApp</div>
+      <div class="subtitle q-my-md">Envío de Formato Inicial por WhatsApp</div>
       <div class="flex q-gutter-x-md q-mb-lg">
         <q-input
           outlined
@@ -360,7 +360,7 @@ const chronological_age = computed(() => {
         >Enviar</q-btn>
       </div>
 
-      <div class="subtitle q-my-md">Envio de Encuesta de Satisfaccion</div>
+      <div class="subtitle q-my-md">Envio de Encuesta de Satisfacción</div>
       <div class="flex q-gutter-x-md">
         <q-input
           outlined
