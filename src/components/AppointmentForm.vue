@@ -8,19 +8,28 @@ defineProps(['candidates'])
 const emits = defineEmits(['close'])
 const loading = ref(false)
 const errors = ref({})
-const evaluators = ref([])
+const areas = ref([])
+const personal = ref([])
 const appointment = ref({})
 
 onMounted(async () => {
-  evaluators.value = (await api.get('evaluators')).data.data
+  areas.value = (await api.get('roles')).data.data
+  areas.value = areas.value.map(area => {
+    let flag = appointmentTypes.value.find(type => type.value == area.name)
+    return { ...area, label: flag ? flag.label : area.name }
+  })
 })
+
+async function fetchPersonal() {
+  personal.value = (await api.get('personal', { params: { area: appointment.value.type_id } })).data.data
+}
 
 const appointmentTypes = ref([
   { label: 'Médico', value: 'medico' },
   { label: 'Nutrición', value: 'nutricion' },
   { label: 'Psicología', value: 'psicologia' },
   { label: 'Comunicación', value: 'comunicacion' },
-  { label: 'Programa Escucha', value: 'programa_escucha' },
+  { label: 'Programa Escucha', value: 'programa-escucha' },
 ])
 
 const fulldatetime = computed(() => {
@@ -82,10 +91,13 @@ async function storeAppointment() {
         stack-label
         label="Tipo de cita"
         class="q-field--required"
-        :options="appointmentTypes"
+        :options="areas"
         v-model="appointment.type_id"
         emit-value
+        option-label="label"
+        option-value="id"
         map-options
+        @update:modelValue="fetchPersonal"
       ></q-select>
 
       <q-select
@@ -93,7 +105,7 @@ async function storeAppointment() {
         stack-label
         label="Atendera"
         class="q-field--required"
-        :options="evaluators"
+        :options="personal"
         v-model="appointment.evaluator_id"
         emit-value
         option-label="name"

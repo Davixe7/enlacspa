@@ -10,6 +10,8 @@ var { token, email } = route.query;
 const newPassword = ref("");
 const confirmPassword = ref("");
 
+const loading = ref(false)
+
 const submitForm = async () => {
   if (!newPassword.value || !confirmPassword.value || !token || !email) return
   let data = {
@@ -19,6 +21,7 @@ const submitForm = async () => {
     password_confirmation: confirmPassword.value
   }
   try {
+    loading.value = true
     await api.post(`${baseUrl}/reset-password`, data)
     Notify.create({ type: "positive", message: "Contraseña restablecida correctamente", });
     newPassword.value = "";
@@ -29,6 +32,7 @@ const submitForm = async () => {
   catch (error) {
     console.log(error)
   }
+  loading.value = false
 };
 </script>
 

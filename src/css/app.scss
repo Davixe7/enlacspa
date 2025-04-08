@@ -87,3 +87,12 @@ body {
 .q-table thead {
   background: #e5e7eb;
 }
+
+@media print {
+  .q-header {
+    display: none;
+  }
+  .q-page-container {
+    padding-top: 0;
+  }
+}

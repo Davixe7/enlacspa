@@ -65,44 +65,21 @@ function setColumns() {
   columns.value = [...cols]
   rows.value = Object.values(evaluationFields.value)
 }
-//const neurologicalAge = ref(0)
-const damageExtensions = ref({
-  0: 'No hay daño',
-  1: 'Focal',
-  2: 'Relativamente Focal',
-  3: 'Semifocal',
-  4: 'Semidifusa',
-  5: 'Relativamente Difusa',
-  6: 'Difusa',
-})
-//const damageExtension = ref(0)
-//const laterality = ref('Ninguna')
-const developmentRate = computed(() => ((neurologicalAge.value / store.chronological_age) * 100).toFixed(2))
-const damageRates = ref({
-  "Completa": [0],
-  "Profunda": [0.0001, 25],
-  "Severa": [25.0001, 50],
-  "Moderada": [50.0001, 75],
-  "Leve": [75.0001, 99]
-});
 
-const damageRate = computed(() => {
-  for (const clave in damageRates.value) {
-    const rango = damageRates.value[clave];
-    if (rango.length === 1 && developmentRate.value === rango[0]) {
-      return clave;
-    } else if (rango.length === 2 && developmentRate.value >= rango[0] && developmentRate.value <= rango[1]) {
-      return clave;
-    }
-  }
-  return null;
-});
+const neurologicalAge = computed(() => {
+  return allRanks.value.reduce((age, rank) => {
+    if (!['F', 'P'].includes(rank.caracteristic)) return age
+    return age + 1
+  }, 0)
+})
+
+const developmentRate = computed(() => ((neurologicalAge.value / store.chronological_age) * 100).toFixed(2))
 
 const allRanks = computed(() => {
-  let newRanks = []
+  var newRanks = []
   evaluationFields.value.map(level => {
     if (level.P > store.chronological_age) return
-    newRanks.concat(Object.values(level.ranks))
+    newRanks = newRanks.concat(Object.values(level.ranks))
   })
   return newRanks;
 })
@@ -113,8 +90,46 @@ const damageExtension = computed(() => {
     if (!['F', '0'].includes(rank.caracteristic)) return
     brainFunctions[rank.brain_function_id] = true
   })
-  return Object.values(brainFunctions).filter(val => val).length;
+  let count = Object.values(brainFunctions).filter(val => val).length;
+  return ({
+    0: 'No hay daño',
+    1: 'Focal',
+    2: 'Relativamente Focal',
+    3: 'Semifocal',
+    4: 'Semidifusa',
+    5: 'Relativamente Difusa',
+    6: 'Difusa',
+  })[count]
 })
+
+const damageGrade = computed(() => {
+  let damageGrades = {
+    "Completa": [0],
+    "Profunda": [0.0001, 25],
+    "Severa": [25.0001, 50],
+    "Moderada": [50.0001, 75],
+    "Leve": [75.0001, 99]
+  }
+
+  if (developmentRate.value <= 0) {
+    return 'Completa';
+  }
+
+  if (developmentRate.value > 99) {
+    return 'Leve';
+  }
+
+  for (const clave in damageGrades) {
+    const rango = damageGrades[clave];
+    if (rango.length === 1 && developmentRate.value === rango[0]) {
+      return clave;
+    }
+    else if (rango.length === 2 && developmentRate.value >= rango[0] && developmentRate.value <= rango[1]) {
+      return clave;
+    }
+  }
+  return null;
+});
 
 const damageLaterality = computed(() => {
   var lateralities = { "l": false, "r": false }
@@ -125,29 +140,12 @@ const damageLaterality = computed(() => {
   return Object.values(lateralities).filter(val => val).length > 1 ? 'Bilateral' : 'Unilateral';
 })
 
-const neurologicalAge = computed(() => {
-  return allRanks.value.reduce((age, rank) => {
-    if (!['F', 'P'].includes(rank.caracteristic)) return age
-    return age + 1
-  }, 0)
+const damageLevel = computed(() => {
+  let damageLog = { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false, 7: false }
+  allRanks.value.map(rank => rank.caracteristic != 'P' ? damageLog[rank.brain_level_id] = true : '')
+  let damagedLevelIds = Object.keys(damageLog).filter(key => damageLog[key])
+  return evaluationFields.value.filter(level => damagedLevelIds.includes(String(level.id)))
 })
-
-/* watch(() => evaluationFields.value, () => {
-  neurologicalAge.value = 0
-  var brainFunctions = { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false }
-  var lateralities = { "l": false, "r": false }
-  evaluationFields.value.forEach(level => {
-    if (level.P > store.chronological_age) { return }
-    Object.values(level.ranks)
-      .forEach(rank => {
-        ['F', 'P'].includes(rank.caracteristic) ? neurologicalAge.value++ : '';
-        ['F', '0'].includes(rank.caracteristic) ? brainFunctions[rank.brain_function_id] = true : '';
-        ['F', '0'].includes(rank.caracteristic) ? lateralities[rank.laterality_impact] = true : '';
-      })
-    //damageExtension.value = Object.values(brainFunctions).filter(val => val).length;
-    laterality.value = Object.values(lateralities).filter(val => val).length > 1 ? 'Bilateral' : 'Unilateral';
-  })
-}, { deep: true }) */
 
 function updateRank(updatedRank) {
   let level = rows.value.find(field => field.id == updatedRank.brain_level_id)
@@ -163,11 +161,25 @@ function editRank(param) {
   rank.value = param
   dialog.value = true
 }
+
+function print() {
+  window.print()
+}
 </script>
 
 <template>
   <q-page>
-    <h1 class="page-title">Evaluación</h1>
+    <div class="flex justify-between items-center q-mb-xl">
+      <h1
+        class="page-title"
+        style="margin-bottom: 0;"
+      >Evaluación</h1>
+      <q-btn
+        @click="print"
+        flat
+        style="color: grey;"
+      >Exportar a PDF</q-btn>
+    </div>
 
     <CandidateProfile
       :candidateId="candidateId"
@@ -252,7 +264,7 @@ function editRank(param) {
             outlined
             stack-label
             label="Extension de la lesion(*)"
-            :modelValue="damageExtensions[damageExtension]"
+            :modelValue="damageExtension"
           ></q-input>
         </div>
 
@@ -261,7 +273,7 @@ function editRank(param) {
             outlined
             stack-label
             label="Grado de la lesion(*)"
-            :modelValue="damageRate"
+            :modelValue="damageGrade"
           ></q-input>
         </div>
 
@@ -294,12 +306,18 @@ function editRank(param) {
           ></q-input>
         </div>
         <div class="col-12 col-md-3">
-          <q-input
-            outlined
-            stack-label
-            label="Nivel de la lesion"
-            :value="store.chronological_age"
-          ></q-input>
+          <label
+            for="#"
+            style="font-weight: 400; font-size: 14px; margin-bottom: .5rem;"
+          >Nivel de la lesion</label>
+          <ul style="margin: 0; padding: 0 0 0 1rem;">
+            <li
+              v-for="item in damageLevel"
+              :key="item.id"
+            >
+              {{ item.name }}
+            </li>
+          </ul>
         </div>
       </div>
 

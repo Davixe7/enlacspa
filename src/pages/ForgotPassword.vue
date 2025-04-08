@@ -3,6 +3,7 @@ import { ref } from "vue";
 import { Notify } from "quasar";
 import { api } from "src/boot/axios";
 
+const loading = ref(false)
 const email = ref("");
 const baseUrl = new URL(api.defaults.baseURL).origin;
 
@@ -10,6 +11,7 @@ const submitForm = async () => {
   if (!email.value) return;
 
   try {
+    loading.value = true
     await api.post(`${baseUrl}/forgot-password`, { email: email.value })
     Notify.create({
       type: "positive",
@@ -19,6 +21,7 @@ const submitForm = async () => {
   catch (error) {
     console.log(error)
   }
+  loading.value = false
 };
 </script>
 
