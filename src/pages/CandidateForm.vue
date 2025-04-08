@@ -69,7 +69,7 @@ async function storeCandidate() {
   try {
     let endpoint = candidate.value.id ? `candidates/${candidate.value.id}` : 'candidates'
     await api.post(endpoint, loadData())
-    Notify.create({ caption: 'Guardado con exito', icon: 'sym_o_check_circle', iconColor: 'positive', timeout: 3000, progress: true })
+    Notify.create({ caption: 'Guardado con éxito', icon: 'sym_o_check_circle', iconColor: 'positive', timeout: 3000, progress: true })
     setTimeout(() => router.push('/candidatos'), 3000)
   }
   catch (error) {
@@ -89,7 +89,7 @@ const fulldatetime = computed(() => {
   return newDate.toFormat('yyyy-MM-dd HH:mm:ss')
 })
 
-const infoChannels = ref(['Publicidad impresa', 'Publicidad en radio', 'Recomendacion de escuela', 'Recomendacion de personal medico', 'Recomendacion de otra persona', 'Otro'])
+const infoChannels = ref(['Publicidad impresa', 'Publicidad en radio', 'Recomendación de escuela', 'Recomendación de personal médico', 'Recomendación de otra persona', 'Otro'])
 const evaluation_schedules = ref([])
 
 const candidate = ref({ id: null, first_name: '', middle_name: '', last_name: '', birth_date: null, age: null, chronological_age: null, diagnosis: '', info_channel: infoChannels.value[infoChannels.value.length - 1], sheet: 1 })
@@ -360,7 +360,7 @@ const chronological_age = computed(() => {
         >Enviar</q-btn>
       </div>
 
-      <div class="subtitle q-my-md">Envio de Encuesta de Satisfacción</div>
+      <div class="subtitle q-my-md">Envío de Encuesta de Satisfacción</div>
       <div class="flex q-gutter-x-md">
         <q-input
           outlined

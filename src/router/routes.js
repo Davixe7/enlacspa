@@ -5,6 +5,16 @@ const routes = [
     component: () => import("pages/LoginPage.vue"),
   },
   {
+    path: "/recuperar-contrasena",
+    meta: { label: "Recuperar contrasena" },
+    component: () => import("pages/ForgotPassword.vue"),
+  },
+  {
+    path: "/restablecer-contrasena",
+    meta: { label: "Restablecer contrasena" },
+    component: () => import("pages/ResetPassword.vue"),
+  },
+  {
     path: "/",
     meta: { label: "Home", icon: "home" },
     component: () => import("layouts/MainLayout.vue"),

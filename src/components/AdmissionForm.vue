@@ -34,7 +34,7 @@ async function updateAcceptance() {
     localCandidate.value = (await api.post(`candidates/${props.candidateId}/admission`, data)).data.data
     Notify.create({ caption: 'Guardado con exito', icon: 'sym_o_check_circle', iconColor: 'positive', progress: true, timeout: 3000 })
     emits('close')
-    setTimeout(() => router.push('/candidates'), 2500)
+    setTimeout(() => router.push('/candidatos'), 2500)
   } catch (error) {
     errors.value = error.formatted ? error.formatted : {}
     Notify.create({ caption: 'Por favor, valide la informacion', icon: 'sym_o_info', iconColor: 'negative' })

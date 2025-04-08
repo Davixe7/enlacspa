@@ -51,7 +51,7 @@ async function storeInterview() {
 
   try {
     interview.value = (await api.post(route, data)).data.data
-    Notify.create({ caption: 'Guardado con exito', icon: 'sym_o_check_circle', iconColor: 'positive' })
+    Notify.create({ caption: 'Guardado con éxito', icon: 'sym_o_check_circle', iconColor: 'positive' })
   }
   catch (error) {
     Notify.create({ caption: 'Error. Revise la informacion', icon: 'sym_o_info', iconColor: 'negative' })
@@ -131,7 +131,7 @@ async function signInterview() {
     </div>
 
     <div class="label-alt">
-      31 - ¿Controla esfínteres?
+      30 - ¿Controla esfínteres?
     </div>
     <div class="q-mb-xl">
       <q-radio
@@ -149,7 +149,7 @@ async function signInterview() {
     </div>
 
     <div class="label-alt">
-      32 - Observaciones adicionales por parte del evaluador:
+      31 - Observaciones adicionales por parte del evaluador:
     </div>
     <div class="q-mb-xl">
       <q-input

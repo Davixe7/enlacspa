@@ -1,3 +1,4 @@
+import { farClosedCaptioning } from "@quasar/extras/fontawesome-v5";
 import { defineStore, acceptHMRUpdate } from "pinia";
 import { api } from "src/boot/axios";
 
@@ -14,7 +15,7 @@ export const useCandidateStore = defineStore("candidate", {
     diagnosis: "",
     info_channel: null,
     sheet: 1,
-    loading: false,
+    loading: farClosedCaptioning,
     contacts: [],
     picture: null,
     evaluation_schedule: null,
@@ -25,8 +26,15 @@ export const useCandidateStore = defineStore("candidate", {
   actions: {
     async fetchCandidate() {
       if (!this.id) return;
-      let data = (await api.get(`candidates/${this.id}`)).data.data;
-      this.$patch(data);
+      try {
+        this.loading = true;
+        let data = (await api.get(`candidates/${this.id}`)).data.data;
+        this.$patch(data);
+        this.loading = false;
+      } catch (error) {
+        console.log(error);
+      }
+      this.loading = false;
     },
   },
 });

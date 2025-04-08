@@ -23,7 +23,7 @@ const showPassword = ref(false)
     <div class="col-12 col-md-6 flex items-center q-pa-md login-form-column">
       <div>
         <h1 class="title">ENLAC</h1>
-        <div class="subtitle">Portal web para la administración y gestión</div>
+        <div class="subtitle q-pb-lg">Portal web para la administración y gestión</div>
         <div>
           <q-form
             class="q-gutter-y-lg"
@@ -65,7 +65,7 @@ const showPassword = ref(false)
                 v-model="remeberme"
                 style="margin-left: -10px"
               ></q-checkbox>
-              <a href="#">¿Olvidó su contraseña?</a>
+              <router-link to="/recuperar-contrasena">¿Olvidó su contraseña?</router-link>
             </div>
             <q-btn
               unelevated
@@ -110,7 +110,6 @@ const showPassword = ref(false)
   font-weight: 500;
   line-height: 1.3rem;
   color: #111827;
-  padding-bottom: 24px;
 }
 
 a {
