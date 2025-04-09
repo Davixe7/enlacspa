@@ -26,6 +26,11 @@ const routes = [
         component: () => import("pages/IndexPage.vue"),
       },
       {
+        path: "/notificaciones",
+        meta: { label: "Notificaciones" },
+        component: () => import("pages/NotificationsPage.vue"),
+      },
+      {
         path: "/candidatos",
         meta: { label: "Candidatos y Evaluaciones" },
         component: () => import("pages/CandidatosPage.vue"),

@@ -9,9 +9,14 @@ export const useAuthStore = defineStore("auth", {
       errors: {},
       baseUrl: url,
       data: {},
+      notifications: [],
     };
   },
-
+  getters: {
+    unreadNotificationsCount() {
+      return this.notifications.length;
+    },
+  },
   actions: {
     async csrfCookie() {
       await api.get(`${this.baseUrl}/sanctum/csrf-cookie`);
@@ -36,6 +41,7 @@ export const useAuthStore = defineStore("auth", {
     },
     async fetchUser() {
       this.data.user = (await api.get("user")).data.data;
+      this.notifications = this.data.user.notifications;
     },
   },
 });

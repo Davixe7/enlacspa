@@ -145,7 +145,7 @@ async function save() {
           :false-value="0"
         ></q-checkbox>
         <q-checkbox
-          label="Responsable ENLAC"
+          label="Responsable del Beneficiario"
           v-model="contact.enlac_responsible"
           :true-value="1"
           :false-value="0"

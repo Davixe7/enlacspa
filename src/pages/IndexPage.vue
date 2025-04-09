@@ -4,28 +4,21 @@
       v-model="slide"
       transition-prev="scale"
       transition-next="scale"
+      control-color="white"
       swipeable
       animated
-      control-color="white"
       navigation
-      padding
       arrows
       height="366px"
-      width="100%"
       class="bg-grey-13 text-white rounded-borders q-mb-lg"
     >
       <q-carousel-slide
-        name="style"
+        v-for="n in 10"
+        :key="n"
+        :name="('' + (n + 1)).padStart('0')"
         class="column no-wrap flex-center"
-        style="width: calc(100vw - 40px)"
+        :img-src="'http://sistemaenlac.com/' + ('' + (n + 1)).padStart(2, '0') + '.png'"
       >
-        <q-icon
-          name="style"
-          size="56px"
-        />
-        <div class="q-mt-md text-center">
-          {{ lorem }}
-        </div>
       </q-carousel-slide>
     </q-carousel>
 
@@ -61,9 +54,7 @@
 
 <script setup>
 import { ref } from "vue";
-
 const slide = ref("style");
-const lorem = ref("Images carrusel");
 const modules = ref([
   {
     label: "Candidatos y Evaluaciones",

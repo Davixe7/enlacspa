@@ -34,11 +34,24 @@
             />
           </template>
         </q-select>
+
         <q-btn
           flat
           round
-          icon="notifications"
-        ></q-btn>
+          icon="sym_o_notifications"
+          class="q-mx-md"
+          to="/notificaciones"
+        >
+          <q-badge
+            v-if="notificationStore.unreadNotificationsCount"
+            color="red"
+            floating
+            rounded
+          >
+            {{ notificationStore.unreadNotificationsCount }}
+          </q-badge>
+        </q-btn>
+
         <q-avatar
           rounded
           size="52px"
@@ -127,10 +140,18 @@
 
 <script setup>
 import { useAuthStore } from "src/stores/user-store";
-import { ref } from "vue";
+import { useNotificationStore } from "src/stores/notification-store";
+
+import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
+onMounted(() => {
+  useAuthStore().fetchUser()
+  useNotificationStore().fetchNotifications()
+})
 
 const authStore = useAuthStore();
+const notificationStore = useNotificationStore();
+
 const route = useRoute();
 const span = ref({ label: "semanal", value: "1" });
 </script>
