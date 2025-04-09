@@ -1,9 +1,11 @@
 <template>
   <q-page>
     <q-carousel
+      autoplay
+      infinite
       v-model="slide"
-      transition-prev="scale"
-      transition-next="scale"
+      transition-prev="fade"
+      transition-next="fade"
       control-color="white"
       swipeable
       animated
@@ -54,7 +56,7 @@
 
 <script setup>
 import { ref } from "vue";
-const slide = ref("style");
+const slide = ref("01");
 const modules = ref([
   {
     label: "Candidatos y Evaluaciones",
