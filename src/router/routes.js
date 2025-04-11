@@ -22,6 +22,7 @@ const routes = [
     children: [
       {
         path: "/home",
+        name: "index",
         meta: { label: "" },
         component: () => import("pages/IndexPage.vue"),
       },
@@ -29,6 +30,21 @@ const routes = [
         path: "/notificaciones",
         meta: { label: "Notificaciones" },
         component: () => import("pages/NotificationsPage.vue"),
+      },
+      {
+        path: "/usuarios",
+        meta: { label: "Administracion de usuario" },
+        component: () => import("pages/UsersPage.vue"),
+      },
+      {
+        path: "/areas-de-trabajo",
+        meta: { label: "Areas de Trabajo" },
+        component: () => import("pages/WorkAreasPage.vue"),
+      },
+      {
+        path: "/puestos",
+        meta: { label: "Puestos" },
+        component: () => import("pages/RolesPage.vue"),
       },
       {
         path: "/candidatos",
