@@ -19,7 +19,7 @@
         :key="n"
         :name="('' + (n + 1)).padStart('0')"
         class="column no-wrap flex-center"
-        :img-src="'http://sistemaenlac.com/' + ('' + (n + 1)).padStart(2, '0') + '.png'"
+        :img-src="'https://sistemaenlac.com/' + ('' + (n + 1)).padStart(2, '0') + '.png'"
       >
       </q-carousel-slide>
     </q-carousel>
