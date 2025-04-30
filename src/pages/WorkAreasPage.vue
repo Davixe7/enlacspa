@@ -1,5 +1,5 @@
 <script setup>
-import { Notify } from 'quasar';
+import Notify from 'src/utils/notify';
 import { api } from 'src/boot/axios';
 import { onMounted, ref } from 'vue';
 
@@ -22,17 +22,17 @@ async function save() {
   let data = workArea.value.id ? { name: workArea.value.name, _method: 'PUT' } : { name: workArea.value.name }
   let actionLabel = workArea.value.id ? 'actualizada' : 'creada'
   try {
-    let newWorkArea = (await api.post(route, data)).data.data
+    let newWorkArea = (await api.post(route, data)).data.data;
 
-      (workArea.value.id)
+    (workArea.value.id)
       ? rows.value.splice(rows.value.indexOf(workArea.value), 1, newWorkArea)
       : rows.value.push(newWorkArea)
 
     dialog.value = false
-    Notify.create(`Area de trabajo ${actionLabel} exitosamente`)
+    Notify.positive(`Area de trabajo ${actionLabel} exitosamente`)
   } catch (error) {
     console.log(error);
-    Notify.create(`No se pudo guardar`)
+    Notify.negative(`No se pudo guardar`)
   }
   loading.value = false
 }

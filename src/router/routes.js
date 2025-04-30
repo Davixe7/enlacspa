@@ -15,8 +15,9 @@ const routes = [
     component: () => import("pages/ResetPassword.vue"),
   },
   {
-    path: "/",
+    path: "",
     meta: { label: "Home", icon: "home" },
+    redirect: "/home",
     component: () => import("layouts/MainLayout.vue"),
 
     children: [
@@ -77,6 +78,25 @@ const routes = [
             path: ":candidateId/entrevistar",
             meta: { label: "Entrevistar", layout: "main" },
             component: () => import("pages/InterviewForm.vue"),
+            props: true,
+          },
+          {
+            path: ":candidateId/kardexes",
+            meta: { label: "Kardexes", layout: "main" },
+            component: () => import("pages/KardexesPage.vue"),
+            props: true,
+          },
+        ],
+      },
+      {
+        path: "/padrinos",
+        meta: { label: "Padrinos" },
+        component: () => import("pages/SponsorsPage.vue"),
+        children: [
+          {
+            path: ":sponsorId/ahijados",
+            meta: { label: "Ahijados", layout: "main" },
+            component: () => import("pages/PaymentConfigs.vue"),
             props: true,
           },
         ],

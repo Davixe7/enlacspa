@@ -1,5 +1,5 @@
 <script setup>
-import { Notify } from 'quasar';
+import Notify from 'src/utils/notify';;
 import { api } from 'src/boot/axios';
 import { onMounted, ref } from 'vue';
 
@@ -30,10 +30,10 @@ async function save() {
       : rows.value.push(newRole)
 
     dialog.value = false
-    Notify.create(`Puesto ${actionLabel} exitosamente`)
+    Notify.positive(`Puesto ${actionLabel} exitosamente`)
   } catch (error) {
     console.log(error);
-    Notify.create(`No se pudo guardar`)
+    Notify.negative(`No se pudo guardar`)
   }
   loading.value = false
 }

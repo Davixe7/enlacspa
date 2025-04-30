@@ -80,7 +80,7 @@ const modules = ref([
     label: "Padrinos",
     color: "#00659180",
     icon: "padrinos",
-    path: "/",
+    path: "/padrinos",
   },
   {
     label: "Administración de Programas",

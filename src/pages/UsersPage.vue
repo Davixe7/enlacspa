@@ -1,8 +1,9 @@
 <script setup>
-import { Notify } from 'quasar';
+import Notify from 'src/utils/notify';
 import { api } from 'src/boot/axios';
 import { onMounted, ref } from 'vue';
 
+const errors = ref({})
 const loading = ref(false)
 const dialog = ref(false)
 
@@ -23,10 +24,10 @@ const columns = ref([
     field: row => row.work_area.name, label: 'Area', sortable: true, align: 'left'
   },
   {
-    field: row => row.role.name, label: 'Puesto', sortable: true, align: 'left'
+    field: row => row.role ? row.role.name : '', label: 'Puesto', sortable: true, align: 'left'
   },
   {
-    field: row => row.leader.name, label: 'Lider', sortable: true, align: 'left'
+    field: row => row.leader ? row.leader.name : 'Ninguno', label: 'Lider', sortable: true, align: 'left'
   },
   {
     name: 'actions', label: 'Acciones', sortable: false, align: 'right'
@@ -35,22 +36,22 @@ const columns = ref([
 
 async function save() {
   loading.value = true
+  errors.value = {}
   let route = user.value.id ? `users/${user.value.id}` : 'users'
   let data = user.value.id ? { ...user.value, _method: 'PUT' } : { ...user.value }
   let actionLabel = user.value.id ? 'actualizado' : 'creado'
   try {
-    let newUser = (await api.post(route, data)).data.data
-    console.log(newUser);
+    let newUser = (await api.post(route, data)).data.data;
 
     (user.value.id)
       ? rows.value.splice(rows.value.indexOf(user.value), 1, newUser)
       : rows.value.push(newUser)
 
     dialog.value = false
-    Notify.create(`Usuario ${actionLabel} exitosamente`)
+    Notify.positive(`Usuario ${actionLabel} exitosamente`)
   } catch (error) {
-    console.log(error);
-    Notify.create(`No se pudo guardar`)
+    errors.value = error.status == 422 && error.formatted ? error.formatted : {}
+    Notify.negative(`No se pudo guardar`)
   }
   loading.value = false
 }
@@ -88,7 +89,7 @@ onMounted(async () => {
       <template v-slot:body-cell-actions="props">
         <q-td class="justify-end text-right">
           <q-btn
-            @click="() => { user = props.row; dialog = true }"
+            @click="() => { user = props.row; dialog = true; errors = {} }"
             icon="edit"
             flat
             round
@@ -114,6 +115,9 @@ onMounted(async () => {
             stack-label
             label="Nombre"
             v-model="user.name"
+            hide-bottom-space
+            :error="!!errors.name"
+            :error-message="errors.name"
           ></q-input>
 
           <q-input
@@ -122,6 +126,9 @@ onMounted(async () => {
             stack-label
             label="Apellido Paterno"
             v-model="user.last_name"
+            hide-bottom-space
+            :error="!!errors.last_name"
+            :error-message="errors.last_name"
           ></q-input>
 
           <q-input
@@ -130,6 +137,9 @@ onMounted(async () => {
             stack-label
             label="Apellido Materno"
             v-model="user.second_last_name"
+            hide-bottom-space
+            :error="!!errors.second_last_name"
+            :error-message="errors.second_last_name"
           ></q-input>
 
           <q-input
@@ -139,6 +149,9 @@ onMounted(async () => {
             type="tel"
             label="Telefono"
             v-model="user.phone"
+            hide-bottom-space
+            :error="!!errors.phone"
+            :error-message="errors.phone"
             mask="##########"
           ></q-input>
 
@@ -153,6 +166,9 @@ onMounted(async () => {
             option-label="name"
             map-options
             emit-value
+            hide-bottom-space
+            :error="!!errors.work_area_id"
+            :error-message="errors.work_area_id"
           ></q-select>
 
           <q-select
@@ -166,6 +182,9 @@ onMounted(async () => {
             option-label="name"
             map-options
             emit-value
+            hide-bottom-space
+            :error="!!errors.role_id"
+            :error-message="errors.role_id"
           ></q-select>
 
           <q-select
@@ -179,6 +198,9 @@ onMounted(async () => {
             option-label="name"
             map-options
             emit-value
+            hide-bottom-space
+            :error="!!errors.leader_id"
+            :error-message="errors.leader_id"
           ></q-select>
 
           <q-input
@@ -188,6 +210,9 @@ onMounted(async () => {
             type="date"
             label="Fecha de ingreso"
             v-model="user.entry_date"
+            hide-bottom-space
+            :error="!!errors.entry_date"
+            :error-message="errors.entry_date"
           ></q-input>
 
           <q-input
@@ -197,6 +222,9 @@ onMounted(async () => {
             type="email"
             label="Email"
             v-model="user.email"
+            hide-bottom-space
+            :error="!!errors.email"
+            :error-message="errors.email"
           ></q-input>
 
           <q-input
@@ -205,6 +233,10 @@ onMounted(async () => {
             type="password"
             label="Contrasena"
             v-model="user.password"
+            hide-bottom-space
+            :error="!!errors.password"
+            :error-message="errors.password"
+            autocomplete="new-password"
           ></q-input>
 
           <div class="flex justify-between items-center">

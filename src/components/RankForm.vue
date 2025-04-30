@@ -1,5 +1,5 @@
 <script setup>
-import { Notify } from 'quasar';
+import Notify from 'src/utils/notify';
 import { api } from 'src/boot/axios';
 import { onMounted, ref } from 'vue';
 
@@ -21,12 +21,12 @@ async function storeRank() {
   let data = props.rank.id ? { ...localRank.value, '_method': 'PUT' } : { ...localRank.value }
   try {
     let response = (await api.post(route, data)).data.data
-    Notify.create({ caption: 'Guardado con exito', icon: 'sym_o_check_circle', iconColor: 'positive' })
+    Notify.positive('Guardado con exito')
     emits('rankUpdated', response)
   }
   catch (error) {
     errors.value = error.formatted ? error.formatted : {}
-    Notify.create({ caption: 'No se pudo guardar', icon: 'sym_o_info', iconColor: 'negative' })
+    Notify.negative('No se pudo guardar')
   }
   loading.value = false
 }
