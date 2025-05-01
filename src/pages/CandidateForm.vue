@@ -4,7 +4,7 @@ import { api } from "src/boot/axios";
 import { DateTime } from "luxon";
 import ContactsPage from "./ContactsPage.vue";
 import MedicationsPage from "./MedicationsPage.vue";
-import { Notify } from "quasar";
+import Notify from "src/utils/notify";
 import { scrollToFirstError } from "src/utils/focusError";
 import { useRouter } from "vue-router";
 
@@ -69,12 +69,12 @@ async function storeCandidate() {
   try {
     let endpoint = candidate.value.id ? `candidates/${candidate.value.id}` : 'candidates'
     await api.post(endpoint, loadData())
-    Notify.create({ caption: 'Guardado con éxito', icon: 'sym_o_check_circle', iconColor: 'positive', timeout: 3000, progress: true })
+    Notify.positive('Guardado con éxito')
     setTimeout(() => router.push('/candidatos'), 3000)
   }
   catch (error) {
     errors.value = error.status == 422 ? error.formatted : {}
-    Notify.create({ caption: 'Por favor, valide la informacion', icon: 'sym_o_info', iconColor: 'negative' })
+    Notify.negative('Por favor, valide la informacion')
     nextTick(() => scrollToFirstError())
   }
   loading.value = false

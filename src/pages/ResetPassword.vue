@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from "vue";
-import { Notify } from "quasar";
+import Notify from "src/utils/notify";
 import { useRoute } from "vue-router";
 import { api } from "src/boot/axios";
 
@@ -23,7 +23,7 @@ const submitForm = async () => {
   try {
     loading.value = true
     await api.post(`${baseUrl}/reset-password`, data)
-    Notify.create({ type: "positive", message: "Contraseña restablecida correctamente", });
+    Notify.positive("Contraseña restablecida correctamente");
     newPassword.value = "";
     confirmPassword.value = "";
     token = "";

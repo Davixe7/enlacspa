@@ -3,7 +3,7 @@ import { nextTick, ref } from 'vue';
 import CandidateProfile from './../components/CandidateProfile.vue'
 import { onMounted } from 'vue';
 import { api } from 'src/boot/axios';
-import { Notify } from 'quasar';
+import Notify from 'src/utils/notify';
 import { scrollToFirstError } from 'src/utils/focusError';
 import { useCandidateStore } from 'src/stores/candidate-store';
 
@@ -51,10 +51,10 @@ async function storeInterview() {
 
   try {
     interview.value = (await api.post(route, data)).data.data
-    Notify.create({ caption: 'Guardado con éxito', icon: 'sym_o_check_circle', iconColor: 'positive' })
+    Notify.positive('Guardado con éxito')
   }
   catch (error) {
-    Notify.create({ caption: 'Error. Revise la informacion', icon: 'sym_o_info', iconColor: 'negative' })
+    Notify.negative('Error. Revise la informacion')
     errors.value = error.formatted ? error.formatted : errors.value.formatted
     nextTick(() => scrollToFirstError())
   }

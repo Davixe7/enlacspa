@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from "vue";
-import { Notify } from "quasar";
+import Notify from "src/utils/notify";
 import { api } from "src/boot/axios";
 
 const loading = ref(false)
@@ -13,10 +13,7 @@ const submitForm = async () => {
   try {
     loading.value = true
     await api.post(`${baseUrl}/forgot-password`, { email: email.value })
-    Notify.create({
-      type: "positive",
-      message: "Enlace de recuperación enviado",
-    });
+    Notify.positive("Enlace de recuperación enviado");
   }
   catch (error) {
     console.log(error)

@@ -15,13 +15,15 @@ const routes = [
     component: () => import("pages/ResetPassword.vue"),
   },
   {
-    path: "/",
+    path: "",
     meta: { label: "Home", icon: "home" },
+    redirect: "/home",
     component: () => import("layouts/MainLayout.vue"),
 
     children: [
       {
         path: "/home",
+        name: "index",
         meta: { label: "" },
         component: () => import("pages/IndexPage.vue"),
       },
@@ -29,6 +31,21 @@ const routes = [
         path: "/notificaciones",
         meta: { label: "Notificaciones" },
         component: () => import("pages/NotificationsPage.vue"),
+      },
+      {
+        path: "/usuarios",
+        meta: { label: "Administracion de usuario" },
+        component: () => import("pages/UsersPage.vue"),
+      },
+      {
+        path: "/areas-de-trabajo",
+        meta: { label: "Areas de Trabajo" },
+        component: () => import("pages/WorkAreasPage.vue"),
+      },
+      {
+        path: "/puestos",
+        meta: { label: "Puestos" },
+        component: () => import("pages/RolesPage.vue"),
       },
       {
         path: "/candidatos",
@@ -61,6 +78,50 @@ const routes = [
             path: ":candidateId/entrevistar",
             meta: { label: "Entrevistar", layout: "main" },
             component: () => import("pages/InterviewForm.vue"),
+            props: true,
+          },
+          {
+            path: ":candidateId/kardexes",
+            meta: { label: "Kardexes", layout: "main" },
+            component: () => import("pages/KardexesPage.vue"),
+            props: true,
+          },
+        ],
+      },
+      {
+        path: "/beneficiarios",
+        meta: { label: "Beneficiarios" },
+        component: () => import("pages/BeneficiariesPage.vue"),
+        children: [
+          {
+            path: ":candidateId/cuotas",
+            meta: { label: "Configuracion de Cuotas", layout: "main" },
+            component: () => import("pages/BeneficiariesCuotas.vue"),
+            props: true,
+          },
+          {
+            path: ":candidateId/cuotas/registrar",
+            meta: { label: "Configuracion de Aporte", layout: "main" },
+            component: () => import("pages/BeneficiariesCuota.vue"),
+            props: true,
+          },
+        ],
+      },
+      {
+        path: "/padrinos",
+        meta: { label: "Padrinos" },
+        component: () => import("pages/SponsorsPage.vue"),
+        children: [
+          {
+            path: "registrar",
+            meta: { label: "Formato de Padrino / Madrina", layout: "main" },
+            component: () => import("components/SponsorForm.vue"),
+            props: true,
+          },
+          {
+            path: ":sponsorId/ahijados",
+            meta: { label: "Ahijados", layout: "main" },
+            component: () => import("pages/PaymentConfigs.vue"),
             props: true,
           },
         ],

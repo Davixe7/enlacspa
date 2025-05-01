@@ -89,13 +89,22 @@
                   dense
                   style="padding-left: 22px"
                 >
-                  <q-item clickable>
+                  <q-item
+                    clickable
+                    to="usuarios"
+                  >
                     <q-item-section>Administración de usuarios</q-item-section>
                   </q-item>
-                  <q-item clickable>
+                  <q-item
+                    clickable
+                    to="areas-de-trabajo"
+                  >
                     <q-item-section>Catálogo de áreas</q-item-section>
                   </q-item>
-                  <q-item clickable>
+                  <q-item
+                    clickable
+                    to="puestos"
+                  >
                     <q-item-section>Catálogo de puestos</q-item-section>
                   </q-item>
                   <q-item clickable>
@@ -120,7 +129,10 @@
     </q-header>
 
     <q-page-container>
-      <div style="padding: 32px">
+      <div
+        style="padding: 32px"
+        v-if="route.name != 'index'"
+      >
         <q-breadcrumbs>
           <q-breadcrumbs-el
             v-for="rt in route.matched"
@@ -131,7 +143,7 @@
           />
         </q-breadcrumbs>
       </div>
-      <div style="padding: 15px 32px">
+      <div style="padding: 32px 32px">
         <router-view />
       </div>
     </q-page-container>

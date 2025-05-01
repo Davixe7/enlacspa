@@ -1,8 +1,8 @@
 <script setup>
 import { DateTime } from 'luxon';
-import { Notify } from 'quasar';
 import { api } from 'src/boot/axios';
 import { computed, onMounted, ref } from 'vue';
+import Notify from 'src/utils/notify';
 
 defineProps(['candidates'])
 const emits = defineEmits(['close'])
@@ -50,12 +50,12 @@ async function storeAppointment() {
   errors.value = {}
   try {
     await api.post('appointments', { ...appointment.value, date: fulldatetime.value })
-    Notify.create({ caption: 'Guardado con exito', icon: 'sym_o_check_circle', iconColor: 'positive' })
+    Notify.positive('Guardado con exito')
     emits('close')
   } catch (error) {
     console.log(error);
     errors.value = error.formatted ? error.formatted : {}
-    Notify.create({ caption: 'Por favor, valide la informacion', icon: 'sym_o_info', iconColor: 'negative' })
+    Notify.negative('Por favor, valide la informacion')
   }
   loading.value = false
 }

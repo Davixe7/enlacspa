@@ -16,6 +16,10 @@ const props = defineProps({
 
 onMounted(async () => {
   if (!props.candidateId) { return }
+  if (!store.full_name) {
+    store.id = props.candidateId
+    store.fetchCandidate()
+  }
 })
 
 const store = useCandidateStore();
