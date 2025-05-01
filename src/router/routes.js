@@ -89,10 +89,35 @@ const routes = [
         ],
       },
       {
+        path: "/beneficiarios",
+        meta: { label: "Beneficiarios" },
+        component: () => import("pages/BeneficiariesPage.vue"),
+        children: [
+          {
+            path: ":candidateId/cuotas",
+            meta: { label: "Configuracion de Cuotas", layout: "main" },
+            component: () => import("pages/BeneficiariesCuotas.vue"),
+            props: true,
+          },
+          {
+            path: ":candidateId/cuotas/registrar",
+            meta: { label: "Configuracion de Aporte", layout: "main" },
+            component: () => import("pages/BeneficiariesCuota.vue"),
+            props: true,
+          },
+        ],
+      },
+      {
         path: "/padrinos",
         meta: { label: "Padrinos" },
         component: () => import("pages/SponsorsPage.vue"),
         children: [
+          {
+            path: "registrar",
+            meta: { label: "Formato de Padrino / Madrina", layout: "main" },
+            component: () => import("components/SponsorForm.vue"),
+            props: true,
+          },
           {
             path: ":sponsorId/ahijados",
             meta: { label: "Ahijados", layout: "main" },

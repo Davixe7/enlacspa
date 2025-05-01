@@ -2,12 +2,18 @@
 import Notify from 'src/utils/notify'
 import { api } from 'src/boot/axios'
 import { computed, onMounted, ref } from 'vue'
+import { useSponsorStore } from 'src/stores/sponsor-store'
+import { storeToRefs } from 'pinia'
 
+const emits = defineEmits(['requestSponsor'])
 const props = defineProps(['sponsorId', 'candidateId', 'paymentConfigId'])
+
+const sponsorStore = useSponsorStore()
+const { sponsors } = storeToRefs(sponsorStore)
+const candidates = ref([])
 
 const errors = ref({})
 const loading = ref(false)
-const candidates = ref([])
 
 const paymentConfig = ref({
   sponsor_id: props.sponsorId ? props.sponsorId : null,
@@ -52,8 +58,13 @@ const monthlyAmount = computed(() => {
   return (yearlyAmount.value / 12).toFixed(2)
 })
 
-onMounted(async () => {
+async function fetchCandidates() {
   candidates.value = (await api.get(`/candidates`)).data.data
+}
+
+onMounted(async () => {
+  await fetchCandidates()
+  await sponsorStore.fetchSponsors()
   if (!props.paymentConfigId) return
   paymentConfig.value = (await api.get(`/payment_configs/${props.paymentConfigId}`)).data.data
 })
@@ -77,6 +88,31 @@ onMounted(async () => {
         class="q-gutter-y-lg"
       >
         <q-select
+          :disable="!!sponsorId"
+          outlined
+          stack-label
+          class="q-field--required"
+          label="Seleccione Padrino"
+          :options="sponsors"
+          v-model="paymentConfig.sponsor_id"
+          emit-value
+          option-label="name"
+          option-value="id"
+          map-options
+          hide-bottom-space
+        ></q-select>
+        <div class="flex justify-end">
+          <a
+            @click.prevent="() => emits('requestSponsor')"
+            style="font-size: .8rem; cursor: pointer; color: var(--q-primary); margin-top: -1rem;"
+          >
+            Registrar nuevo
+          </a>
+        </div>
+
+        <q-select
+          v-show="!candidateId"
+          :disable="!!candidateId"
           outlined
           stack-label
           class="q-field--required"

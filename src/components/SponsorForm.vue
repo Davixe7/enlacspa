@@ -1,12 +1,11 @@
 <script setup>
-import Notify from 'src/utils/notify';
 import { api } from 'src/boot/axios'
+import { useSponsorStore } from 'src/stores/sponsor-store'
 import { onMounted, ref } from 'vue'
 
+const store = useSponsorStore()
+const errors = store.errors
 const props = defineProps(['sponsorId'])
-
-const errors = ref({})
-const loading = ref(false)
 
 const maritalStatusOptions = [
   { label: 'Soltero(a)', value: 'Soltero(a)' },
@@ -23,21 +22,6 @@ const sponsor = ref({
   birthdate: '',
   marital_status: null,
 })
-
-async function saveData() {
-  loading.value = true
-  try {
-    let route = sponsor.value.id ? `/sponsors/${sponsor.value.id}` : '/sponsors'
-    let data = sponsor.value.id ? { ...sponsor.value, _method: 'PUT' } : { ...sponsor.value }
-    await api.post(route, data)
-    Notify.positive('Guardado con éxito')
-  }
-  catch (error) {
-    errors.value = error.status == 422 ? error.formatted : {}
-    Notify.negative('No se pudo guardar')
-  }
-  loading.value = false
-}
 
 onMounted(async () => {
   if (!props.sponsorId) return
@@ -59,7 +43,7 @@ onMounted(async () => {
     </q-card-section>
     <q-card-section>
       <q-form
-        @submit.prevent="saveData()"
+        @submit.prevent="store.saveData(sponsor)"
         class="q-gutter-y-lg"
       >
         <q-input
@@ -136,7 +120,7 @@ onMounted(async () => {
           <q-btn
             type="submit"
             color="primary"
-            :loading="loading"
+            :loading="store.loading"
             class="q-ml-auto"
           >
             Guardar</q-btn>

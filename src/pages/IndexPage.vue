@@ -19,7 +19,7 @@
         :key="n"
         :name="('' + (n)).padStart('0')"
         class="column no-wrap flex-center"
-        :img-src="'http://sistemaenlac.com/' + ('' + (n)).padStart(2, '0') + '.png'"
+        :img-src="'http://sistemaenlac.com/banner/' + ('' + (n)).padStart(2, '0') + '.png'"
       >
       </q-carousel-slide>
     </q-carousel>
@@ -68,7 +68,7 @@ const modules = ref([
     label: "Beneficiarios",
     color: "#DD004A80",
     icon: "beneficiarios",
-    path: "/",
+    path: "/beneficiarios",
   },
   {
     label: "Modulo 3",

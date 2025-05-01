@@ -102,6 +102,11 @@ async function storeRank() {
             val="r"
             label="Derecha"
           />
+          <q-radio
+            v-model="localRank.laterality_impact"
+            val="b"
+            label="Ambos"
+          />
         </div>
         <div
           v-show="!!errors.laterality_impact"

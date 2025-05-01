@@ -37,14 +37,19 @@ function addCandidate(id) {
 </script>
 
 <template>
-  <div class="flex">
+  <div class="flex items-center">
+    <h1 class="page-title">
+      Padrinos
+    </h1>
     <q-btn
+      class="q-ml-auto"
       color="primary"
       icon="sym_o_add"
       @click="createSponsor"
-    >Nuevo
+    >Agregar Padrino
     </q-btn>
   </div>
+
   <q-table
     flat
     bordered
@@ -71,8 +76,10 @@ function addCandidate(id) {
   </q-table>
 
   <q-dialog v-model="dialog2">
-    <PaymentConfigForm :sponsor-id="sponsorId">
-    </PaymentConfigForm>
-    <!-- <SponsorForm :sponsor-id="sponsorId"></SponsorForm> -->
+    <PaymentConfigForm :sponsor-id="sponsorId" />
+  </q-dialog>
+
+  <q-dialog v-model="dialog">
+    <SponsorForm :sponsor-id="sponsorId" />
   </q-dialog>
 </template>
