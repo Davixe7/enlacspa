@@ -19,11 +19,7 @@
         :key="n"
         :name="('' + (n)).padStart('0')"
         class="column no-wrap flex-center"
-<<<<<<< HEAD
-        :img-src="'https://sistemaenlac.com/' + ('' + (n + 1)).padStart(2, '0') + '.png'"
-=======
         :img-src="'http://sistemaenlac.com/banner/' + ('' + (n)).padStart(2, '0') + '.png'"
->>>>>>> users
       >
       </q-carousel-slide>
     </q-carousel>
