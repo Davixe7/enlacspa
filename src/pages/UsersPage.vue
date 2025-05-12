@@ -179,7 +179,7 @@ onMounted(async () => {
             v-model="user.role_id"
             :options="roles"
             option-value="id"
-            option-label="name"
+            option-label="label"
             map-options
             emit-value
             hide-bottom-space
