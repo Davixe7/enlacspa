@@ -1,26 +1,30 @@
 <script setup>
 import Notify from 'src/utils/notify';;
 import { api } from 'src/boot/axios';
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
+import _ from 'lodash';
 
-const role = ref({ name: '', id: null })
+const role = ref({ name: '', label: '', id: null })
 const loading = ref(false)
 const dialog = ref(false)
 const rows = ref([])
 const columns = ref([
   {
-    field: 'name', label: 'Nombre del puesto', sortable: true, align: 'left'
+    field: 'label', label: 'Nombre del puesto', sortable: true, align: 'left'
   },
   {
     name: 'actions', label: 'Acciones', sortable: false, align: 'right'
   },
 ])
 
+const slugName = computed(() => _.kebabCase(role.value.label).replace(/-/g, "_"))
+
 async function save() {
   loading.value = true
   let route = role.value.id ? `roles/${role.value.id}` : 'roles'
-  let data = role.value.id ? { name: role.value.name, _method: 'PUT' } : { name: role.value.name }
+  let data = role.value.id ? { name: slugName.value, label: role.value.label, _method: 'PUT' } : { name: slugName.value, label: role.value.label }
   let actionLabel = role.value.id ? 'actualizado' : 'creado'
+
   try {
     let newRole = (await api.post(route, data)).data.data
     console.log(newRole);
@@ -93,7 +97,8 @@ onMounted(async () => {
             outlined
             stack-label
             label="Nombre del puesto"
-            v-model="role.name"
+            v-model="role.label"
+            :hint="'COD: ' + slugName"
           ></q-input>
           <q-card-section class="flex justify-end q-px-none">
             <q-btn

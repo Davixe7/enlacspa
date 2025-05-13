@@ -143,11 +143,10 @@ onMounted(async () => {
           ></q-input>
 
           <q-input
-            required
             outlined
             stack-label
             type="tel"
-            label="Telefono"
+            label="Teléfono"
             v-model="user.phone"
             hide-bottom-space
             :error="!!errors.phone"
@@ -159,7 +158,7 @@ onMounted(async () => {
             required
             outlined
             stack-label
-            label="Area"
+            label="Área"
             v-model="user.work_area_id"
             :options="workAreas"
             option-value="id"
@@ -191,7 +190,7 @@ onMounted(async () => {
             required
             outlined
             stack-label
-            label="Lider"
+            label="Líder"
             v-model="user.leader_id"
             :options="users"
             option-value="id"
@@ -231,7 +230,7 @@ onMounted(async () => {
             outlined
             stack-label
             type="password"
-            label="Contrasena"
+            label="Contraseña"
             v-model="user.password"
             hide-bottom-space
             :error="!!errors.password"

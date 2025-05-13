@@ -39,7 +39,7 @@ const routes = [
       },
       {
         path: "/areas-de-trabajo",
-        meta: { label: "Areas de Trabajo" },
+        meta: { label: "Áreas de Trabajo" },
         component: () => import("pages/WorkAreasPage.vue"),
       },
       {

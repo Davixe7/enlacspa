@@ -9,12 +9,26 @@ const dialog = ref(false)
 const rows = ref([])
 const columns = ref([
   {
-    field: 'name', label: 'Nombre del Area', sortable: true, align: 'left'
+    field: 'name', label: 'Nombre del Área', sortable: true, align: 'left'
   },
   {
     name: 'actions', label: 'Acciones', sortable: false, align: 'right'
   },
 ])
+
+async function removeArea(areaIndex) {
+  if (!window.confirm('Seguro que desea eliminar el area?')) return
+  try {
+    let id = rows.value[areaIndex].id
+    await api.post(`work_areas/${id}`, { _method: 'DELETE' })
+    rows.value.splice(areaIndex, 1)
+    Notify.positive(`Área de trabajo eliminada exitosamente`)
+  }
+  catch (e) {
+    Notify.negative(`No se pudo eliminar`)
+    console.log(e);
+  }
+}
 
 async function save() {
   loading.value = true
@@ -29,7 +43,7 @@ async function save() {
       : rows.value.push(newWorkArea)
 
     dialog.value = false
-    Notify.positive(`Area de trabajo ${actionLabel} exitosamente`)
+    Notify.positive(`Área de trabajo ${actionLabel} exitosamente`)
   } catch (error) {
     console.log(error);
     Notify.negative(`No se pudo guardar`)
@@ -46,14 +60,14 @@ onMounted(async () => {
   <q-page>
     <div class="flex items-center q-mb-lg">
       <h1 class="page-title q-mb-0">
-        Areas de Trabajo
+        Áreas de Trabajo
       </h1>
       <q-btn
         @click="() => { workArea = { name: '' }; dialog = true }"
         color="primary"
         icon="add"
         class="q-ml-auto"
-      >Agregar area de trabajo</q-btn>
+      >Agregar área de trabajo</q-btn>
     </div>
 
     <q-table
@@ -72,6 +86,13 @@ onMounted(async () => {
             flat
             round
           ></q-btn>
+
+          <q-btn
+            @click="() => removeArea(props.rowIndex)"
+            icon="delete"
+            flat
+            round
+          ></q-btn>
         </q-td>
       </template>
     </q-table>
@@ -83,7 +104,7 @@ onMounted(async () => {
         <q-card-section>
           <div class="q-page-titlte">
             {{ workArea.id ? 'Actualizar' : 'Agregar' }}
-            area de trabajo
+            Área de trabajo
           </div>
         </q-card-section>
         <q-card-section>
@@ -91,7 +112,7 @@ onMounted(async () => {
             required
             outlined
             stack-label
-            label="Nombre del area de trabajo"
+            label="Nombre del área de trabajo"
             v-model="workArea.name"
           ></q-input>
           <q-card-section class="flex justify-end q-px-none">
