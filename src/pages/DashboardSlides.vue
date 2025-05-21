@@ -2,12 +2,9 @@
 import { api } from 'src/boot/axios';
 import notify from 'src/utils/notify';
 import { onMounted, ref } from 'vue';
+import draggable from 'vuedraggable'
+
 const rows = ref([])
-const columns = ref([
-  { name: 'thumb', label: 'Previa', sortable: false, align: 'left' },
-  { name: 'title', label: 'Titulo', field: 'title', sortable: false, align: 'left' },
-  { name: 'actions', label: 'Acciones', sortable: false, align: 'right' },
-])
 
 async function removeSlide(slide) {
   if (!window.confirm('Seguro que desea eliminar la diapositiva?')) return
@@ -25,6 +22,18 @@ async function removeSlide(slide) {
 onMounted(async () => {
   rows.value = (await api.get('dashboard-slides')).data.data
 })
+
+async function onDragEnd() {
+  let id_order = rows.value.map((slide, i) => ({ id: slide.id, order: i }))
+  try {
+    let response = ((await api.post('dashboard-slides/reorder', { id_order }))).data.data
+    console.log(response);
+  }
+  catch (error) {
+    console.log(error);
+    notify.negative('Error al reordenar las diapositivas')
+  }
+}
 </script>
 
 <template>
@@ -39,26 +48,50 @@ onMounted(async () => {
     </q-btn>
   </div>
 
-  <q-table
+  <q-markup-table
     :rows="rows"
-    :columns="columns"
-    :pagination="{ rowsPerPage: 0 }"
     hide-bottom
   >
-    <template v-slot:body-cell-thumb="props">
-      <q-td>
-        <q-img :src="props.row.thumb"></q-img>
-      </q-td>
-    </template>
-    <template v-slot:body-cell-actions="props">
-      <q-td class="text-right">
-        <q-btn
-          flat
-          round
-          icon="sym_o_delete"
-          @click="removeSlide(props.row)"
-        />
-      </q-td>
-    </template>
-  </q-table>
+    <thead>
+      <tr>
+        <th></th>
+        <th class="text-left">Previa</th>
+        <th class="text-left">Titulo</th>
+        <th class="text-left">Estado</th>
+        <th class="text-right">Acciones</th>
+      </tr>
+    </thead>
+    <draggable
+      v-if="rows"
+      v-model="rows"
+      :tag="'tbody'"
+      :item-key="'id'"
+      @change="onDragEnd"
+    >
+      <template #item="{ element }">
+        <q-tr>
+          <q-td>
+            <q-icon name="sym_o_drag_handle"></q-icon>
+          </q-td>
+          <q-td>
+            <q-img :src="element.thumb"></q-img>
+          </q-td>
+          <q-td>
+            {{ element.title }}
+          </q-td>
+          <q-td>
+            {{ element.status }}
+          </q-td>
+          <q-td class="text-right">
+            <q-btn
+              flat
+              round
+              icon="sym_o_delete"
+              @click="removeSlide(element)"
+            />
+          </q-td>
+        </q-tr>
+      </template>
+    </draggable>
+  </q-markup-table>
 </template>
