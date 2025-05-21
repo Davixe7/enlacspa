@@ -107,7 +107,10 @@
                   >
                     <q-item-section>Catálogo de puestos</q-item-section>
                   </q-item>
-                  <q-item clickable>
+                  <q-item
+                    clickable
+                    to="carrusel"
+                  >
                     <q-item-section>Administración de carrusel</q-item-section>
                   </q-item>
                 </q-list>
@@ -131,7 +134,7 @@
     <q-page-container>
       <div
         style="padding: 32px"
-        v-if="route.name != 'index'"
+        v-if="!route.meta.hideBreadcrumb"
       >
         <q-breadcrumbs>
           <q-breadcrumbs-el
@@ -143,7 +146,7 @@
           />
         </q-breadcrumbs>
       </div>
-      <div style="padding: 32px 32px">
+      <div :style="{ padding: route.meta.noPadding ? 0 : '32px 32px' }">
         <router-view />
       </div>
     </q-page-container>
@@ -156,6 +159,7 @@ import { useNotificationStore } from "src/stores/notification-store";
 
 import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
+
 onMounted(() => {
   useAuthStore().fetchUser()
   useNotificationStore().fetchNotifications()

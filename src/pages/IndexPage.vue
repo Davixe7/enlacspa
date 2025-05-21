@@ -15,11 +15,11 @@
       class="bg-grey-13 text-white rounded-borders q-mb-lg"
     >
       <q-carousel-slide
-        v-for="n in 10"
-        :key="n"
-        :name="('' + (n)).padStart('0')"
+        v-for="slide in slides"
+        :key="slide.id"
+        :name="slide.id"
         class="column no-wrap flex-center"
-        :img-src="'http://sistemaenlac.com/banner/' + ('' + (n)).padStart(2, '0') + '.png'"
+        :img-src="slide.picture"
       >
       </q-carousel-slide>
     </q-carousel>
@@ -55,8 +55,14 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-const slide = ref("01");
+import { api } from "src/boot/axios";
+import { onMounted, ref } from "vue";
+onMounted(async () => {
+  slides.value = (await api.get('dashboard-slides')).data.data
+  slide.value = slides.value[0].id
+})
+const slides = ref([])
+const slide = ref(null);
 const modules = ref([
   {
     label: "Candidatos y Evaluaciones",

@@ -1,5 +1,25 @@
 const routes = [
   {
+    path: "/carrusel",
+    meta: { label: "Carrusel" },
+    component: () => import("layouts/MainLayout.vue"),
+    children: [
+      {
+        path: "",
+        component: () => import("pages/DashboardSlides.vue"),
+      },
+      {
+        path: "anadir-diapositiva",
+        meta: {
+          label: "Anadir diapositiva",
+          hideBreadcrumb: true,
+          noPadding: true,
+        },
+        component: () => import("pages/DashboardSlideForm.vue"),
+      },
+    ],
+  },
+  {
     path: "/login",
     meta: { label: "Candidatos y Evaluaciones" },
     component: () => import("pages/LoginPage.vue"),
@@ -24,7 +44,7 @@ const routes = [
       {
         path: "/home",
         name: "index",
-        meta: { label: "" },
+        meta: { label: "", hideBreadcrumb: true },
         component: () => import("pages/IndexPage.vue"),
       },
       {
