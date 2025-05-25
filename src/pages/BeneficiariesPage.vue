@@ -47,7 +47,7 @@ const columns = ref([
     name: 'actions',
     label: 'Acciones',
     field: 'actions',
-    align: 'center'
+    align: 'right'
   }
 ]);
 
@@ -62,7 +62,7 @@ const columns = ref([
     hide-bottom
   >
     <template v-slot:body-cell-actions="props">
-      <q-td>
+      <q-td class="text-right">
         <q-btn
           round
           unelevated
@@ -76,6 +76,13 @@ const columns = ref([
           style="font-weight: 600; font-size: 1.5rem; width: 45px !important; ;height: 45px !important; min-width: initial; min-height: initial;"
           :to="`beneficiarios/${props.row.id}/kardex`"
         >K</q-btn>
+
+        <q-btn
+          round
+          unelevated
+          icon="sym_o_calendar_month"
+          :to="`beneficiarios/${props.row.id}/citas`"
+        />
       </q-td>
     </template>
   </q-table>

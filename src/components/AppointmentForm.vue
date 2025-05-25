@@ -4,8 +4,8 @@ import { api } from 'src/boot/axios';
 import { computed, onMounted, ref } from 'vue';
 import Notify from 'src/utils/notify';
 
-defineProps(['candidates'])
-const emits = defineEmits(['close'])
+const props = defineProps(['candidates'])
+const emits = defineEmits(['close', 'save'])
 const loading = ref(false)
 const errors = ref({})
 const areas = ref([])
@@ -14,6 +14,7 @@ const appointment = ref({})
 
 onMounted(async () => {
   areas.value = (await api.get('work_areas')).data.data
+  appointment.value.candidate_id = props.candidates.length ? props.candidates[0].id : null
 })
 
 async function fetchPersonal() {
@@ -31,9 +32,9 @@ async function storeAppointment() {
   loading.value = true
   errors.value = {}
   try {
-    await api.post('appointments', { ...appointment.value, date: fulldatetime.value })
+    let newAppointment = (await api.post('appointments', { ...appointment.value, date: fulldatetime.value })).data.data
     Notify.positive('Guardado con exito')
-    emits('close')
+    emits('save', newAppointment)
   } catch (error) {
     console.log(error);
     errors.value = error.formatted ? error.formatted : {}
@@ -60,6 +61,7 @@ async function storeAppointment() {
         stack-label
         class="q-field--required"
         label="Candidatos"
+        :disable="candidates.length == 1"
         :options="candidates"
         v-model="appointment.candidate_id"
         emit-value
@@ -182,6 +184,7 @@ async function storeAppointment() {
         @click="storeAppointment"
         unelevated
         color="primary"
+        :loading="loading"
       >Guardar</q-btn>
     </q-card-section>
   </q-card>

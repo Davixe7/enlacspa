@@ -59,7 +59,7 @@ import { api } from "src/boot/axios";
 import { onMounted, ref } from "vue";
 onMounted(async () => {
   slides.value = (await api.get('dashboard-slides')).data.data
-  slide.value = slides.value[0].id
+  slide.value = slides.value.length ? slides.value[0].id : null
 })
 const slides = ref([])
 const slide = ref(null);
