@@ -36,7 +36,6 @@ export default defineRouter(function (/* { store, ssrContext } */) {
   Router.beforeEach((to, from, next) => {
     let layout = to.meta.layout || "default";
     if (layout === "main") {
-      console.log(to.matched);
       to.matched.splice(1, 1, {
         ...to.matched[2],
         path: to.matched[1].path,

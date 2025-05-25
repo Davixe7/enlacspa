@@ -159,10 +159,12 @@ import { useNotificationStore } from "src/stores/notification-store";
 
 import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
+import { useMeta } from "quasar";
 
 onMounted(() => {
   useAuthStore().fetchUser()
   useNotificationStore().fetchNotifications()
+  useMeta(() => ({ title: route.meta.label }));
 })
 
 const authStore = useAuthStore();

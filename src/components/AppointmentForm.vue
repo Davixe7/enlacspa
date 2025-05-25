@@ -13,24 +13,12 @@ const personal = ref([])
 const appointment = ref({})
 
 onMounted(async () => {
-  areas.value = (await api.get('roles')).data.data
-  areas.value = areas.value.map(area => {
-    let flag = appointmentTypes.value.find(type => type.value == area.name)
-    return { ...area, label: flag ? flag.label : area.name }
-  })
+  areas.value = (await api.get('work_areas')).data.data
 })
 
 async function fetchPersonal() {
   personal.value = (await api.get('personal', { params: { area: appointment.value.type_id } })).data.data
 }
-
-const appointmentTypes = ref([
-  { label: 'Médico', value: 'medico' },
-  { label: 'Nutrición', value: 'nutricion' },
-  { label: 'Psicología', value: 'psicologia' },
-  { label: 'Comunicación', value: 'comunicacion' },
-  { label: 'Programa Escucha', value: 'programa-escucha' },
-])
 
 const fulldatetime = computed(() => {
   let newDate = DateTime.fromFormat(date.value + ' ' + time.value, 'dd/MM/yyyy hh:mm')
@@ -38,12 +26,6 @@ const fulldatetime = computed(() => {
 })
 const date = ref(DateTime.now().toFormat('dd/MM/yyyy'))
 const time = ref(DateTime.now().toFormat('hh:mm'))
-
-/* watch(() => appointment.value, newValue => {
-  let luxonDate = DateTime.fromISO(newValue.date)
-  date.value = luxonDate.toFormat('DD/MM/YYYY')
-  time.value = luxonDate.toFormat('H:i:s')
-}) */
 
 async function storeAppointment() {
   loading.value = true
@@ -94,7 +76,7 @@ async function storeAppointment() {
         :options="areas"
         v-model="appointment.type_id"
         emit-value
-        option-label="label"
+        option-label="name"
         option-value="id"
         map-options
         @update:modelValue="fetchPersonal"

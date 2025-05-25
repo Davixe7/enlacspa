@@ -96,7 +96,11 @@ const candidate = ref({ id: null, first_name: '', middle_name: '', last_name: ''
 const contacts = ref([])
 const medications = ref([]);
 const evaluators = ref([])
-const evaluation_schedule = ref({ evaluator_id: null, date: DateTime.now().toFormat('yyyy-MM-dd HH:mm:ss') })
+const evaluation_schedule = ref({
+  evaluator_id: null,
+  date: DateTime.now().toFormat('yyyy-MM-dd HH:mm:ss'),
+  type_id: 0
+})
 const picture = ref(null)
 const recepient = ref({ name: '', phone: '' })
 

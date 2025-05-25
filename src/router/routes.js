@@ -125,6 +125,12 @@ const routes = [
             component: () => import("pages/BeneficiariesCuota.vue"),
             props: true,
           },
+          {
+            path: ":candidateId/kardex",
+            meta: { label: "Kardex", layout: "main" },
+            component: () => import("pages/KardexPage.vue"),
+            props: true,
+          },
         ],
       },
       {

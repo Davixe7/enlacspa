@@ -69,6 +69,13 @@ const columns = ref([
           icon="sym_o_attach_money"
           :to="`beneficiarios/${props.row.id}/cuotas`"
         />
+
+        <q-btn
+          round
+          unelevated
+          style="font-weight: 600; font-size: 1.5rem; width: 45px !important; ;height: 45px !important; min-width: initial; min-height: initial;"
+          :to="`beneficiarios/${props.row.id}/kardex`"
+        >K</q-btn>
       </q-td>
     </template>
   </q-table>
