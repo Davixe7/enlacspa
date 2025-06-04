@@ -71,13 +71,13 @@ const modules = ref([
     path: "/candidatos",
   },
   {
-    label: "Beneficiarios",
+    label: "Admisiones y Beneficiarios",
     color: "#DD004A80",
     icon: "beneficiarios",
     path: "/beneficiarios",
   },
   {
-    label: "Modulo 3",
+    label: "Tesoreria",
     color: "#8DAF1280",
     icon: "rectangle",
     path: "/",

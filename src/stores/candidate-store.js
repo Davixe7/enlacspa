@@ -15,11 +15,13 @@ export const useCandidateStore = defineStore("candidate", {
     diagnosis: "",
     info_channel: null,
     sheet: 1,
+    onboard_at: null,
     loading: farClosedCaptioning,
     contacts: [],
     picture: null,
     evaluation_schedule: null,
     interviewee: {},
+    program: null,
     errors: {},
   }),
 

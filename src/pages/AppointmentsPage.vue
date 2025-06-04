@@ -2,6 +2,7 @@
 import { api } from 'src/boot/axios';
 import { computed, onMounted, ref } from 'vue';
 import AppointmentForm from 'src/components/AppointmentForm.vue';
+import BeneficiaryProfile from 'src/components/BeneficiaryProfile.vue';
 
 const props = defineProps(['candidateId'])
 const candidate = ref()
@@ -23,9 +24,9 @@ const appointmentTypes = ref([
 
 const columns = ref([
   { name: 'type', label: 'Tipo de cita', field: row => appointmentTypes.value[row.type_id], align: 'left' },
-  { name: 'evaluator.name', label: 'Persona', field: row => row.evaluator.name, align: 'left' },
-  { name: 'date', label: 'Fecha', field: row => row.date.split(' ')[0], align: 'left' },
-  { name: 'time', label: 'Horario', field: row => row.date.split(' ')[1], align: 'left' },
+  { name: 'evaluator.name', label: 'Persona', field: row => row.evaluator.full_name, align: 'left' },
+  { name: 'date', label: 'Fecha', field: row => row.frontendDate, align: 'left' },
+  { name: 'time', label: 'Horario', field: row => row.frontendTime, align: 'left' },
 ])
 
 const dialog = ref(false)
@@ -47,8 +48,11 @@ function updateAppointments(appointment) {
 </script>
 
 <template>
-  <div class="flex items-center">
-    <h1 class="page-title">Registro de citas</h1>
+  <div class="flex items-center q-mb-lg">
+    <h1
+      class="page-title"
+      style="margin-bottom: 0;"
+    >Registro de citas</h1>
     <q-btn
       @click="dialog = true"
       class="q-ml-auto"
@@ -56,6 +60,11 @@ function updateAppointments(appointment) {
       icon="sym_o_add"
     >Programar cita</q-btn>
   </div>
+
+  <BeneficiaryProfile
+    :candidateId="candidateId"
+    class="q-mb-lg"
+  ></BeneficiaryProfile>
 
   <h1 class="page-subtitle">Citas pendientes</h1>
   <q-table

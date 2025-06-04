@@ -56,7 +56,7 @@ const columns = ref([
   <q-table
     flat
     bordered
-    title="Configuracion de Cuotas"
+    title="Configuración de Cuotas"
     :rows="totales"
     :columns="columns"
     hide-bottom

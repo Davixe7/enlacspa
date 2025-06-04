@@ -96,7 +96,7 @@ onMounted(async () => {
           :options="sponsors"
           v-model="paymentConfig.sponsor_id"
           emit-value
-          option-label="name"
+          option-label="full_name"
           option-value="id"
           map-options
           hide-bottom-space
@@ -185,7 +185,7 @@ onMounted(async () => {
         <q-input
           outlined
           stack-label
-          label="Que dia del mes sera su aportacion?"
+          label="¿Qué día del mes será su aportación?"
           v-model="paymentConfig.month_payday"
           type="number"
           hide-bottom-space
@@ -208,10 +208,12 @@ onMounted(async () => {
             <q-radio
               v-model="paymentConfig.address_type"
               :val="'home'"
+              label="Casa"
             ></q-radio>
             <q-radio
               v-model="paymentConfig.address_type"
               :val="'office'"
+              label="Oficina"
             ></q-radio>
           </div>
         </div>

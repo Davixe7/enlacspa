@@ -10,7 +10,12 @@ import { useRouter } from "vue-router";
 
 
 const router = useRouter()
-const props = defineProps(['candidateId'])
+const props = defineProps({
+  'candidateId': { type: String, },
+  'notifications': { type: Boolean, default: true },
+  'evaluations': { type: Boolean, default: true },
+  'redirectTo': { type: String, default: '/candidatos' }
+})
 
 onMounted(async () => {
   evaluators.value = (await api.get('evaluators')).data.data
@@ -70,7 +75,7 @@ async function storeCandidate() {
     let endpoint = candidate.value.id ? `candidates/${candidate.value.id}` : 'candidates'
     await api.post(endpoint, loadData())
     Notify.positive('Guardado con éxito')
-    setTimeout(() => router.push('/candidatos'), 3000)
+    setTimeout(() => router.push(props.redirectTo), 3000)
   }
   catch (error) {
     errors.value = error.status == 422 ? error.formatted : {}
@@ -239,7 +244,10 @@ const chronological_age = computed(() => {
     <div class="form-section">
       <div class="page-title">Programar Evaluación</div>
 
-      <div class="row q-col-gutter-lg q-mb-md">
+      <div
+        v-if="evaluations"
+        class="row q-col-gutter-lg q-mb-md"
+      >
         <div class="col-12 col-md-4">
           <q-select
             outlined
@@ -339,7 +347,10 @@ const chronological_age = computed(() => {
       </ul>
     </div>
 
-    <div class="form-section">
+    <div
+      v-if="notifications"
+      class="form-section"
+    >
       <div class="page-title">Herramientas Adicionales</div>
       <div class="subtitle q-my-md">Envío de Formato Inicial por WhatsApp</div>
       <div class="flex q-gutter-x-md q-mb-lg">

@@ -114,6 +114,17 @@ const routes = [
         component: () => import("pages/BeneficiariesPage.vue"),
         children: [
           {
+            path: ":candidateId/perfil",
+            meta: { label: "Configuracion de Cuotas", layout: "main" },
+            component: () => import("pages/CandidateForm.vue"),
+            props: (route) => ({
+              candidateId: route.params.candidateId,
+              notifications: false,
+              evaluations: false,
+              redirectTo: "/beneficiarios",
+            }),
+          },
+          {
             path: ":candidateId/cuotas",
             meta: { label: "Configuracion de Cuotas", layout: "main" },
             component: () => import("pages/BeneficiariesCuotas.vue"),

@@ -54,7 +54,7 @@ const columns = ref([
 </script>
 
 <template>
-  <h1 class="page-title">Beneficiarios</h1>
+  <h1 class="page-title">Admisiones y Beneficiarios</h1>
   <q-table
     :rows="rows"
     :columns="columns"
@@ -63,6 +63,14 @@ const columns = ref([
   >
     <template v-slot:body-cell-actions="props">
       <q-td class="text-right">
+
+        <q-btn
+          round
+          unelevated
+          icon="sym_o_visibility"
+          :to="`beneficiarios/${props.row.id}/perfil`"
+        />
+
         <q-btn
           round
           unelevated
