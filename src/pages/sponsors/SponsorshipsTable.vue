@@ -9,7 +9,13 @@ const paymentConfigs = ref([])
 const dialog = ref(false)
 
 const columns = ref([
-  { name: 'name', field: (row) => row.candidate.full_name, label: 'Nombre del Candidato', sortable: true, align: 'left' },
+  {
+    name: 'name',
+    field: (row) => row.candidate.full_name,
+    label: 'Nombre del Candidato',
+    sortable: true,
+    align: 'left'
+  },
   { name: 'amount', field: 'id', label: 'Folio', sortable: true, align: 'left' },
   { name: 'created_at', field: 'amount', label: 'Monto', sortable: true, align: 'left' },
   { name: 'frequency', field: 'frequency', label: 'Frecuencia ', sortable: true, align: 'left' },
@@ -24,7 +30,9 @@ function editPaymentConfig(id) {
 }
 
 onMounted(async () => {
-  paymentConfigs.value = (await api.get(`/payment_configs/?sponsor_id=${props.sponsorId}`)).data.data
+  paymentConfigs.value = (
+    await api.get(`/payment_configs/?sponsor_id=${props.sponsorId}`)
+  ).data.data
 })
 </script>
 
@@ -49,6 +57,9 @@ onMounted(async () => {
   </q-table>
 
   <q-dialog v-model="dialog">
-    <PaymentConfigForm :payment-config-id="paymentConfigId" />
+    <PaymentConfigForm
+      :payment-config-id="paymentConfigId"
+      @save="dialog = false"
+    />
   </q-dialog>
 </template>

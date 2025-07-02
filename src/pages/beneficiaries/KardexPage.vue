@@ -55,7 +55,10 @@ async function deleteFile(collectionName) {
   if (!window.confirm('Seguro que desea eliminar el documento adjunto?')) return
   try {
     loading.value = true
-    await api.post(`candidates/${props.candidateId}/kardexes`, { collection_name: collectionName, _method: 'DELETE' })
+    await api.post(`candidates/${props.candidateId}/kardexes`, {
+      collection_name: collectionName,
+      _method: 'DELETE'
+    })
     delete media.value['kardex_' + collectionName]
   } catch (error) {
     console.log(error)
@@ -138,6 +141,7 @@ async function deleteFile(collectionName) {
             </div>
 
             <q-btn
+              style="flex: 0 0"
               :disable="!kardex[props.row.slug]"
               @click="uploadFile(props.row.slug)"
               color="primary"

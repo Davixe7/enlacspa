@@ -42,8 +42,12 @@ const paymentConfig = ref({ ...template })
 async function saveData() {
   try {
     loading.value = true
-    let route = paymentConfig.value.id ? `/payment_configs/${paymentConfig.value.id}` : '/payment_configs'
-    let data = paymentConfig.value.id ? { ...paymentConfig.value, _method: 'PUT' } : { ...paymentConfig.value }
+    let route = paymentConfig.value.id
+      ? `/payment_configs/${paymentConfig.value.id}`
+      : '/payment_configs'
+    let data = paymentConfig.value.id
+      ? { ...paymentConfig.value, _method: 'PUT' }
+      : { ...paymentConfig.value }
     await api.post(route, data)
     Notify.positive('Guardado con éxito')
     emits('save')
@@ -87,18 +91,21 @@ const monthlyAmount = computed(() => {
 })
 
 onMounted(async () => {
-  if (props.paymentConfigId) {
-    let route = `/payment_configs/${props.paymentConfigId}`
-    paymentConfig.value = (await api.get(route)).data.data
+  if (!props.paymentConfigId && !(props.candidateId && props.sponsorId)) {
+    paymentConfig.value.sponsor_id = Number(props.sponsorId)
     return
   }
 
-  if (props.candidateId && props.sponsorId) {
-    let route = `/payment_configs/?candidate_id=${props.candidateId}&sponsor_id=${props.sponsorId}`
-    paymentConfig.value = (await api.get(route)).data.data
-    return
+  let route = props.paymentConfigId
+    ? `/payment_configs/${props.paymentConfigId}`
+    : `/payment_configs/?candidate_id=${props.candidateId}&sponsor_id=${props.sponsorId}`
+
+  paymentConfig.value = (await api.get(route)).data.data
+
+  if (!paymentConfig.value.receipt['id']) {
+    console.log(template.receipt)
+    paymentConfig.value.receipt = { ...template.receipt }
   }
-  paymentConfig.value.sponsor_id = Number(props.sponsorId)
 })
 </script>
 
@@ -227,7 +234,7 @@ onMounted(async () => {
         </div>
 
         <div v-if="paymentConfig.wants_deductible_receipt">
-          <div class="form-section-label q-pb-md">Recibo deducible</div>
+          <div class="form-section-label q-mb-none">Recibo deducible</div>
           <DeductibleReceiptForm v-model="paymentConfig.receipt" />
         </div>
 
