@@ -11,5 +11,14 @@
     "javascriptreact",
     "typescript",
     "vue"
-  ]
+  ],
+  "[vue]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "prettier.vueIndentScriptAndStyle": false,
+  "vue.autoInsert.dotValue": true,
+  "vue.format.wrapAttributes": "force"
 }

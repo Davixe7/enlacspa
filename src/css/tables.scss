@@ -1,0 +1,35 @@
+//TABLES
+.q-table {
+  &--bordered {
+    border: 1px solid $grey-300;
+  }
+
+  thead {
+    background: #e5e7eb;
+  }
+
+  th {
+    font-size: 16px;
+    font-weight: 700;
+    color: #374151;
+    vertical-align: top;
+    padding: 16px;
+    white-space: break-spaces;
+  }
+
+  tbody td {
+    font-weight: 400;
+    font-size: 16px;
+    color: $grey-900;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: nowrap;
+    width: fit-content;
+    margin-left: auto;
+    .q-btn {
+      font-size: 13px;
+    }
+  }
+}

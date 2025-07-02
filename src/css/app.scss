@@ -1,6 +1,9 @@
 // app global css in SCSS form
+@import 'utils.scss';
+@import 'tables.scss';
+
 body {
-  font-family: "DM Sans", serif;
+  font-family: 'DM Sans', serif;
   font-size: 16px;
   line-height: 1.3rem;
   letter-spacing: 0;
@@ -9,6 +12,12 @@ body {
   text-transform: initial;
   font-size: 16px;
 }
+
+.q-btn--dense {
+  font-size: 12px;
+  padding: 4px 8px !important;
+}
+
 .q-btn:not(.q-btn--round) {
   padding: 6px 16px;
 }
@@ -44,7 +53,7 @@ body {
 
 //INPUTS
 .q-field--required .q-field__label::after {
-  content: "*";
+  content: '*';
   color: #dc3545;
   margin-left: 1px;
 }
@@ -80,18 +89,48 @@ body {
   color: #111827;
 }
 
-//TABLES
-.q-table th {
-  font-size: 16px;
-  font-weight: 700;
-  color: #374151;
-  vertical-align: top;
-  padding: 16px;
-  white-space: break-spaces;
+.profile {
+  container-type: inline-size;
+  border: 1px solid #d9d9d9;
+  display: flex;
 }
-
-.q-table thead {
-  background: #e5e7eb;
+.profile__avatar {
+  width: 75px;
+  height: 75px;
+  padding: 16px 0 0 16px;
+  flex: 1 0 75px;
+}
+.profile__content {
+  padding: 16px;
+}
+@container (min-width: 991px) {
+  .profile__avatar {
+    width: 150px;
+    height: 150px;
+    padding: 0;
+    flex: initial;
+  }
+  .profile__content {
+    display: table;
+    width: 100%;
+    padding: 0;
+    border-collapse: collapse;
+  }
+  .form-row {
+    display: table-row;
+  }
+  .form-row > * {
+    display: table-cell;
+    border: 1px solid #d9d9d9;
+    margin-bottom: 0 !important;
+    padding: 16px;
+  }
+}
+.form-group {
+  margin-bottom: 16px;
+}
+.form-label {
+  font-weight: 500;
 }
 
 @media print {
@@ -101,4 +140,12 @@ body {
   .q-page-container {
     padding-top: 0;
   }
+}
+
+.q-breadcrumbs--last {
+  color: #6b7280;
+}
+
+.q-breadcrumbs__separator {
+  color: #9ca3af;
 }

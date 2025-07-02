@@ -1,6 +1,6 @@
 <script setup>
-import { api } from 'src/boot/axios';
-import { ref, watch } from 'vue';
+import { api } from 'src/boot/axios'
+import { ref, watch } from 'vue'
 
 const emits = defineEmits(['update:modelValue'])
 
@@ -8,32 +8,41 @@ const props = defineProps({
   candidateId: { default: null },
   hideBottomSpace: { type: Boolean, default: false },
   modelValue: { type: Object, required: true },
-  errors: { type: Object, required: false, default: () => ({}) },
+  errors: { type: Object, required: false, default: () => ({}) }
 })
 const relationships = [
-  { label: "Abuelo(a)", value: "abuelo" },
-  { label: "Hermano(a)", value: "hermano" },
-  { label: "Hermanastro(a)", value: "hermanastro" },
-  { label: "Madre/Padre", value: "madre_padre" },
-  { label: "Padrastro/Madrastra", value: "padrastro_madrastra" },
-  { label: "Primo(a)", value: "primo" },
-  { label: "Tío(a)", value: "tio" },
-];
+  { label: 'Abuelo(a)', value: 'abuelo' },
+  { label: 'Hermano(a)', value: 'hermano' },
+  { label: 'Hermanastro(a)', value: 'hermanastro' },
+  { label: 'Madre/Padre', value: 'madre_padre' },
+  { label: 'Padrastro/Madrastra', value: 'padrastro_madrastra' },
+  { label: 'Primo(a)', value: 'primo' },
+  { label: 'Tío(a)', value: 'tio' }
+]
 const contact = ref({ ...props.modelValue })
 const localErrors = ref({ ...props.errors })
 
-watch(() => props.errors, (newValue) => localErrors.value = { ...newValue })
-watch(() => props.modelValue, (newValue) => Object.assign(contact.value, newValue))
-watch(() => contact.value, () => {
-  props.hideBottomSpace ? emits('update:modelValue', { ...contact.value }) : ''
-}, { deep: true })
+watch(
+  () => props.errors,
+  (newValue) => (localErrors.value = { ...newValue })
+)
+watch(
+  () => props.modelValue,
+  (newValue) => Object.assign(contact.value, newValue)
+)
+watch(
+  () => contact.value,
+  () => {
+    props.hideBottomSpace ? emits('update:modelValue', { ...contact.value }) : ''
+  },
+  { deep: true }
+)
 
 async function save() {
   try {
-    await api.post('contacts/validate', { ...contact.value });
+    await api.post('contacts/validate', { ...contact.value })
     emits('update:modelValue', { ...contact.value })
-  }
-  catch (error) {
+  } catch (error) {
     if (error.status == 422) {
       localErrors.value = error.response.data.errors
     }
@@ -137,25 +146,36 @@ async function save() {
         mask="##########"
         type="tel"
       ></q-input>
-      <div class="flex">
-        <q-checkbox
-          label="Tutor legal"
-          v-model="contact.legal_guardian"
-          :true-value="1"
-          :false-value="0"
-        ></q-checkbox>
-        <q-checkbox
-          label="Responsable del Beneficiario"
-          v-model="contact.enlac_responsible"
-          :true-value="1"
-          :false-value="0"
-        ></q-checkbox>
+
+      <div style="position: relative">
+        <label
+          for="#"
+          class="q-field__label block q-mb-xs"
+          style="margin-bottom: 4px"
+          >Relacion</label
+        >
+        <div
+          class="flex q-pt-xs"
+          style="border: 1px solid #fff; margin-left: -8px"
+        >
+          <q-checkbox
+            label="Tutor legal"
+            v-model="contact.legal_guardian"
+            :true-value="1"
+            :false-value="0"
+            class="q-mr-sm"
+          ></q-checkbox>
+          <q-checkbox
+            label="Responsable del Beneficiario"
+            v-model="contact.enlac_responsible"
+            :true-value="1"
+            :false-value="0"
+          ></q-checkbox>
+        </div>
       </div>
     </div>
   </div>
-  <div class="page-title">
-    Domicilio
-  </div>
+  <div class="page-title">Domicilio</div>
   <div class="row q-col-gutter-lg">
     <div class="col-12 col-md-6 q-gutter-y-md">
       <q-input
@@ -235,7 +255,8 @@ async function save() {
       <q-btn
         color="primary"
         @click="save"
-      >Guardar Información</q-btn>
+        >Guardar Información</q-btn
+      >
     </div>
   </div>
 </template>

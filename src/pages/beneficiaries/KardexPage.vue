@@ -1,13 +1,19 @@
 <script setup>
-import { api } from 'src/boot/axios';
-import { onMounted, ref } from 'vue';
+import { api } from 'src/boot/axios'
+import { onMounted, ref } from 'vue'
 
 const props = defineProps(['candidateId'])
 
 onMounted(async () => {
+  loading.value = true
   candidate.value = (await api.get(`candidates/${props.candidateId}`)).data.data
   media.value = (await api.get(`candidates/${props.candidateId}/kardexes`)).data.data
   rows.value = (await api.get('kardexes')).data.data
+
+  Object.keys(rows.value).forEach((category) => {
+    rows.value[category].forEach((item) => (kardex.value[item.slug] = { file: null, detail: null }))
+  })
+  loading.value = false
 })
 
 const loading = ref(false)
@@ -19,14 +25,14 @@ const columns = ref([
   { name: 'check', label: '', align: 'left' },
   { name: 'name', label: '', field: 'name', align: 'left' },
   { name: 'download', label: '', align: 'right' },
-  { name: 'upload', label: '', align: 'right' },
+  { name: 'upload', label: '', align: 'right' }
 ])
 
 const categoryLabels = {
-  'default': 'Documentos a Solicitar',
-  'tutor': 'Documentos a Descargar y Firmar por Responsable del Beneficiario y Tutor Legal',
-  'doctor': 'Documentos a Descargar y Firmar por Médico',
-  'externo': 'Documentos a Descargar y Firmar por Externos',
+  default: 'Documentos a Solicitar',
+  tutor: 'Documentos a Descargar y Firmar por Responsable del Beneficiario y Tutor Legal',
+  doctor: 'Documentos a Descargar y Firmar por Médico',
+  external: 'Documentos a Descargar y Firmar por Externos'
 }
 
 async function uploadFile(collectionName) {
@@ -34,13 +40,15 @@ async function uploadFile(collectionName) {
     loading.value = true
     let data = new FormData()
     data.append('collection_name', collectionName)
-    data.append('upload', kardex.value[collectionName])
+    data.append('upload', kardex.value[collectionName].file)
+    data.append('detail', kardex.value[collectionName].detail)
     let response = (await api.post(`candidates/${props.candidateId}/kardexes`, data)).data.data
     media.value[response.collection_name] = response
   } catch (error) {
-    console.log(error);
+    console.log(error)
+  } finally {
+    loading.value = false
   }
-  loading.value = false
 }
 
 async function deleteFile(collectionName) {
@@ -50,14 +58,16 @@ async function deleteFile(collectionName) {
     await api.post(`candidates/${props.candidateId}/kardexes`, { collection_name: collectionName, _method: 'DELETE' })
     delete media.value['kardex_' + collectionName]
   } catch (error) {
-    console.log(error);
+    console.log(error)
+  } finally {
+    loading.value = false
   }
-  loading.value = false
 }
 </script>
 
 <template>
   <h1 class="page-title">Kardex del Beneficiario</h1>
+
   <template
     v-for="category in Object.keys(rows)"
     :key="category"
@@ -72,7 +82,7 @@ async function deleteFile(collectionName) {
       :columns="columns"
     >
       <template v-slot:body-cell-check="props">
-        <q-td style="width: 60px; max-width: 60px;">
+        <q-td style="width: 60px; max-width: 60px">
           <q-checkbox
             :model-value="!!media['kardex_' + props.row.slug]"
             :true-value="true"
@@ -84,6 +94,7 @@ async function deleteFile(collectionName) {
       <template v-slot:body-cell-download="props">
         <q-td class="text-right">
           <a
+            v-if="props.row.has_template"
             :href="props.row.template"
             target="_blank"
           >
@@ -93,24 +104,39 @@ async function deleteFile(collectionName) {
       </template>
 
       <template v-slot:body-cell-upload="props">
-        <q-td style="width: 320px;">
+        <q-td style="width: 320px">
           <div
             class="flex items-center justify-end q-ml-auto"
             v-if="!media['kardex_' + props.row.slug]"
           >
-            <q-file
-              style="width: 240px"
-              clearable
-              dense
-              outlined
-              placeholder="Adjuntar archivo"
-              v-model="kardex[props.row.slug]"
-              class="q-mr-sm"
-            >
-              <template v-slot:prepend>
-                <q-icon name="sym_o_attach_file"></q-icon>
-              </template>
-            </q-file>
+            <div v-if="kardex[props.row.slug]">
+              <q-file
+                style="width: 240px"
+                clearable
+                dense
+                outlined
+                placeholder="Adjuntar archivo"
+                v-model="kardex[props.row.slug].file"
+                class="q-mr-sm"
+              >
+                <template v-slot:prepend>
+                  <q-icon name="sym_o_attach_file" />
+                </template>
+              </q-file>
+
+              <q-input
+                v-if="props.row.has_detail"
+                dense
+                outlined
+                v-model="kardex[props.row.slug].detail"
+                class="q-mr-sm"
+              >
+                <template v-slot:prepend>
+                  <q-icon name="sym_o_edit" />
+                </template>
+              </q-input>
+            </div>
+
             <q-btn
               :disable="!kardex[props.row.slug]"
               @click="uploadFile(props.row.slug)"
@@ -119,24 +145,34 @@ async function deleteFile(collectionName) {
               dense
               icon="sym_o_upload"
               :loading="loading"
-            ></q-btn>
+            />
           </div>
           <div v-else>
-            <q-btn
-              style="width: 240px"
-              color="primary"
-              icon="sym_o_download"
-              target="_blank"
-              class="q-mr-sm"
-              :href="media['kardex_' + props.row.slug].original_url"
-            >{{ media['kardex_' + props.row.slug].file_name }}</q-btn>
-            <q-btn
-              @click="deleteFile(props.row.slug)"
-              color="negative"
-              round
-              dense
-              icon="sym_o_delete"
-            ></q-btn>
+            <div style="display: flex; flex-flow: column">
+              <div class="flex">
+                <q-btn
+                  style="width: 240px"
+                  color="primary"
+                  icon="sym_o_download"
+                  target="_blank"
+                  class="q-mr-sm"
+                  :href="media['kardex_' + props.row.slug].original_url"
+                  >{{ media['kardex_' + props.row.slug].file_name }}</q-btn
+                >
+                <q-btn
+                  @click="deleteFile(props.row.slug)"
+                  color="negative"
+                  round
+                  dense
+                  icon="sym_o_delete"
+                ></q-btn>
+              </div>
+              <q-input
+                readonly
+                outlined
+                :model-value="media['kardex_' + props.row.slug].detail"
+              ></q-input>
+            </div>
           </div>
         </q-td>
       </template>

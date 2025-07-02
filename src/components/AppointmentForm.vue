@@ -1,8 +1,8 @@
 <script setup>
-import { DateTime } from 'luxon';
-import { api } from 'src/boot/axios';
-import { computed, onMounted, ref } from 'vue';
-import Notify from 'src/utils/notify';
+import { DateTime } from 'luxon'
+import { api } from 'src/boot/axios'
+import { computed, onMounted, ref } from 'vue'
+import Notify from 'src/utils/notify'
 
 const props = defineProps(['candidates'])
 const emits = defineEmits(['close', 'save'])
@@ -18,7 +18,8 @@ onMounted(async () => {
 })
 
 async function fetchPersonal() {
-  personal.value = (await api.get('personal', { params: { area: appointment.value.type_id } })).data.data
+  let params = { area: appointment.value.type_id }
+  personal.value = (await api.get('personal', { params })).data.data
 }
 
 const fulldatetime = computed(() => {
@@ -29,14 +30,19 @@ const date = ref(DateTime.now().toFormat('dd/MM/yyyy'))
 const time = ref(DateTime.now().toFormat('hh:mm'))
 
 async function storeAppointment() {
-  loading.value = true
-  errors.value = {}
   try {
-    let newAppointment = (await api.post('appointments', { ...appointment.value, date: fulldatetime.value })).data.data
+    loading.value = true
+    errors.value = {}
+    let newAppointment = (
+      await api.post('appointments', {
+        ...appointment.value,
+        date: fulldatetime.value
+      })
+    ).data.data
     Notify.positive('Guardado con exito')
     emits('save', newAppointment)
   } catch (error) {
-    console.log(error);
+    console.log(error)
     errors.value = error.formatted ? error.formatted : {}
     Notify.negative('Por favor, valide la informacion')
   }
@@ -45,14 +51,14 @@ async function storeAppointment() {
 </script>
 
 <template>
-  <q-card style="width: 500px;">
-    <q-card-section>
-      <div class="page-title page-title--no-margin flex items-center">
+  <q-card style="width: 500px">
+    <q-card-section style="border-bottom: 1px solid #d9d9d9">
+      <div class="page-title q-mb-none flex items-center text-primary">
         <q-icon
           name="calendar_today"
-          class="q-mr-sm"
+          class="q-mr-md"
         ></q-icon>
-        Programar cita
+        Programar Cita
       </div>
     </q-card-section>
     <q-card-section class="q-gutter-y-md">
@@ -97,72 +103,77 @@ async function storeAppointment() {
         map-options
       ></q-select>
 
-      <q-input
-        outlined
-        stack-label
-        v-model="date"
-        class="q-field--required"
-        label="Seleccione fecha"
-      >
-        <template v-slot:append>
-          <q-icon
-            name="event"
-            class="cursor-pointer"
+      <div class="row q-col-gutter-x-md">
+        <div class="col-6">
+          <q-input
+            outlined
+            stack-label
+            v-model="date"
+            class="q-field--required"
+            label="Seleccione fecha"
           >
-            <q-popup-proxy
-              cover
-              transition-show="scale"
-              transition-hide="scale"
-            >
-              <q-date
-                v-model="date"
-                mask="DD/MM/YYYY"
+            <template v-slot:append>
+              <q-icon
+                name="event"
+                class="cursor-pointer"
               >
-                <div class="row items-center justify-end">
-                  <q-btn
-                    v-close-popup
-                    label="Cerrar"
-                    color="primary"
-                    flat
-                  />
-                </div>
-              </q-date>
-            </q-popup-proxy>
-          </q-icon>
-        </template>
-      </q-input>
-
-      <q-input
-        outlined
-        stack-label
-        v-model="time"
-        class="q-field--required"
-        label="Horario"
-      >
-        <template v-slot:append>
-          <q-icon
-            name="access_time"
-            class="cursor-pointer"
+                <q-popup-proxy
+                  cover
+                  transition-show="scale"
+                  transition-hide="scale"
+                >
+                  <q-date
+                    v-model="date"
+                    mask="DD/MM/YYYY"
+                  >
+                    <div class="row items-center justify-end">
+                      <q-btn
+                        v-close-popup
+                        label="Cerrar"
+                        color="primary"
+                        flat
+                      />
+                    </div>
+                  </q-date>
+                </q-popup-proxy>
+              </q-icon>
+            </template>
+          </q-input>
+        </div>
+        <div class="col-6">
+          <q-input
+            outlined
+            stack-label
+            v-model="time"
+            class="q-field--required"
+            label="Horario"
           >
-            <q-popup-proxy
-              cover
-              transition-show="scale"
-              transition-hide="scale"
-            >
-              <q-time v-model="time">
-                <div class="row items-center justify-end">
-                  <q-btn
-                    v-close-popup
-                    label="Cerrar"
-                    color="primary"
-                    flat
-                  />
-                </div>
-              </q-time>
-            </q-popup-proxy>
-          </q-icon>
-        </template>
-      </q-input>
+            <template v-slot:append>
+              <q-icon
+                name="access_time"
+                class="cursor-pointer"
+              >
+                <q-popup-proxy
+                  cover
+                  transition-show="scale"
+                  transition-hide="scale"
+                >
+                  <q-time v-model="time">
+                    <div class="row items-center justify-end">
+                      <q-btn
+                        v-close-popup
+                        label="Cerrar"
+                        color="primary"
+                        flat
+                      />
+                    </div>
+                  </q-time>
+                </q-popup-proxy>
+              </q-icon>
+            </template>
+          </q-input>
+        </div>
+      </div>
 
       <q-input
         outlined
@@ -179,13 +190,15 @@ async function storeAppointment() {
         unelevated
         outline
         color="primary"
-      >Cerrar</q-btn>
+        >Cerrar</q-btn
+      >
       <q-btn
         @click="storeAppointment"
         unelevated
         color="primary"
         :loading="loading"
-      >Guardar</q-btn>
+        >Guardar</q-btn
+      >
     </q-card-section>
   </q-card>
 </template>

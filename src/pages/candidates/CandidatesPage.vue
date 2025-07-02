@@ -1,66 +1,68 @@
 <script setup>
-import { api } from "src/boot/axios";
-import { onMounted } from "vue";
-import { ref } from "vue";
-import AppointmentForm from './../components/AppointmentForm.vue'
+import { api } from 'src/boot/axios'
+import { onMounted } from 'vue'
+import { ref } from 'vue'
+import AppointmentForm from 'components/AppointmentForm.vue'
+import { formatDate } from 'src/utils/formatDate'
 
 onMounted(() => fetchCandidates())
 
 async function fetchCandidates() {
   rows.value = (await api.get('candidates/dashboard')).data.data
 }
+
 const appointmentDialog = ref(false)
-const rows = ref([]);
+const rows = ref([])
 const columns = ref([
   {
-    name: "name",
-    label: "Nombre de Candidato",
-    align: "left",
-    field: "full_name",
-    sortable: true,
+    name: 'name',
+    label: 'Nombre de Candidato',
+    align: 'left',
+    field: 'full_name',
+    sortable: true
   },
   {
-    name: "sheet",
-    label: "Folio",
-    align: "left",
-    field: "sheet",
-    sortable: true,
+    name: 'sheet',
+    label: 'Folio',
+    align: 'left',
+    field: 'sheet',
+    sortable: true
   },
   {
-    name: "date",
-    label: "Fecha de Evaluación",
-    align: "left",
-    field: (row) => row.evaluation_schedule ? row.evaluation_schedule.date : 'NO DISPONIBLE',
-    sortable: true,
+    name: 'date',
+    label: 'Fecha de Evaluación',
+    align: 'left',
+    field: (row) => formatDate(row.evaluation_schedule.date),
+    sortable: true
   },
   {
-    name: "evaluator",
-    label: "Evaluador",
-    align: "left",
-    field: (row) => row.evaluation_schedule ? row.evaluation_schedule.evaluator.name : 'No disponible',
-    sortable: true,
+    name: 'evaluator',
+    label: 'Evaluador',
+    align: 'left',
+    field: (row) => row.evaluation_schedule.evaluator.name,
+    sortable: true
   },
   {
-    name: "is_candidate",
-    label: "Candidato",
-    align: "left",
-    field: (row) => (row.acceptance_status ? "Sí" : "No"),
-    sortable: true,
+    name: 'is_candidate',
+    label: 'Candidato',
+    align: 'left',
+    field: (row) => (row.acceptance_status ? 'Sí' : 'No'),
+    sortable: true
   },
   {
-    name: "notes",
-    label: "Observaciones",
-    align: "left",
+    name: 'notes',
+    label: 'Observaciones',
+    align: 'left',
     field: 'diagnosis',
-    sortable: false,
+    sortable: false
   },
   {
-    name: "actions",
-    label: "Acciones",
-    align: "right",
-    sortable: false,
-  },
-]);
+    name: 'actions',
+    label: 'Acciones',
+    align: 'right',
+    sortable: false
+  }
+])
 </script>
 
 <template>
@@ -73,14 +75,14 @@ const columns = ref([
         outline=""
         class="q-mr-md"
         to="/candidatos/reportes"
-      >Reporte de candidatos
+        >Reporte de candidatos
       </q-btn>
       <q-btn
         color="primary"
         icon="calendar_today"
         outline=""
         @click="appointmentDialog = true"
-      >Programar cita
+        >Programar cita
       </q-btn>
       <q-btn
         color="primary"
@@ -94,33 +96,37 @@ const columns = ref([
     </div>
 
     <q-table
+      bordered
+      flat
       wrap-cells
+      hide-bottom
       :columns="columns"
       :rows="rows"
       :pagination="{ rowsPerPage: 0 }"
     >
       <template v-slot:body-cell-actions="props">
         <q-td>
-          <div class="flex justify-end">
+          <div class="q-table__actions">
             <q-btn
               dense
               flat
               round
-              icon="edit"
+              icon="sym_o_edit"
               :to="`candidatos/${props.row.id}/editar`"
             />
             <q-btn
               dense
               flat
               round
-              icon="chat"
+              icon="sym_o_chat"
               :to="`candidatos/${props.row.id}/entrevistar`"
+              class="q-mx-xs"
             />
             <q-btn
               dense
               flat
               round
-              icon="list"
+              icon="sym_o_content_paste"
               :to="`candidatos/${props.row.id}/evaluar`"
             />
           </div>
@@ -137,28 +143,7 @@ const columns = ref([
   </q-page>
 </template>
 
-<style scoped>
-.q-table th {
-  font-size: 16px;
-  font-weight: 700;
-  color: #374151;
-  vertical-align: top;
-  padding: 16px;
-  white-space: break-spaces;
-}
-
-.q-table thead {
-  background: #e5e7eb;
-}
-
-.q-table tbody td {
-  font-size: 16px;
-}
-
-.q-btn--dense .q-icon {
-  font-size: 20px;
-}
-
+<style lang="scss">
 .q-table td {
   vertical-align: top;
   padding: 16px;

@@ -1,22 +1,21 @@
 <script setup>
-import { onMounted, ref } from "vue";
-import { useAuthStore } from "./../stores/user-store"
+import { onMounted, ref } from 'vue'
+import { useAuthStore } from '../../stores/user-store'
 
 onMounted(() => authStore.csrfCookie())
 
-const authStore = useAuthStore();
-const email = ref('');
-const password = ref('');
-const remeberme = ref(false);
+const authStore = useAuthStore()
+const email = ref('')
+const password = ref('')
+const remeberme = ref(false)
 const showPassword = ref(false)
-
 </script>
 
 <template>
   <div class="row login-row">
     <div class="col-12 col-md-6 login-brand-column">
       <img
-        src="./../assets/logo_white.png"
+        src="./../../assets/logo_white.png"
         alt=""
       />
     </div>
@@ -72,7 +71,8 @@ const showPassword = ref(false)
               :loading="authStore.loading"
               color="primary"
               type="submit"
-            >Iniciar sesión</q-btn>
+              >Iniciar sesión</q-btn
+            >
           </q-form>
         </div>
       </div>
@@ -81,7 +81,7 @@ const showPassword = ref(false)
 </template>
 
 <style lang="scss">
-.login-form-column>div {
+.login-form-column > div {
   flex: 1 1 auto;
 }
 
@@ -133,7 +133,7 @@ a {
     order: 1;
     padding-left: 100px;
 
-    >div {
+    > div {
       max-width: 370px;
     }
   }
@@ -146,6 +146,5 @@ a {
   .row .login-brand-column img {
     height: auto;
   }
-
 }
 </style>

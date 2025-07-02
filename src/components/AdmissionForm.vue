@@ -1,9 +1,9 @@
 <script setup>
-import Notify from 'src/utils/notify';
-import { api } from 'src/boot/axios';
-import { useCandidateStore } from 'src/stores/candidate-store';
-import { onMounted, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import Notify from 'src/utils/notify'
+import { api } from 'src/boot/axios'
+import { useCandidateStore } from 'src/stores/candidate-store'
+import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 const props = defineProps(['candidate', 'candidateId'])
 const emits = defineEmits(['close'])
@@ -18,7 +18,7 @@ const localCandidate = ref({ ...props.candidate })
 onMounted(async () => {
   programs.value = (await api.get('programs')).data.data
   localCandidate.value = { ...store.$state }
-  localCandidate.value.acceptance_status = localCandidate.value.acceptance_status == null ? 1 : localCandidate.value.acceptance_status;
+  localCandidate.value.acceptance_status = localCandidate.value.acceptance_status == null ? 1 : localCandidate.value.acceptance_status
 })
 
 async function updateAcceptance() {
@@ -46,10 +46,10 @@ async function updateAcceptance() {
 <template>
   <q-card>
     <q-card-section>
-      <div class="page-title page-title--no-margin">Es candidato para formar parte del instituto ENLAC?</div>
+      <div class="page-title q-mb-none">Es candidato para formar parte del instituto ENLAC?</div>
     </q-card-section>
     <q-card-section>
-      <div style="padding-bottom: 40px; margin-left: -10px;">
+      <div style="padding-bottom: 40px; margin-left: -10px">
         <q-radio
           label="Si"
           :val="1"
@@ -93,13 +93,15 @@ async function updateAcceptance() {
         unelevated
         outline
         color="primary"
-      >Cerrar</q-btn>
+        >Cerrar</q-btn
+      >
       <q-btn
         :loading="loading"
         @click="updateAcceptance"
         unelevated
         color="primary"
-      >Guardar</q-btn>
+        >Guardar</q-btn
+      >
     </q-card-section>
   </q-card>
 </template>

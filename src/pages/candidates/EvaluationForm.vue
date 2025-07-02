@@ -1,12 +1,12 @@
 <script setup>
-import { api } from 'src/boot/axios';
-import { computed, onMounted, ref } from 'vue';
-import { useCandidateStore } from 'src/stores/candidate-store';
-import CandidateProfile from './../components/CandidateProfile.vue'
-import EvaluationResults from 'src/components/EvaluationResults.vue';
-import EvaluationComments from 'src/components/EvaluationComments.vue';
-import RankForm from './../components/RankForm.vue'
-import AdmissionForm from './../components/AdmissionForm.vue'
+import { api } from 'src/boot/axios'
+import { computed, onMounted, ref } from 'vue'
+import { useCandidateStore } from 'src/stores/candidate-store'
+import CandidateProfile from 'src/components/CandidateProfile.vue'
+import EvaluationResults from 'src/components/EvaluationResults.vue'
+import EvaluationComments from 'src/components/EvaluationComments.vue'
+import RankForm from 'src/components/RankForm.vue'
+import AdmissionForm from 'src/components/AdmissionForm.vue'
 
 const store = useCandidateStore()
 const props = defineProps(['candidateId'])
@@ -23,29 +23,31 @@ const dialog2 = ref(false)
 onMounted(async () => {
   store.id = props.candidateId
   await store.fetchCandidate()
-  evaluationFields.value = (await (api.get('evaluation_fields', { params: { candidate_id: props.candidateId } }))).data.data
-  brainFunctions.value = (await (api.get('brain_functions'))).data.data
+  evaluationFields.value = (await api.get('evaluation_fields', { params: { candidate_id: props.candidateId } })).data.data
+  brainFunctions.value = (await api.get('brain_functions')).data.data
   setColumns()
 })
 
 function setColumns() {
-  let cols = [{
-    name: 'name',
-    label: 'Nivel Cerebral',
-    align: 'left',
-    sortable: false
-  },
-  {
-    name: 'growth',
-    label: 'Tiempo de Formación',
-    align: 'left',
-    sortable: false
-  }]
-  brainFunctions.value.forEach(func => {
+  let cols = [
+    {
+      name: 'name',
+      label: 'Nivel Cerebral',
+      align: 'left',
+      sortable: false
+    },
+    {
+      name: 'growth',
+      label: 'Tiempo de Formación',
+      align: 'left',
+      sortable: false
+    }
+  ]
+  brainFunctions.value.forEach((func) => {
     cols.push({
       name: func.id,
       label: func.name,
-      field: row => row.ranks[func.id],
+      field: (row) => row.ranks[func.id],
       align: 'left',
       sortable: false
     })
@@ -56,15 +58,15 @@ function setColumns() {
 
 const allRanks = computed(() => {
   var newRanks = []
-  evaluationFields.value.map(level => {
+  evaluationFields.value.map((level) => {
     if (level.P > store.chronological_age) return
     newRanks = newRanks.concat(Object.values(level.ranks))
   })
-  return newRanks;
+  return newRanks
 })
 
 function updateRank(updatedRank) {
-  let level = rows.value.find(field => field.id == updatedRank.brain_level_id)
+  let level = rows.value.find((field) => field.id == updatedRank.brain_level_id)
   let levelIndex = rows.value.indexOf(level)
   let newLevel = { ...rows.value[levelIndex] }
   newLevel.ranks[updatedRank.brain_function_id] = updatedRank
@@ -88,13 +90,16 @@ function print() {
     <div class="flex justify-between items-center q-mb-xl">
       <h1
         class="page-title"
-        style="margin-bottom: 0;"
-      >Evaluación</h1>
+        style="margin-bottom: 0"
+      >
+        Evaluación
+      </h1>
       <q-btn
         @click="print"
         flat
-        style="color: grey;"
-      >Exportar a PDF</q-btn>
+        style="color: grey"
+        >Exportar a PDF</q-btn
+      >
     </div>
 
     <CandidateProfile
@@ -200,7 +205,7 @@ label {
   font-weight: 700;
   font-size: 16px;
   color: #111827;
-  margin-right: .5rem;
+  margin-right: 0.5rem;
   display: block;
   transform: none;
 }

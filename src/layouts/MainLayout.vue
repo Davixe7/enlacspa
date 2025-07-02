@@ -122,7 +122,9 @@
                 <q-item-section avatar>
                   <q-icon name="logout" />
                 </q-item-section>
-                <q-item-section @click="authStore.attemptLogout()">Cerrar sesion</q-item-section>
+                <q-item-section @click="authStore.attemptLogout()"
+                  >Cerrar sesion</q-item-section
+                >
               </q-item>
               <q-separator />
             </q-list>
@@ -146,7 +148,7 @@
           />
         </q-breadcrumbs>
       </div>
-      <div :style="{ padding: route.meta.noPadding ? 0 : '32px 32px' }">
+      <div :style="{ padding: route.meta.noPadding ? 0 : '16px 32px 32px' }">
         <router-view />
       </div>
     </q-page-container>
@@ -162,10 +164,10 @@ import { useRoute } from "vue-router";
 import { useMeta } from "quasar";
 
 onMounted(() => {
-  useAuthStore().fetchUser()
-  useNotificationStore().fetchNotifications()
+  useAuthStore().fetchUser();
+  useNotificationStore().fetchNotifications();
   useMeta(() => ({ title: route.meta.label }));
-})
+});
 
 const authStore = useAuthStore();
 const notificationStore = useNotificationStore();
@@ -207,7 +209,7 @@ const span = ref({ label: "semanal", value: "1" });
   padding-right: 8px;
 }
 
-.q-item__section--side>.q-icon {
+.q-item__section--side > .q-icon {
   font-size: 16px;
 }
 

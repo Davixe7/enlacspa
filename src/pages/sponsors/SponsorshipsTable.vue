@@ -5,16 +5,15 @@ import { onMounted } from 'vue'
 import PaymentConfigForm from 'src/components/PaymentConfigForm.vue'
 
 const props = defineProps(['sponsorId'])
-const sponsor = ref({})
 const paymentConfigs = ref([])
 const dialog = ref(false)
 
 const columns = ref([
-  { name: 'name', field: row => row.candidate.full_name, label: 'Nombre del Candidato', sortable: true, align: 'left' },
+  { name: 'name', field: (row) => row.candidate.full_name, label: 'Nombre del Candidato', sortable: true, align: 'left' },
   { name: 'amount', field: 'id', label: 'Folio', sortable: true, align: 'left' },
   { name: 'created_at', field: 'amount', label: 'Monto', sortable: true, align: 'left' },
   { name: 'frequency', field: 'frequency', label: 'Frecuencia ', sortable: true, align: 'left' },
-  { name: 'actions', label: 'Acciones', sortable: false, align: 'right' },
+  { name: 'actions', label: 'Acciones', sortable: false, align: 'right' }
 ])
 
 const paymentConfigId = ref(null)
@@ -25,15 +24,11 @@ function editPaymentConfig(id) {
 }
 
 onMounted(async () => {
-  sponsor.value = (await api.get(`/sponsors/${props.sponsorId}`)).data.data
   paymentConfigs.value = (await api.get(`/payment_configs/?sponsor_id=${props.sponsorId}`)).data.data
 })
 </script>
 
 <template>
-  <div>
-    {{ sponsor.name }}
-  </div>
   <q-table
     flat
     bordered
@@ -54,7 +49,6 @@ onMounted(async () => {
   </q-table>
 
   <q-dialog v-model="dialog">
-    <PaymentConfigForm :payment-config-id="paymentConfigId">
-    </PaymentConfigForm>
+    <PaymentConfigForm :payment-config-id="paymentConfigId" />
   </q-dialog>
 </template>
