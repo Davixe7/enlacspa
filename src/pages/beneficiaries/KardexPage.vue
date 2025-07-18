@@ -22,10 +22,10 @@ const media = ref({})
 const candidate = ref({})
 const rows = ref([])
 const columns = ref([
-  { name: 'check', label: '', align: 'left' },
-  { name: 'name', label: '', field: 'name', align: 'left' },
-  { name: 'download', label: '', align: 'right' },
-  { name: 'upload', label: '', align: 'right' }
+  { name: 'check', align: 'left' },
+  { name: 'name', field: 'name', align: 'left' },
+  { name: 'download', align: 'right' },
+  { name: 'upload', align: 'right' }
 ])
 
 const categoryLabels = {
@@ -91,6 +91,12 @@ async function deleteFile(collectionName) {
             :true-value="true"
             :false-value="false"
           />
+        </q-td>
+      </template>
+
+      <template v-slot:body-cell-name="props">
+        <q-td :class="{ 'kardex--required': props.row.required }">
+          <label for="">{{ props.row.name }}</label>
         </q-td>
       </template>
 
@@ -174,6 +180,7 @@ async function deleteFile(collectionName) {
               <q-input
                 readonly
                 outlined
+                v-if="props.row.has_detail"
                 :model-value="media['kardex_' + props.row.slug].detail"
               ></q-input>
             </div>
@@ -194,5 +201,9 @@ td:first-child {
   font-size: 24px;
   font-weight: 500;
   margin: 2rem 0 1rem 0;
+}
+.kardex--required label::after {
+  content: ' *';
+  color: red;
 }
 </style>

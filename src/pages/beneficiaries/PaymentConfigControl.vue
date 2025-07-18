@@ -1,93 +1,88 @@
 <script setup>
-import { api } from "src/boot/axios";
-import notify from "src/utils/notify";
-import { computed, onMounted, ref } from "vue";
+import { api } from 'src/boot/axios'
+import { useAuthStore } from 'src/stores/user-store'
+import notify from 'src/utils/notify'
+import { computed, onMounted, ref } from 'vue'
 
-const rows = ref([]);
-const props = defineProps(["candidateId"]);
-const errors = ref({});
-const loading = ref(false);
-const dialog = ref(false);
-const candidate = ref({});
+const rows = ref([])
+const props = defineProps(['candidateId'])
+const errors = ref({})
+const loading = ref(false)
+const dialog = ref(false)
+const candidate = ref({})
 
 const amountSponsors = computed(() => {
-  if (!rows.value.length) return 0;
-  let total = rows.value.reduce((sum, row) => sum + row.monthly_amount, 0);
-  return total.toFixed(2);
-});
+  if (!rows.value.length) return 0
+  let total = rows.value.reduce((sum, row) => sum + row.monthly_amount, 0)
+  return total.toFixed(2)
+})
 
 const amountEnlac = computed(() => {
-  if (!candidate.value.id) return 0;
-  return (candidate.value.program.price - amountSponsors.value).toFixed(2);
-});
+  if (!candidate.value.id) return 0
+  return (candidate.value.program.price - amountSponsors.value).toFixed(2)
+})
 
 const payment = ref({
   candidate_id: props.candidateId,
   sponsor_id: null,
-  payment_type: "",
+  payment_type: '',
   is_partial: 0,
-  date: "",
-  payment_method: "",
+  date: '',
+  payment_method: '',
   ref: null,
   comments: null,
-  amount: 0.0,
-});
+  amount: 0.0
+})
 
-const configs = ref([]);
+const configs = ref([])
 const paymentMethods = ref([
-  "Efectivo",
-  "Transferencia",
-  "Depósito",
-  "Cheque",
-  "Tarjeta de Débito",
-  "Tarjeta de Crédito",
-  "Oxxo",
-]);
+  'Efectivo',
+  'Transferencia',
+  'Depósito',
+  'Cheque',
+  'Tarjeta de Débito',
+  'Tarjeta de Crédito',
+  'Oxxo'
+])
 
 async function fetchConfigs() {
-  let response = (await api.get("/test")).data;
-  configs.value = { ...response, [""]: response[""] };
+  let response = (await api.get(`/test/?candidate_id=${props.candidateId}`)).data
+  configs.value = { ...response, ['']: response[''] }
 }
 
 onMounted(async () => {
-  payment.value.payment_method = paymentMethods.value[0];
+  payment.value.payment_method = paymentMethods.value[0]
 
-  candidate.value = (
-    await api.get(`/candidates/${props.candidateId}`)
-  ).data.data;
+  candidate.value = (await api.get(`/candidates/${props.candidateId}`)).data.data
 
-  rows.value = (
-    await api.get(`payment_configs/?candidate_id=${props.candidateId}`)
-  ).data.data;
+  rows.value = (await api.get(`payment_configs/?candidate_id=${props.candidateId}`)).data.data
 
-  await fetchConfigs();
-});
+  await fetchConfigs()
+})
 
 function setPayment(config) {
-  let firstDue = configs.value[config].find((i) => i.status == "red");
-  firstDue = firstDue
-    ? firstDue
-    : configs.value[config].find((i) => i.status == "yellow");
+  let firstDue = configs.value[config].find((i) => i.status == 'red')
+  firstDue = firstDue ? firstDue : configs.value[config].find((i) => i.status == 'yellow')
 
-  payment.value.sponsor_id = config;
-  payment.value.payment_type = config ? "sponsor" : "parent";
-  payment.value.date = firstDue.date;
-  dialog.value = true;
+  payment.value.sponsor_id = config
+  payment.value.payment_type = config ? 'sponsor' : 'parent'
+  payment.value.date = firstDue.date
+  dialog.value = true
 }
 
 async function storePayment() {
-  loading.value = true;
+  loading.value = true
   try {
-    let data = { ...payment.value };
-    (await api.post("payments", data)).data.data;
-    notify.positive("Pago registrado con exito");
-    dialog.value = false;
-    await fetchConfigs();
+    let data = { ...payment.value }
+    ;(await api.post('payments', data)).data.data
+    notify.positive('Pago registrado con exito')
+    dialog.value = false
+    await fetchConfigs()
   } catch (error) {
-    errors.value = error.formatted ? error.formatted : {};
-    notify.negative("Error al registrar el pago");
+    errors.value = error.formatted ? error.formatted : {}
+    notify.negative('Error al registrar el pago')
   }
-  loading.value = false;
+  loading.value = false
 }
 </script>
 
@@ -114,17 +109,23 @@ async function storePayment() {
           <th>Jul</th>
         </tr>
       </thead>
-      <tbody>
+      <tbody v-if="rows && rows.length">
         <tr
           v-for="config in Object.keys(configs).reverse()"
           :key="config"
         >
-          <td>Cuota de {{ config == "" ? "Padres" : "Padrinos" }}</td>
+          <td>
+            {{
+              config != ''
+                ? rows.find((r) => r.sponsor?.id == config).sponsor.full_name
+                : 'Cuota de padres'
+            }}
+          </td>
           <td
             v-for="payment in configs[config]"
             :key="payment.month"
             :class="[`bg-${payment.status}-2`]"
-            @click="setPayment(config)"
+            @click="useAuthStore().can('payments.update') ? setPayment(config) : ''"
           >
             <div>${{ payment.abono }}</div>
           </td>
@@ -168,7 +169,7 @@ async function storePayment() {
               <th>Concepto</th>
               <td>
                 Cuota de
-                {{ payment.payment_type == "sponsor" ? "Padrino" : "Padre" }}
+                {{ payment.payment_type == 'sponsor' ? 'Padrino' : 'Padre' }}
               </td>
             </tr>
             <tr>
@@ -251,19 +252,6 @@ async function storePayment() {
                 ></q-input>
               </td>
             </tr>
-            <!-- <template v-if="configs">
-              <tr>
-                <th colspan="2">Pagos realizados en el mes</th>
-              </tr>
-              <tr>
-                <th class="text-center">Fecha</th>
-                <th class="text-center">Monto</th>
-              </tr>
-              <tr class="text-center">
-                <td>25 Ene 2025</td>
-                <td>1000.00</td>
-              </tr>
-            </template> -->
           </tbody>
         </q-markup-table>
         <q-card-section>

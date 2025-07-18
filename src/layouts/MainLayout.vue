@@ -1,22 +1,17 @@
 <template>
   <q-layout view="lHh Lpr lFf">
     <q-header>
-      <q-toolbar
-        color="red"
-        style="padding: 36px 32px"
-      >
+      <q-toolbar style="padding: 36px 32px">
         <router-link to="/home">
           <q-img
             src="/logo_header.png"
             width="72px"
-          ></q-img>
+          />
         </router-link>
 
         <div class="q-toolbar__title-container">
           <q-toolbar-title> ENLAC </q-toolbar-title>
-          <div class="q-toolbar__subtitle">
-            Portal web para la administración y gestión
-          </div>
+          <div class="q-toolbar__subtitle">Portal web para la administración y gestión</div>
         </div>
         <q-select
           dark
@@ -91,27 +86,11 @@
                 >
                   <q-item
                     clickable
-                    to="usuarios"
+                    v-for="link in adminLinks"
+                    :key="link.link"
+                    :to="link.link"
                   >
-                    <q-item-section>Administración de usuarios</q-item-section>
-                  </q-item>
-                  <q-item
-                    clickable
-                    to="areas-de-trabajo"
-                  >
-                    <q-item-section>Catálogo de áreas</q-item-section>
-                  </q-item>
-                  <q-item
-                    clickable
-                    to="puestos"
-                  >
-                    <q-item-section>Catálogo de puestos</q-item-section>
-                  </q-item>
-                  <q-item
-                    clickable
-                    to="carrusel"
-                  >
-                    <q-item-section>Administración de carrusel</q-item-section>
+                    <q-item-section>{{ link.label }}</q-item-section>
                   </q-item>
                 </q-list>
               </q-expansion-item>
@@ -122,9 +101,7 @@
                 <q-item-section avatar>
                   <q-icon name="logout" />
                 </q-item-section>
-                <q-item-section @click="authStore.attemptLogout()"
-                  >Cerrar sesion</q-item-section
-                >
+                <q-item-section @click="authStore.attemptLogout()">Cerrar sesion</q-item-section>
               </q-item>
               <q-separator />
             </q-list>
@@ -156,24 +133,31 @@
 </template>
 
 <script setup>
-import { useAuthStore } from "src/stores/user-store";
-import { useNotificationStore } from "src/stores/notification-store";
+import { useAuthStore } from 'src/stores/user-store'
+import { useNotificationStore } from 'src/stores/notification-store'
 
-import { onMounted, ref } from "vue";
-import { useRoute } from "vue-router";
-import { useMeta } from "quasar";
+import { onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
+import { useMeta } from 'quasar'
 
 onMounted(() => {
-  useAuthStore().fetchUser();
-  useNotificationStore().fetchNotifications();
-  useMeta(() => ({ title: route.meta.label }));
-});
+  useAuthStore().fetchUser()
+  useNotificationStore().fetchNotifications()
+  useMeta(() => ({ title: route.meta.label }))
+})
 
-const authStore = useAuthStore();
-const notificationStore = useNotificationStore();
+const adminLinks = ref([
+  { label: 'Notificaciones', link: '/notificaciones' },
+  { label: 'Usuarios', link: '/usuarios' },
+  { label: 'Areas', link: '/areas-de-trabajo' },
+  { label: 'Puestos', link: '/puestos' },
+  { label: 'Carrusel', link: '/carrusel' }
+])
+const authStore = useAuthStore()
+const notificationStore = useNotificationStore()
 
-const route = useRoute();
-const span = ref({ label: "semanal", value: "1" });
+const route = useRoute()
+const span = ref({ label: 'semanal', value: '1' })
 </script>
 
 <style>

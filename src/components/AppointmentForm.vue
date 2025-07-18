@@ -13,7 +13,7 @@ const personal = ref([])
 const appointment = ref({})
 
 onMounted(async () => {
-  areas.value = (await api.get('work_areas')).data.data
+  areas.value = (await api.get('work_areas/?allows_appointments=1')).data.data
   appointment.value.candidate_id = props.candidates.length ? props.candidates[0].id : null
 })
 
@@ -132,6 +132,7 @@ async function storeAppointment() {
                         label="Cerrar"
                         color="primary"
                         flat
+                        @click="dialog = false"
                       />
                     </div>
                   </q-date>

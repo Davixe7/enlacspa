@@ -1,14 +1,14 @@
 <script setup>
-import { ref } from "vue";
-import Notify from "src/utils/notify";
-import { useRoute } from "vue-router";
-import { api } from "src/boot/axios";
+import { ref } from 'vue'
+import Notify from 'src/utils/notify'
+import { useRoute } from 'vue-router'
+import { api } from 'src/boot/axios'
 
-const baseUrl = new URL(api.defaults.baseURL).origin;
+const baseUrl = new URL(api.defaults.baseURL).origin
 const route = useRoute()
-var { token, email } = route.query;
-const newPassword = ref("");
-const confirmPassword = ref("");
+var { token, email } = route.query
+const newPassword = ref('')
+const confirmPassword = ref('')
 
 const loading = ref(false)
 
@@ -23,24 +23,23 @@ const submitForm = async () => {
   try {
     loading.value = true
     await api.post(`${baseUrl}/reset-password`, data)
-    Notify.positive("Contraseña restablecida correctamente");
-    newPassword.value = "";
-    confirmPassword.value = "";
-    token = "";
-    email = "";
-  }
-  catch (error) {
+    Notify.positive('Contraseña restablecida correctamente')
+    newPassword.value = ''
+    confirmPassword.value = ''
+    token = ''
+    email = ''
+  } catch (error) {
     console.log(error)
   }
   loading.value = false
-};
+}
 </script>
 
 <template>
   <div class="row login-row">
     <div class="col-12 col-md-6 login-brand-column">
       <img
-        src="./../assets/logo_white.png"
+        src="./../../assets/logo_white.png"
         alt=""
       />
     </div>
@@ -70,7 +69,7 @@ const submitForm = async () => {
               stack-label
               outlined
               type="password"
-              :rules="[val => val.length >= 8 || 'Debe tener al menos 8 caracteres']"
+              :rules="[(val) => val.length >= 8 || 'Debe tener al menos 8 caracteres']"
               clearable
               hide-bottom-space
             />
@@ -82,7 +81,7 @@ const submitForm = async () => {
               stack-label
               outlined
               type="password"
-              :rules="[val => val === newPassword || 'Las contraseñas deben coincidir']"
+              :rules="[(val) => val === newPassword || 'Las contraseñas deben coincidir']"
               clearable
               hide-bottom-space
             />
@@ -102,7 +101,7 @@ const submitForm = async () => {
 </template>
 
 <style lang="scss">
-.login-form-column>div {
+.login-form-column > div {
   flex: 1 1 auto;
 }
 
@@ -154,7 +153,7 @@ a {
     order: 1;
     padding-left: 100px;
 
-    >div {
+    > div {
       max-width: 370px;
     }
   }
@@ -167,6 +166,5 @@ a {
   .row .login-brand-column img {
     height: auto;
   }
-
 }
 </style>

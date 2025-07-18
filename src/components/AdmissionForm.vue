@@ -18,7 +18,8 @@ const localCandidate = ref({ ...props.candidate })
 onMounted(async () => {
   programs.value = (await api.get('programs')).data.data
   localCandidate.value = { ...store.$state }
-  localCandidate.value.acceptance_status = localCandidate.value.acceptance_status == null ? 1 : localCandidate.value.acceptance_status
+  localCandidate.value.acceptance_status =
+    localCandidate.value.acceptance_status == null ? 1 : localCandidate.value.acceptance_status
 })
 
 async function updateAcceptance() {
@@ -31,7 +32,9 @@ async function updateAcceptance() {
       program_id: localCandidate.value.program_id,
       _method: 'PUT'
     }
-    localCandidate.value = (await api.post(`candidates/${props.candidateId}/admission`, data)).data.data
+    localCandidate.value = (
+      await api.post(`candidates/${props.candidateId}/admission`, data)
+    ).data.data
     Notify.positive('Guardado con exito')
     emits('close')
     setTimeout(() => router.push('/candidatos'), 2500)

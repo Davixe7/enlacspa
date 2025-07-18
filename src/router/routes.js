@@ -102,6 +102,62 @@ const routes = [
         meta: { label: '', hideBreadcrumb: true },
         component: () => import('pages/IndexPage.vue')
       },
+      {
+        path: '/tesoreria',
+        name: 'financial',
+        meta: { label: 'Tesoreria', hideBreadcrumb: false },
+        component: () => import('pages/FinancialPage.vue')
+      },
+      {
+        path: '/tesoreria/:candidateId',
+        name: 'financial.control',
+        meta: { label: 'Tesoreria / Control de Cuotas', hideBreadcrumb: false },
+        component: () => import('pages/FinancialControl.vue'),
+        props: true
+      },
+      {
+        path: '/tesoreria/:candidateId/historial',
+        name: 'financial.history',
+        meta: { label: 'Tesoreria / Historial de pagos', hideBreadcrumb: false },
+        component: () => import('pages/FinancialHistory.vue'),
+        props: true
+      },
+      {
+        path: '/notificaciones',
+        name: 'notifications',
+        meta: { label: 'Notificaciones', hideBreadcrumb: true },
+        component: () => import('pages/admin/NotificationsPage.vue')
+      },
+      {
+        path: '/usuarios',
+        name: 'users',
+        meta: { label: 'Usuarios', hideBreadcrumb: true },
+        component: () => import('pages/admin/UsersPage.vue')
+      },
+      {
+        path: '/puestos',
+        name: 'places',
+        meta: { label: 'Puestos', hideBreadcrumb: true },
+        component: () => import('pages/admin/RolesPage.vue')
+      },
+      {
+        path: '/areas-de-trabajo',
+        name: 'workareas',
+        meta: { label: 'Areas de trabajo', hideBreadcrumb: true },
+        component: () => import('pages/admin/WorkAreasPage.vue')
+      },
+      {
+        path: '/carrusel',
+        name: 'carrusel',
+        meta: { label: 'Carrusel', hideBreadcrumb: true },
+        component: () => import('pages/admin/DashboardSlides.vue')
+      },
+      {
+        path: '/anadir-diapositiva',
+        name: 'carrusel.addSlide',
+        meta: { label: 'Agregar diapositiva', hideBreadcrumb: true },
+        component: () => import('pages/admin/DashboardSlideForm.vue')
+      },
       ...candidates,
       ...padrinos,
       ...beneficiary

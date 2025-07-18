@@ -55,64 +55,64 @@
 </template>
 
 <script setup>
-import { api } from "src/boot/axios";
-import { onMounted, ref } from "vue";
+import { api } from 'src/boot/axios'
+import { onMounted, ref } from 'vue'
 onMounted(async () => {
   slides.value = (await api.get('dashboard-slides')).data.data
   slide.value = slides.value.length ? slides.value[0].id : null
 })
 const slides = ref([])
-const slide = ref(null);
+const slide = ref(null)
 const modules = ref([
   {
-    label: "Candidatos y Evaluaciones",
-    color: "#EE8B0080",
-    icon: "candidatos",
-    path: "/candidatos",
+    label: 'Candidatos y Evaluaciones',
+    color: '#EE8B0080',
+    icon: 'candidatos',
+    path: '/candidatos'
   },
   {
-    label: "Admisiones y Beneficiarios",
-    color: "#DD004A80",
-    icon: "beneficiarios",
-    path: "/beneficiarios",
+    label: 'Admisiones y Beneficiarios',
+    color: '#DD004A80',
+    icon: 'beneficiarios',
+    path: '/beneficiarios'
   },
   {
-    label: "Tesoreria",
-    color: "#8DAF1280",
-    icon: "rectangle",
-    path: "/",
+    label: 'Tesoreria',
+    color: '#8DAF1280',
+    icon: 'tesoreria',
+    path: '/tesoreria'
   },
   {
-    label: "Padrinos",
-    color: "#00659180",
-    icon: "padrinos",
-    path: "/padrinos",
+    label: 'Padrinos',
+    color: '#00659180',
+    icon: 'padrinos',
+    path: '/padrinos'
   },
   {
-    label: "Administración de Programas",
-    color: "#98007780",
-    icon: "administracion",
-    path: "/",
+    label: 'Administración de Programas',
+    color: '#98007780',
+    icon: 'administracion',
+    path: '/'
   },
   {
-    label: "Capacitaciones",
-    color: "#D4242980",
-    icon: "capacitaciones",
-    path: "/",
+    label: 'Capacitaciones',
+    color: '#D4242980',
+    icon: 'capacitaciones',
+    path: '/'
   },
   {
-    label: "Procuración de Fondos",
-    color: "#36087680",
-    icon: "fondos",
-    path: "/",
+    label: 'Procuración de Fondos',
+    color: '#36087680',
+    icon: 'fondos',
+    path: '/'
   },
   {
-    label: "Personal ENLAC",
-    color: "#A3B8FF",
-    icon: "personal",
-    path: "/",
-  },
-]);
+    label: 'Personal ENLAC',
+    color: '#A3B8FF',
+    icon: 'personal',
+    path: '/'
+  }
+])
 </script>
 
 <style>
@@ -121,7 +121,7 @@ const modules = ref([
   margin-top: -36px;
 }
 
-.q-col-gutter-xl>* {
+.q-col-gutter-xl > * {
   padding-left: 36px;
   padding-top: 36px;
 }

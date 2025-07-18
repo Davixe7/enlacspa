@@ -1,32 +1,31 @@
 <script setup>
-import { ref } from "vue";
-import Notify from "src/utils/notify";
-import { api } from "src/boot/axios";
+import { ref } from 'vue'
+import Notify from 'src/utils/notify'
+import { api } from 'src/boot/axios'
 
 const loading = ref(false)
-const email = ref("");
-const baseUrl = new URL(api.defaults.baseURL).origin;
+const email = ref('')
+const baseUrl = new URL(api.defaults.baseURL).origin
 
 const submitForm = async () => {
-  if (!email.value) return;
+  if (!email.value) return
 
   try {
     loading.value = true
     await api.post(`${baseUrl}/forgot-password`, { email: email.value })
-    Notify.positive("Enlace de recuperación enviado");
-  }
-  catch (error) {
+    Notify.positive('Enlace de recuperación enviado')
+  } catch (error) {
     console.log(error)
   }
   loading.value = false
-};
+}
 </script>
 
 <template>
   <div class="row login-row">
     <div class="col-12 col-md-6 login-brand-column">
       <img
-        src="./../assets/logo_white.png"
+        src="src/assets/logo_white.png"
         alt=""
       />
     </div>
@@ -43,9 +42,7 @@ const submitForm = async () => {
             ></q-icon>
           </router-link>
           <h1 class="title">ENLAC</h1>
-          <div class="subtitle">
-            Olvidé mi contraseña
-          </div>
+          <div class="subtitle">Olvidé mi contraseña</div>
         </q-card-section>
 
         <q-card-section>
@@ -58,7 +55,7 @@ const submitForm = async () => {
               v-model="email"
               label="Correo Electrónico"
               type="email"
-              :rules="[val => !!val || 'El correo es obligatorio']"
+              :rules="[(val) => !!val || 'El correo es obligatorio']"
             />
 
             <div class="flex q-pt-md">
@@ -88,7 +85,7 @@ const submitForm = async () => {
   width: 100%;
 }
 
-.login-form-column>div {
+.login-form-column > div {
   flex: 1 1 auto;
 }
 
@@ -113,7 +110,7 @@ const submitForm = async () => {
     order: 1;
     padding-left: 100px;
 
-    >div {
+    > div {
       max-width: 370px;
     }
   }
@@ -126,6 +123,5 @@ const submitForm = async () => {
   .row .login-brand-column img {
     height: auto;
   }
-
 }
 </style>

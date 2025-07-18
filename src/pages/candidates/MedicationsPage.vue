@@ -1,44 +1,53 @@
 <script setup>
-import { api } from "src/boot/axios";
-import { reactive, ref, watch } from "vue";
+import { api } from 'src/boot/axios'
+import { reactive, ref, watch } from 'vue'
 
 const emits = defineEmits(['update:modelValue'])
 
 const props = defineProps({
+  readonly: { type: Boolean, default: false },
   errors: { type: Object, required: false, default: () => ({}) },
   candidateId: { type: Number, required: false, default: null },
   modelValue: {
     type: Array,
     default: () => [],
     required: true
-  },
-});
+  }
+})
 
 const loading = ref(false)
-const localMedications = ref([...props.modelValue]);
+const localMedications = ref([...props.modelValue])
 
-watch(() => props.modelValue, (newValue) => {
-  localMedications.value = newValue
-}, { deep: true })
+watch(
+  () => props.modelValue,
+  (newValue) => {
+    localMedications.value = newValue
+  },
+  { deep: true }
+)
 
-watch(() => localMedications.value, (newValue) => {
-  emits('update:modelValue', newValue)
-}, { deep: true })
+watch(
+  () => localMedications.value,
+  (newValue) => {
+    emits('update:modelValue', newValue)
+  },
+  { deep: true }
+)
 
 const medication = reactive({
-  name: "",
-  dose: "",
-  frequency: "",
-  duration: "",
-});
+  name: '',
+  dose: '',
+  frequency: '',
+  duration: ''
+})
 
 function addMedication() {
-  medication.name = "";
-  medication.dose = "";
-  medication.frequency = "";
-  medication.duration = "";
-  medication.observations = "";
-  localMedications.value.push({ ...medication });
+  medication.name = ''
+  medication.dose = ''
+  medication.frequency = ''
+  medication.duration = ''
+  medication.observations = ''
+  localMedications.value.push({ ...medication })
 }
 
 async function saveMedication(med) {
@@ -62,7 +71,7 @@ async function deleteMedication(med) {
 
   try {
     loading.value = true
-    await api.post(`medications/${med.id}`, { '_method': 'DELETE' })
+    await api.post(`medications/${med.id}`, { _method: 'DELETE' })
     localMedications.value.splice(localMedications.value.indexOf(med), 1)
   } catch (error) {
     console.log(error)
@@ -72,37 +81,36 @@ async function deleteMedication(med) {
 
 const columns = ref([
   {
-    name: "name",
-    field: "name",
-    label: "Nombre del medication",
-    align: "left",
+    name: 'name',
+    field: 'name',
+    label: 'Nombre del medication',
+    align: 'left'
   },
-  { name: "dosis", field: "dose", label: "Dosis", align: "left" },
+  { name: 'dosis', field: 'dose', label: 'Dosis', align: 'left' },
   {
-    name: "frecuencia",
-    field: "frequency",
-    label: "Frecuencia",
-    align: "left",
-  },
-  {
-    name: "tiempo",
-    field: "duration",
-    label: "Tiempo de tomarlo",
-    align: "left",
+    name: 'frecuencia',
+    field: 'frequency',
+    label: 'Frecuencia',
+    align: 'left'
   },
   {
-    name: "observaciones",
-    field: () =>
-      "Lörem ipsum orade kövis då antivaxxare. Sanys infrafede de stenosamma plagen. ",
-    label: "Observaciones",
-    align: "left",
+    name: 'tiempo',
+    field: 'duration',
+    label: 'Tiempo de tomarlo',
+    align: 'left'
   },
   {
-    name: "actions",
-    label: "Acciones",
-    align: "right",
+    name: 'observaciones',
+    field: () => 'Lörem ipsum orade kövis då antivaxxare. Sanys infrafede de stenosamma plagen. ',
+    label: 'Observaciones',
+    align: 'left'
   },
-]);
+  {
+    name: 'actions',
+    label: 'Acciones',
+    align: 'right'
+  }
+])
 </script>
 
 <template>
@@ -185,6 +193,7 @@ const columns = ref([
 
     <div class="flex justify-end">
       <q-btn
+        :disable="props.readonly"
         color="primary"
         icon="add"
         @click="addMedication"

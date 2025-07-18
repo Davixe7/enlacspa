@@ -1,20 +1,20 @@
 <script setup>
-import { computed, nextTick, onMounted, ref } from "vue";
-import { api } from "src/boot/axios";
-import { DateTime } from "luxon";
-import ContactsPage from "./ContactsPage.vue";
-import MedicationsPage from "./MedicationsPage.vue";
-import Notify from "src/utils/notify";
-import { scrollToFirstError } from "src/utils/focusError";
-import { useRouter } from "vue-router";
-
+import { computed, nextTick, onMounted, ref } from 'vue'
+import { api } from 'src/boot/axios'
+import { DateTime } from 'luxon'
+import ContactsPage from './ContactsPage.vue'
+import MedicationsPage from './MedicationsPage.vue'
+import Notify from 'src/utils/notify'
+import { scrollToFirstError } from 'src/utils/focusError'
+import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const props = defineProps({
-  'candidateId': { type: String, },
-  'notifications': { type: Boolean, default: true },
-  'evaluations': { type: Boolean, default: true },
-  'redirectTo': { type: String, default: '/candidatos' }
+  readonly: { type: Boolean, default: false },
+  candidateId: { type: String },
+  notifications: { type: Boolean, default: true },
+  evaluations: { type: Boolean, default: true },
+  redirectTo: { type: String, default: '/candidatos' }
 })
 
 onMounted(async () => {
@@ -22,8 +22,12 @@ onMounted(async () => {
   if (props.candidateId) {
     candidate.value = (await api.get(`candidates/${props.candidateId}`)).data.data
     medications.value = candidate.value.medications
-    evaluation_schedule.value = candidate.value.evaluation_schedule ? candidate.value.evaluation_schedule : evaluation_schedule.value
-    evaluation_schedules.value = candidate.value.evaluation_schedules ? candidate.value.evaluation_schedules : []
+    evaluation_schedule.value = candidate.value.evaluation_schedule
+      ? candidate.value.evaluation_schedule
+      : evaluation_schedule.value
+    evaluation_schedules.value = candidate.value.evaluation_schedules
+      ? candidate.value.evaluation_schedules
+      : []
   }
   let datetime = DateTime.fromFormat(evaluation_schedule.value.date, 'yyyy-MM-dd HH:mm:ss')
   evaluationDate.value = datetime.toFormat('dd/MM/yyyy')
@@ -31,7 +35,15 @@ onMounted(async () => {
 })
 
 function loadData() {
-  let foreignColumns = ['first_name', 'middle_name', 'last_name', 'birth_date', 'info_channel', 'diagnosis', 'sheet'];
+  let foreignColumns = [
+    'first_name',
+    'middle_name',
+    'last_name',
+    'birth_date',
+    'info_channel',
+    'diagnosis',
+    'sheet'
+  ]
 
   let formdata = new FormData()
 
@@ -39,33 +51,36 @@ function loadData() {
     formdata.append('_method', 'PUT')
   }
 
-  Object.keys(candidate.value).forEach(attr => {
+  Object.keys(candidate.value).forEach((attr) => {
     if (foreignColumns.includes(attr)) {
       formdata.append(`candidate[${attr}]`, candidate.value[attr])
     }
   })
 
   evaluation_schedule.value.date = fulldatetime.value
-  Object.keys(evaluation_schedule.value).forEach(attr => {
-    let value = evaluation_schedule.value[attr] === null ? '' : evaluation_schedule.value[attr];
+  Object.keys(evaluation_schedule.value).forEach((attr) => {
+    let value = evaluation_schedule.value[attr] === null ? '' : evaluation_schedule.value[attr]
     formdata.append(`evaluation_schedule[${attr}]`, value)
   })
 
   contacts.value.forEach((contact, i) => {
-    Object.keys(contact).forEach(contactAttr => {
-      formdata.append(`contacts[${i}][${contactAttr}]`, contacts.value[i][contactAttr] ? contacts.value[i][contactAttr] : '')
+    Object.keys(contact).forEach((contactAttr) => {
+      formdata.append(
+        `contacts[${i}][${contactAttr}]`,
+        contacts.value[i][contactAttr] ? contacts.value[i][contactAttr] : ''
+      )
     })
   })
 
   medications.value.forEach((med, i) => {
-    Object.keys(med).forEach(medKey => {
+    Object.keys(med).forEach((medKey) => {
       formdata.append(`medications[${i}][${medKey}]`, medications.value[i][medKey])
     })
   })
 
   formdata.append('picture', picture.value)
 
-  return formdata;
+  return formdata
 }
 
 async function storeCandidate() {
@@ -76,8 +91,7 @@ async function storeCandidate() {
     await api.post(endpoint, loadData())
     Notify.positive('Guardado con éxito')
     setTimeout(() => router.push(props.redirectTo), 3000)
-  }
-  catch (error) {
+  } catch (error) {
     errors.value = error.status == 422 ? error.formatted : {}
     Notify.negative('Por favor, valide la informacion')
     nextTick(() => scrollToFirstError())
@@ -86,20 +100,41 @@ async function storeCandidate() {
 }
 
 const loading = ref(false)
-const errors = ref({});
+const errors = ref({})
 const evaluationDate = ref(null)
 const evaluationTime = ref(null)
 const fulldatetime = computed(() => {
-  let newDate = DateTime.fromFormat(evaluationDate.value + ' ' + evaluationTime.value, 'dd/MM/yyyy HH:mm')
+  let newDate = DateTime.fromFormat(
+    evaluationDate.value + ' ' + evaluationTime.value,
+    'dd/MM/yyyy HH:mm'
+  )
   return newDate.toFormat('yyyy-MM-dd HH:mm:ss')
 })
 
-const infoChannels = ref(['Publicidad impresa', 'Publicidad en radio', 'Recomendación de escuela', 'Recomendación de personal médico', 'Recomendación de otra persona', 'Otro'])
+const infoChannels = ref([
+  'Publicidad impresa',
+  'Publicidad en radio',
+  'Recomendación de escuela',
+  'Recomendación de personal médico',
+  'Recomendación de otra persona',
+  'Otro'
+])
 const evaluation_schedules = ref([])
 
-const candidate = ref({ id: null, first_name: '', middle_name: '', last_name: '', birth_date: null, age: null, chronological_age: null, diagnosis: '', info_channel: infoChannels.value[infoChannels.value.length - 1], sheet: 1 })
+const candidate = ref({
+  id: null,
+  first_name: '',
+  middle_name: '',
+  last_name: '',
+  birth_date: null,
+  age: null,
+  chronological_age: null,
+  diagnosis: '',
+  info_channel: infoChannels.value[infoChannels.value.length - 1],
+  sheet: 1
+})
 const contacts = ref([])
-const medications = ref([]);
+const medications = ref([])
 const evaluators = ref([])
 const evaluation_schedule = ref({
   evaluator_id: null,
@@ -110,7 +145,9 @@ const picture = ref(null)
 const recepient = ref({ name: '', phone: '' })
 
 const age = computed(() => {
-  if (!candidate.value.birth_date) { return null }
+  if (!candidate.value.birth_date) {
+    return null
+  }
   let birth_date = DateTime.fromISO(candidate.value.birth_date)
   let now = DateTime.now()
   let diff = now.diff(birth_date, ['years', 'months', 'days'])
@@ -121,7 +158,9 @@ const age = computed(() => {
 })
 
 const chronological_age = computed(() => {
-  if (!candidate.value.birth_date) { return null }
+  if (!candidate.value.birth_date) {
+    return null
+  }
   let birth_date = DateTime.fromISO(candidate.value.birth_date)
   let now = DateTime.now()
   let diff = now.diff(birth_date, 'months')
@@ -199,8 +238,9 @@ const chronological_age = computed(() => {
     </div>
 
     <ContactsPage
+      :readonly="props.readonly"
       :candidateId="candidateId"
-      @update:modelValue="newContacts => contacts = [...newContacts]"
+      @update:modelValue="(newContacts) => (contacts = [...newContacts])"
       :errors="errors"
     ></ContactsPage>
 
@@ -236,6 +276,7 @@ const chronological_age = computed(() => {
     </div>
 
     <MedicationsPage
+      :readonly="props.readonly"
       v-model="medications"
       :candidateId="candidate.id"
       :errors="errors"
@@ -341,8 +382,8 @@ const chronological_age = computed(() => {
           v-for="schedule in evaluation_schedules"
           :key="schedule.id"
         >
-          <span style="font-family: monospace; margin-right: 1rem;">{{ schedule.date }}</span>
-          <span style="font-family: monospace;">{{ schedule.evaluator.name }}</span>
+          <span style="font-family: monospace; margin-right: 1rem">{{ schedule.date }}</span>
+          <span style="font-family: monospace">{{ schedule.evaluator.name }}</span>
         </li>
       </ul>
     </div>
@@ -372,7 +413,8 @@ const chronological_age = computed(() => {
         <q-btn
           style="width: 100px; height: 48px; align-self: flex-end"
           color="primary"
-        >Enviar</q-btn>
+          >Enviar</q-btn
+        >
       </div>
 
       <div class="subtitle q-my-md">Envío de Encuesta de Satisfacción</div>
@@ -395,7 +437,8 @@ const chronological_age = computed(() => {
         <q-btn
           style="width: 100px; height: 48px; align-self: flex-end"
           color="primary"
-        >Enviar</q-btn>
+          >Enviar</q-btn
+        >
       </div>
     </div>
 
@@ -428,6 +471,7 @@ const chronological_age = computed(() => {
 
     <div class="flex justify-end">
       <q-btn
+        :disable="props.readonly"
         :loading="loading"
         color="primary"
         @click="storeCandidate"

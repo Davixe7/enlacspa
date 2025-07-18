@@ -1,8 +1,8 @@
 <script setup>
-import Notify from 'src/utils/notify';;
-import { api } from 'src/boot/axios';
-import { computed, onMounted, ref } from 'vue';
-import _ from 'lodash';
+import Notify from 'src/utils/notify'
+import { api } from 'src/boot/axios'
+import { computed, onMounted, ref } from 'vue'
+import _ from 'lodash'
 
 const role = ref({ name: '', label: '', id: null })
 const loading = ref(false)
@@ -10,33 +10,41 @@ const dialog = ref(false)
 const rows = ref([])
 const columns = ref([
   {
-    field: 'label', label: 'Nombre del puesto', sortable: true, align: 'left'
+    field: 'label',
+    label: 'Nombre del puesto',
+    sortable: true,
+    align: 'left'
   },
   {
-    name: 'actions', label: 'Acciones', sortable: false, align: 'right'
-  },
+    name: 'actions',
+    label: 'Acciones',
+    sortable: false,
+    align: 'right'
+  }
 ])
 
-const slugName = computed(() => _.kebabCase(role.value.label).replace(/-/g, "_"))
+const slugName = computed(() => _.kebabCase(role.value.label).replace(/-/g, '_'))
 
 async function save() {
   loading.value = true
   let route = role.value.id ? `roles/${role.value.id}` : 'roles'
-  let data = role.value.id ? { name: slugName.value, label: role.value.label, _method: 'PUT' } : { name: slugName.value, label: role.value.label }
+  let data = role.value.id
+    ? { name: slugName.value, label: role.value.label, _method: 'PUT' }
+    : { name: slugName.value, label: role.value.label }
   let actionLabel = role.value.id ? 'actualizado' : 'creado'
 
   try {
     let newRole = (await api.post(route, data)).data.data
-    console.log(newRole);
+    console.log(newRole)
 
-    (role.value.id)
+    role.value.id
       ? rows.value.splice(rows.value.indexOf(role.value), 1, newRole)
       : rows.value.push(newRole)
 
     dialog.value = false
     Notify.positive(`Puesto ${actionLabel} exitosamente`)
   } catch (error) {
-    console.log(error);
+    console.log(error)
     Notify.negative(`No se pudo guardar`)
   }
   loading.value = false
@@ -50,15 +58,19 @@ onMounted(async () => {
 <template>
   <q-page>
     <div class="flex items-center q-mb-lg">
-      <h1 class="page-title q-mb-0">
-        Puestos
-      </h1>
+      <h1 class="page-title q-mb-0">Puestos</h1>
       <q-btn
-        @click="() => { role = { name: '' }; dialog = true }"
+        @click="
+          () => {
+            role = { name: '' }
+            dialog = true
+          }
+        "
         color="primary"
         icon="add"
         class="q-ml-auto"
-      >Agregar Puesto</q-btn>
+        >Agregar Puesto</q-btn
+      >
     </div>
 
     <q-table
@@ -70,10 +82,16 @@ onMounted(async () => {
       hide-bottom
     >
       <template v-slot:body-cell-actions="props">
-        <q-td class="justify-end text-right">
+        <q-td class="q-table__actions">
           <q-btn
-            @click="() => { role = props.row; dialog = true }"
-            icon="edit"
+            @click="
+              () => {
+                role = props.row
+                dialog = true
+              }
+            "
+            dense
+            icon="sym_o_edit"
             flat
             round
           ></q-btn>
@@ -83,7 +101,7 @@ onMounted(async () => {
   </q-page>
 
   <q-dialog v-model="dialog">
-    <q-card style="width: 420px;">
+    <q-card style="width: 420px">
       <q-form @submit.prevent="save">
         <q-card-section>
           <div class="q-page-titlte">
@@ -105,7 +123,8 @@ onMounted(async () => {
               type="submit"
               color="primary"
               :loading="loading"
-            >Guardar</q-btn>
+              >Guardar</q-btn
+            >
           </q-card-section>
         </q-card-section>
       </q-form>

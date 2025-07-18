@@ -1,14 +1,24 @@
 <script setup>
-  import { useCandidateStore } from 'src/stores/candidate-store'
-  import { onMounted } from 'vue'
+import { useCandidateStore } from 'src/stores/candidate-store'
+import { onMounted } from 'vue'
 
-  const props = defineProps(['candidateId'])
-  const candidateStore = useCandidateStore()
+const props = defineProps(['candidateId'])
+const candidateStore = useCandidateStore()
 
-  onMounted(async () => {
-    candidateStore.id = props.candidateId
-    candidateStore.fetchCandidate()
-  })
+const relationships = {
+  abuelo: 'Abuelo(a)',
+  hermano: 'Hermano(a)',
+  hermanastro: 'Hermanastro(a)',
+  madre_padre: 'Madre/Padre',
+  padrastro_madrastra: 'Padrastro/Madrastra',
+  primo: 'Primo(a)',
+  tio: 'Tío(a)'
+}
+
+onMounted(async () => {
+  candidateStore.id = props.candidateId
+  candidateStore.fetchCandidate()
+})
 </script>
 
 <template>
@@ -36,7 +46,7 @@
 
         <div class="form-group">
           <div class="form-label">Folio</div>
-          <div class="form-value">{{ candidateStore.sheet }}</div>
+          <div class="form-value">{{ candidateStore.id }}</div>
         </div>
       </div>
 
@@ -58,7 +68,7 @@
             style="text-transform: capitalize"
             v-if="candidateStore.contact"
           >
-            {{ candidateStore.contact.relationship }}
+            {{ relationships[candidateStore.contact.relationship.toLowerCase()] }}
           </div>
         </div>
 

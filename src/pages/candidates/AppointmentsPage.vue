@@ -3,7 +3,10 @@ import { api } from 'src/boot/axios'
 import { computed, onMounted, ref } from 'vue'
 import AppointmentForm from 'src/components/AppointmentForm.vue'
 
-const props = defineProps(['candidateId'])
+const props = defineProps({
+  candidateId: { type: Number, required: true },
+  readonly: { type: Boolean, default: false }
+})
 const candidate = ref()
 
 onMounted(async () => {
@@ -11,11 +14,28 @@ onMounted(async () => {
   appointments.value = (await api.get(`appointments/?candidate_id=${props.candidateId}`)).data.data
 })
 
-const appointmentTypes = ref(['Evaluacion', 'Médico', 'Nutrición', 'Psicología', 'Comunicación', 'Programa Escucha'])
+const appointmentTypes = ref([
+  'Evaluacion',
+  'Médico',
+  'Nutrición',
+  'Psicología',
+  'Comunicación',
+  'Programa Escucha'
+])
 
 const columns = ref([
-  { name: 'type', label: 'Tipo de cita', field: (row) => appointmentTypes.value[row.type_id], align: 'left' },
-  { name: 'evaluator.name', label: 'Persona', field: (row) => row.evaluator.full_name, align: 'left' },
+  {
+    name: 'type',
+    label: 'Tipo de cita',
+    field: (row) => appointmentTypes.value[row.type_id],
+    align: 'left'
+  },
+  {
+    name: 'evaluator.name',
+    label: 'Persona',
+    field: (row) => row.evaluator.full_name,
+    align: 'left'
+  },
   { name: 'date', label: 'Fecha', field: (row) => row.frontendDate, align: 'left' },
   { name: 'time', label: 'Horario', field: (row) => row.frontendTime, align: 'left' }
 ])
@@ -47,6 +67,7 @@ function updateAppointments(appointment) {
       Registro de citas
     </h1>
     <q-btn
+      :disable="props.readonly"
       @click="dialog = true"
       class="q-ml-auto"
       color="primary"
@@ -76,6 +97,7 @@ function updateAppointments(appointment) {
     <AppointmentForm
       :candidates="[candidate]"
       @save="updateAppointments"
+      @close="dialog = false"
     />
   </q-dialog>
 </template>

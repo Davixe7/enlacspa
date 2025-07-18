@@ -4,7 +4,10 @@ import { api } from 'src/boot/axios'
 import SponsorPicker from 'pages/beneficiaries/SponsorPicker.vue'
 
 const dialog = ref(false)
-const props = defineProps(['candidateId'])
+const props = defineProps({
+  candidateId: { type: String, required: false },
+  readonly: { type: Boolean, default: false }
+})
 const paymentConfigs = ref([])
 const except = computed(() => paymentConfigs.value.map((item) => item.sponsor.id))
 
@@ -20,54 +23,52 @@ onMounted(async () => {
     v-model="dialog"
     @close="dialog = false"
   />
-  <q-markup-table
+  <q-card
     bordered
-    style="height: 100%"
+    style="display: flex; flex-flow: column nowrap; height: 100%"
   >
-    <tbody>
-      <tr>
-        <td colspan="2">
-          <div class="page-subtitle q-my-none">Padrinos</div>
-        </td>
-      </tr>
-      <tr
-        v-for="paymentConfig in paymentConfigs"
-        :key="paymentConfig.id"
+    <q-card-section>
+      <div class="page-subtitle q-my-none">Padrinos</div>
+    </q-card-section>
+    <q-markup-table>
+      <tbody>
+        <tr
+          v-for="paymentConfig in paymentConfigs"
+          :key="paymentConfig.id"
+        >
+          <td>
+            <div class="text-bold">{{ paymentConfig.sponsor.name }}</div>
+            <div>${{ paymentConfig.amount }}</div>
+          </td>
+          <td class="text-right">
+            <router-link
+              class="text-primary"
+              style="font-size: 0.75rem"
+              :to="`padrinos/${paymentConfig.sponsor_id}`"
+              >Editar
+            </router-link>
+          </td>
+        </tr>
+      </tbody>
+    </q-markup-table>
+    <q-card-section class="flex justify-end q-mt-auto">
+      <q-btn
+        :disable="props.readonly"
+        flat
+        color="primary"
+        icon="sym_o_add"
+        @click="dialog = true"
+        >Asociar padrino</q-btn
       >
-        <td>
-          <div class="text-bold">{{ paymentConfig.sponsor.name }}</div>
-          <div>${{ paymentConfig.amount }}</div>
-        </td>
-        <td class="text-right">
-          <router-link
-            class="text-primary"
-            style="font-size: 0.75rem"
-            :to="`padrinos/${paymentConfig.sponsor_id}`"
-            >Editar
-          </router-link>
-        </td>
-      </tr>
-      <tr>
-        <td colspan="2">
-          <div class="flex justify-end">
-            <q-btn
-              flat
-              color="primary"
-              icon="sym_o_add"
-              @click="dialog = true"
-              >Asociar padrino</q-btn
-            >
-            <q-btn
-              unelevated
-              class="q-ml-md"
-              color="primary"
-              icon="sym_o_add"
-              to="registrar-padrino"
-              >Registrar nuevo</q-btn
-            >
-          </div>
-        </td>
-      </tr>
-    </tbody>
-  </q-markup-table>
+      <q-btn
+        :disable="props.readonly"
+        unelevated
+        class="q-ml-md"
+        color="primary"
+        icon="sym_o_add"
+        to="registrar-padrino"
+        >Registrar nuevo</q-btn
+      >
+    </q-card-section>
+  </q-card>
 </template>

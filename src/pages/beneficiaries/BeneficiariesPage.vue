@@ -1,60 +1,79 @@
 <script setup>
-import { onMounted, ref } from "vue";
-import { api } from "src/boot/axios";
-import { formatDate } from "src/utils/formatDate";
+import { onMounted, ref } from 'vue'
+import { api } from 'src/boot/axios'
+import { formatDate } from 'src/utils/formatDate'
+import { useAuthStore } from 'src/stores/user-store'
 
-const loading = ref(false);
+const authStore = useAuthStore()
+const loading = ref(false)
 
 onMounted(async () => {
-  loading.value = true;
-  rows.value = (await api.get("beneficiaries")).data.data;
-  loading.value = false;
-});
+  loading.value = true
+  rows.value = (await api.get('beneficiaries')).data.data
+  loading.value = false
+})
 
-const rows = ref([]);
+const rows = ref([])
 const columns = ref([
   {
-    name: "name",
-    label: "Nombre del Beneficiario",
-    field: "name",
-    align: "left",
-    sortable: true,
+    name: 'name',
+    label: 'Nombre del Beneficiario',
+    field: 'name',
+    align: 'left',
+    sortable: true
   },
   {
-    name: "sheet",
-    label: "Folio",
-    field: "sheet",
-    align: "left",
-    sortable: true,
+    name: 'sheet',
+    label: 'Folio',
+    field: 'id',
+    align: 'left',
+    sortable: true
   },
   {
-    name: "status",
-    label: "Estatus",
-    field: "status",
-    align: "left",
-    sortable: true,
+    name: 'entry_status',
+    label: 'Estatus',
+    field: 'entry_status',
+    align: 'left',
+    sortable: true
   },
   {
-    name: "onboard_at",
-    label: "Fecha de ingreso",
-    field: (row) => (row.onboard_at ? formatDate(row.onboard_at) : "Pendiente"),
-    align: "left",
-    sortable: true,
+    name: 'entry_date',
+    label: 'Fecha de ingreso',
+    field: (row) => (row.onboard_at ? formatDate(row.entry_date) : '--'),
+    align: 'left',
+    sortable: true
   },
   {
-    name: "program_name",
-    label: "Programa",
-    field: "program_name",
-    align: "left",
-    sortable: true,
+    name: 'program_name',
+    label: 'Programa',
+    field: 'program_name',
+    align: 'left',
+    sortable: true
   },
   {
-    name: "actions",
-    label: "Acciones",
-    field: "actions",
-    align: "right",
-  },
-]);
+    name: 'actions',
+    label: 'Acciones',
+    field: 'actions',
+    align: 'right'
+  }
+])
+
+const entryStatuses = [
+  { value: 'pendiente_ingresar', label: 'Pendiente de ingresar' },
+  { value: 'listo_ingresar', label: 'Listo para ingresar' },
+  { value: 'programar_ingreso', label: 'Programar ingreso' },
+  { value: 'activo', label: 'Activo' },
+  { value: 'permiso_temporal', label: 'Permiso temporal' },
+  { value: 'prueba_vida', label: 'Prueba de vida' },
+  { value: 'inactivo', label: 'Inactivo' }
+]
+
+const actions = ref([
+  { disable: false, icon: 'visibility', route: 'perfil', label: 'Perfil' },
+  { disable: !authStore.can('kardexes.update'), icon: 'folder', route: 'kardex', label: 'Kardex' },
+  { disable: false, icon: 'calendar_month', route: 'citas', label: 'Citas' },
+  { disable: false, icon: 'attach_money', route: 'cuotas', label: 'Control de Cuotas' }
+])
 </script>
 
 <template>
@@ -80,39 +99,38 @@ const columns = ref([
         </div>
       </div>
     </template>
+    <template v-slot:body-cell-entry_status="props">
+      <q-td>
+        <q-select
+          dense
+          outlined
+          hide-bottom-space
+          :options="entryStatuses"
+          v-model="props.row.entry_status"
+          emit-value
+          map-options
+        />
+      </q-td>
+    </template>
     <template v-slot:body-cell-actions="props">
       <q-td class="text-right q-table__actions q-py-xs">
         <q-btn
+          v-for="action in actions"
+          :key="action.icon"
+          :disable="action.disable"
           round
           unelevated
           dense
-          icon="sym_o_visibility"
-          :to="`beneficiarios/${props.row.id}/perfil`"
-        />
-
-        <q-btn
-          round
-          unelevated
-          dense
-          icon="sym_o_folder"
-          :to="`beneficiarios/${props.row.id}/kardex`"
-        />
-
-        <q-btn
-          round
-          unelevated
-          dense
-          icon="sym_o_calendar_month"
-          :to="`beneficiarios/${props.row.id}/citas`"
-        />
-
-        <q-btn
-          round
-          unelevated
-          dense
-          icon="sym_o_attach_money"
-          :to="`beneficiarios/${props.row.id}/cuotas`"
-        />
+          :icon="`sym_o_${action.icon}`"
+          :to="`beneficiarios/${props.row.id}/${action.route}`"
+          ><q-tooltip
+            :offset="[0, 0]"
+            anchor="top middle"
+            self="bottom middle"
+          >
+            {{ action.label }}
+          </q-tooltip>
+        </q-btn>
       </q-td>
     </template>
   </q-table>

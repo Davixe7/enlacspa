@@ -11,6 +11,7 @@ const errors = ref({})
 const loading = ref(false)
 
 const template = {
+  type: 'sponsor',
   sponsor_id: props.sponsorId ? Number(props.sponsorId) : null,
   candidate_id: props.candidateId ? Number(props.candidateId) : null,
   amount: 0,
@@ -48,6 +49,12 @@ async function saveData() {
     let data = paymentConfig.value.id
       ? { ...paymentConfig.value, _method: 'PUT' }
       : { ...paymentConfig.value }
+
+    if (!paymentConfig.value.wants_deductible_receipt) {
+      alert('Doesnt want receipt')
+      delete data.receipt
+    }
+
     await api.post(route, data)
     Notify.positive('Guardado con éxito')
     emits('save')
@@ -235,7 +242,10 @@ onMounted(async () => {
 
         <div v-if="paymentConfig.wants_deductible_receipt">
           <div class="form-section-label q-mb-none">Recibo deducible</div>
-          <DeductibleReceiptForm v-model="paymentConfig.receipt" />
+          <DeductibleReceiptForm
+            v-model="paymentConfig.receipt"
+            :errors="errors"
+          />
         </div>
 
         <div class="flex justify-end">

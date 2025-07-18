@@ -1,3 +1,5 @@
+import { useAuthStore } from 'src/stores/user-store'
+
 export default [
   {
     path: '/beneficiarios',
@@ -18,7 +20,8 @@ export default [
           candidateId: route.params.candidateId,
           notifications: false,
           evaluations: false,
-          redirectTo: '/beneficiarios'
+          redirectTo: '/beneficiarios',
+          readonly: !useAuthStore().can('beneficiaries.update')
         })
       },
       {
@@ -28,7 +31,8 @@ export default [
         props: true
       },
       {
-        path: ':candidateId/configs',
+        name: 'beneficiary.paymentConfig.control',
+        path: ':candidateId/control-de-cuotas',
         meta: { label: 'Gestionar pagos' },
         component: () => import('src/pages/beneficiaries/PaymentConfigControl.vue'),
         props: true
@@ -55,7 +59,10 @@ export default [
         path: ':candidateId/citas',
         meta: { label: 'Citas' },
         component: () => import('src/pages/candidates/AppointmentsPage.vue'),
-        props: true
+        props: (route) => ({
+          candidateId: route.params.candidateId,
+          readonly: !useAuthStore().can('appointments.update')
+        })
       }
     ]
   }

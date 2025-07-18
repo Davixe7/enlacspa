@@ -1,11 +1,11 @@
 <script setup>
-import { nextTick, ref } from 'vue';
-import CandidateProfile from './../components/CandidateProfile.vue'
-import { onMounted } from 'vue';
-import { api } from 'src/boot/axios';
-import Notify from 'src/utils/notify';
-import { scrollToFirstError } from 'src/utils/focusError';
-import { useCandidateStore } from 'src/stores/candidate-store';
+import { nextTick, ref } from 'vue'
+import CandidateProfile from 'components/CandidateProfile.vue'
+import { onMounted } from 'vue'
+import { api } from 'src/boot/axios'
+import Notify from 'src/utils/notify'
+import { scrollToFirstError } from 'src/utils/focusError'
+import { useCandidateStore } from 'src/stores/candidate-store'
 
 const props = defineProps(['candidateId'])
 const store = useCandidateStore()
@@ -35,8 +35,11 @@ const interview = ref({
 })
 
 async function fetchInterview() {
-  try { interview.value = (await api.get(`/interviews/?candidate_id=${props.candidateId}`)).data.data }
-  catch (error) { if (error.status == 404) return }
+  try {
+    interview.value = (await api.get(`/interviews/?candidate_id=${props.candidateId}`)).data.data
+  } catch (error) {
+    if (error.status == 404) return
+  }
 }
 
 async function fetchQuestions() {
@@ -47,13 +50,14 @@ async function storeInterview() {
   loading.value = true
   let route = interview.value.id ? `interviews/${interview.value.id}` : 'interviews'
   let data = { ...interview.value, interviewee: store.interviewee }
-  if (interview.value.id) { data._method = 'PUT' }
+  if (interview.value.id) {
+    data._method = 'PUT'
+  }
 
   try {
     interview.value = (await api.post(route, data)).data.data
     Notify.positive('Guardado con éxito')
-  }
-  catch (error) {
+  } catch (error) {
     Notify.negative('Error. Revise la informacion')
     errors.value = error.formatted ? error.formatted : errors.value.formatted
     nextTick(() => scrollToFirstError())
@@ -62,7 +66,7 @@ async function storeInterview() {
 }
 
 async function signInterview() {
-  interview.value.signed_at = new Date();
+  interview.value.signed_at = new Date()
   await storeInterview()
 }
 </script>
@@ -97,9 +101,7 @@ async function signInterview() {
                 :val="question.id"
               ></q-checkbox>
             </q-item-section>
-            <q-item-section>
-              {{ n + 1 }} - {{ question.question_text }}
-            </q-item-section>
+            <q-item-section> {{ n + 1 }} - {{ question.question_text }} </q-item-section>
           </q-item>
         </q-list>
       </div>
@@ -110,29 +112,25 @@ async function signInterview() {
           :disable="Boolean(interview.signed_at)"
           :class="{ 'q-field--error': !!errors.content }"
           :error-message="errors.content"
-          style="height: 100%;"
+          style="height: 100%"
         ></q-editor>
       </div>
     </div>
 
-    <div class="label-alt">
-      29 - Que calificacion APGAR tuvo al nacer? Seleccione una opción
-    </div>
+    <div class="label-alt">29 - Que calificacion APGAR tuvo al nacer? Seleccione una opción</div>
     <div class="flex q-mb-xl">
       <div
         v-for="n in 10"
         :key="n"
         class="btn-rank"
         :class="{ 'btn-rank--active': interview.apgar_rank == n }"
-        @click="!interview.signed_at ? interview.apgar_rank = n : ''"
+        @click="!interview.signed_at ? (interview.apgar_rank = n) : ''"
       >
         {{ n }}
       </div>
     </div>
 
-    <div class="label-alt">
-      30 - ¿Controla esfínteres?
-    </div>
+    <div class="label-alt">30 - ¿Controla esfínteres?</div>
     <div class="q-mb-xl">
       <q-radio
         v-model="interview.sphincters_control"
@@ -148,9 +146,7 @@ async function signInterview() {
       ></q-radio>
     </div>
 
-    <div class="label-alt">
-      31 - Observaciones adicionales por parte del evaluador:
-    </div>
+    <div class="label-alt">31 - Observaciones adicionales por parte del evaluador:</div>
     <div class="q-mb-xl">
       <q-input
         outlined
@@ -170,7 +166,7 @@ async function signInterview() {
           anchor="top right"
           self="bottom end"
           class="bg-black text-white q-py-sm q-px-md"
-          style="font-size: 14px; width: 154px;"
+          style="font-size: 14px; width: 154px"
         >
           Al guardarlo podrá seguir editando
         </q-tooltip>
@@ -199,7 +195,7 @@ async function signInterview() {
           anchor="top right"
           self="bottom end"
           class="bg-black text-white q-py-sm q-px-md"
-          style="font-size: 14px; width: 154px;"
+          style="font-size: 14px; width: 154px"
         >
           Al firmar ya no podrá editarlo
         </q-tooltip>
@@ -253,25 +249,25 @@ async function signInterview() {
 }
 
 .q-checkbox__bg {
-  border: 1px solid #4B5563;
+  border: 1px solid #4b5563;
 }
 
 .btn-rank {
-  color: #001F6D;
+  color: #001f6d;
   text-align: center;
   font-size: 25px;
   font-weight: 700;
   padding: 16px;
   border-radius: 8px;
-  background: #E5E7EB;
+  background: #e5e7eb;
   flex: 1 1 auto;
   margin: 0 10px 10px 0;
   cursor: pointer;
 }
 
 .btn-rank--active {
-  background: #001F6D;
-  color: #E5E7EB;
+  background: #001f6d;
+  color: #e5e7eb;
 }
 
 .btn-rank:last-child {
