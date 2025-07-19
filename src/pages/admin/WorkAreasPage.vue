@@ -56,6 +56,11 @@ async function save() {
   loading.value = false
 }
 
+function setWorkArea(row) {
+  workArea.value = row
+  dialog.value = true
+}
+
 onMounted(async () => {
   rows.value = (await api.get('work_areas')).data.data
 })
@@ -66,12 +71,7 @@ onMounted(async () => {
     <div class="flex items-center q-mb-lg">
       <h1 class="page-title q-mb-0">Áreas de Trabajo</h1>
       <q-btn
-        @click="
-          () => {
-            workArea = { name: '', allows_appointments: 0, id: null }
-            dialog = true
-          }
-        "
+        @click="setWorkArea({ name: '', allows_appointments: 0, id: null })"
         color="primary"
         icon="add"
         class="q-ml-auto"
@@ -88,27 +88,24 @@ onMounted(async () => {
       hide-bottom
     >
       <template v-slot:body-cell-actions="props">
-        <q-td class="q-table__actions">
-          <q-btn
-            @click="
-              () => {
-                workArea = props.row
-                dialog = true
-              }
-            "
-            icon="sym_o_edit"
-            dense
-            flat
-            round
-          />
+        <q-td>
+          <div class="q-table__actions">
+            <q-btn
+              @click="setWorkArea(props.row)"
+              icon="sym_o_edit"
+              dense
+              flat
+              round
+            />
 
-          <q-btn
-            @click="() => removeArea(props.rowIndex)"
-            icon="sym_o_delete"
-            dense
-            flat
-            round
-          />
+            <q-btn
+              @click="removeArea(props.rowIndex)"
+              icon="sym_o_delete"
+              dense
+              flat
+              round
+            />
+          </div>
         </q-td>
       </template>
     </q-table>

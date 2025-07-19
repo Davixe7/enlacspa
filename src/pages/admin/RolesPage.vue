@@ -50,6 +50,11 @@ async function save() {
   loading.value = false
 }
 
+function setRole(target) {
+  role.value = target
+  dialog.value = true
+}
+
 onMounted(async () => {
   rows.value = (await api.get('roles')).data.data
 })
@@ -60,12 +65,7 @@ onMounted(async () => {
     <div class="flex items-center q-mb-lg">
       <h1 class="page-title q-mb-0">Puestos</h1>
       <q-btn
-        @click="
-          () => {
-            role = { name: '' }
-            dialog = true
-          }
-        "
+        @click="setRole({ name: '' })"
         color="primary"
         icon="add"
         class="q-ml-auto"
@@ -82,19 +82,16 @@ onMounted(async () => {
       hide-bottom
     >
       <template v-slot:body-cell-actions="props">
-        <q-td class="q-table__actions">
-          <q-btn
-            @click="
-              () => {
-                role = props.row
-                dialog = true
-              }
-            "
-            dense
-            icon="sym_o_edit"
-            flat
-            round
-          ></q-btn>
+        <q-td>
+          <div class="q-table__actions">
+            <q-btn
+              @click="setRole(props.row)"
+              dense
+              icon="sym_o_edit"
+              flat
+              round
+            />
+          </div>
         </q-td>
       </template>
     </q-table>

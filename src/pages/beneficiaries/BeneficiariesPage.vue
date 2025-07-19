@@ -113,24 +113,26 @@ const actions = ref([
       </q-td>
     </template>
     <template v-slot:body-cell-actions="props">
-      <q-td class="text-right q-table__actions q-py-xs">
-        <q-btn
-          v-for="action in actions"
-          :key="action.icon"
-          :disable="action.disable"
-          round
-          unelevated
-          dense
-          :icon="`sym_o_${action.icon}`"
-          :to="`beneficiarios/${props.row.id}/${action.route}`"
-          ><q-tooltip
-            :offset="[0, 0]"
-            anchor="top middle"
-            self="bottom middle"
-          >
-            {{ action.label }}
-          </q-tooltip>
-        </q-btn>
+      <q-td class="text-right q-py-xs">
+        <div q-table__actions>
+          <q-btn
+            v-for="action in actions"
+            :key="action.icon"
+            :disable="action.disable"
+            round
+            unelevated
+            dense
+            :icon="`sym_o_${action.icon}`"
+            :to="`beneficiarios/${props.row.id}/${action.route}`"
+            ><q-tooltip
+              :offset="[0, 0]"
+              anchor="top middle"
+              self="bottom middle"
+            >
+              {{ action.label }}
+            </q-tooltip>
+          </q-btn>
+        </div>
       </q-td>
     </template>
   </q-table>
