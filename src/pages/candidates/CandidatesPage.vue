@@ -46,7 +46,7 @@ const columns = ref([
     name: 'is_candidate',
     label: 'Candidato',
     align: 'left',
-    field: (row) => (row.acceptance_status ? 'Sí' : 'No'),
+    field: (row) => (row.admission_status ? 'Sí' : 'No'),
     sortable: true
   },
   {

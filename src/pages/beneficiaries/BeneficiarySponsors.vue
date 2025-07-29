@@ -25,13 +25,14 @@ onMounted(async () => {
   />
   <q-card
     bordered
+    flat
     style="display: flex; flex-flow: column nowrap; height: 100%"
   >
     <q-card-section>
       <div class="page-subtitle q-my-none">Padrinos</div>
     </q-card-section>
     <q-markup-table>
-      <tbody>
+      <tbody v-if="paymentConfigs.length">
         <tr
           v-for="paymentConfig in paymentConfigs"
           :key="paymentConfig.id"
@@ -50,11 +51,22 @@ onMounted(async () => {
           </td>
         </tr>
       </tbody>
+      <tbody v-else>
+        <tr>
+          <td
+            colspan="2"
+            class="text-center"
+            style="height: 200px"
+          >
+            No hay padrinos asociados para mostrar.
+          </td>
+        </tr>
+      </tbody>
     </q-markup-table>
     <q-card-section class="flex justify-end q-mt-auto">
       <q-btn
         :disable="props.readonly"
-        flat
+        outline
         color="primary"
         icon="sym_o_add"
         @click="dialog = true"

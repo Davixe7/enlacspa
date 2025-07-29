@@ -48,10 +48,12 @@
         </q-btn>
 
         <q-avatar
-          rounded
+          v-if="authStore.data.user"
           size="52px"
+          text-color="white"
+          color="grey"
         >
-          <q-img src="/avatar.png"></q-img>
+          {{ authStore.data.user.name.charAt(0).toUpperCase() }}
         </q-avatar>
 
         <q-btn

@@ -18,8 +18,8 @@ const localCandidate = ref({ ...props.candidate })
 onMounted(async () => {
   programs.value = (await api.get('programs')).data.data
   localCandidate.value = { ...store.$state }
-  localCandidate.value.acceptance_status =
-    localCandidate.value.acceptance_status == null ? 1 : localCandidate.value.acceptance_status
+  localCandidate.value.admission_status =
+    localCandidate.value.admission_status == null ? 1 : localCandidate.value.admission_status
 })
 
 async function updateAcceptance() {
@@ -27,7 +27,7 @@ async function updateAcceptance() {
   loading.value = true
   try {
     let data = {
-      acceptance_status: localCandidate.value.acceptance_status,
+      admission_status: localCandidate.value.admission_status,
       rejection_comment: localCandidate.value.rejection_comment,
       program_id: localCandidate.value.program_id,
       _method: 'PUT'
@@ -56,15 +56,15 @@ async function updateAcceptance() {
         <q-radio
           label="Si"
           :val="1"
-          v-model="localCandidate.acceptance_status"
+          v-model="localCandidate.admission_status"
         ></q-radio>
         <q-radio
           label="No"
           :val="0"
-          v-model="localCandidate.acceptance_status"
+          v-model="localCandidate.admission_status"
         ></q-radio>
       </div>
-      <template v-if="localCandidate.acceptance_status">
+      <template v-if="localCandidate.admission_status">
         <div class="text-weight-bold q-pb-lg">Seleccione las opciones del programa</div>
         <div class="row q-col-gutter-lg">
           <q-radio
