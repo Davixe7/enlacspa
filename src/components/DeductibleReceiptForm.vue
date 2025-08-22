@@ -22,8 +22,7 @@ const fiscalRegimeOptions = [
   { value: 624, label: 'Coordinados' },
   {
     value: 625,
-    label:
-      'Régimen de las Actividades Empresariales con ingresos a través de Plataformas Tecnológicas'
+    label: `Régimen de las Actividades Empresariales con ingresos a través de PlataformasTecnológicas`
   },
   { value: 626, label: 'Régimen Simplificado de Confianza' }
 ]
@@ -200,11 +199,11 @@ const cfdiOptions = [
       :error="!!props.errors['receipt.observations']"
       :error-message="props.errors['receipt.observations']"
     />
-    <q-input
+    <q-file
       outlined
       stack-label
       label="Constancia de situación fiscal"
-      v-model="model.fiscalStatus"
+      v-model="model.fiscalStatusFile"
       hide-bottom-space
       :error="!!props.errors['receipt.fiscalStatus']"
       :error-message="props.errors['receipt.fiscalStatus']"

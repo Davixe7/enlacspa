@@ -83,6 +83,7 @@ async function deleteFile(collectionName) {
       hide-bottom
       :rows="rows[category]"
       :columns="columns"
+      :pagination="{ rowsPerPage: 0 }"
     >
       <template v-slot:body-cell-check="props">
         <q-td style="width: 60px; max-width: 60px">
@@ -103,7 +104,7 @@ async function deleteFile(collectionName) {
       <template v-slot:body-cell-download="props">
         <q-td class="text-right">
           <a
-            v-if="props.row.has_template"
+            v-if="props.row.template"
             :href="props.row.template"
             target="_blank"
           >

@@ -8,10 +8,12 @@ import EvaluationComments from 'src/components/EvaluationComments.vue'
 import RankForm from 'src/components/RankForm.vue'
 import AdmissionForm from 'src/components/AdmissionForm.vue'
 
+const loading = ref(false)
 const store = useCandidateStore()
 const props = defineProps(['candidateId'])
 const brainFunctions = ref([])
 const evaluationFields = ref([])
+const evaluationFieldsB = ref(null)
 
 const rank = ref({})
 const columns = ref([])
@@ -23,10 +25,24 @@ const dialog2 = ref(false)
 onMounted(async () => {
   store.id = props.candidateId
   await store.fetchCandidate()
-  evaluationFields.value = (await api.get('evaluation_fields', { params: { candidate_id: props.candidateId } })).data.data
+  await fetchFields()
   brainFunctions.value = (await api.get('brain_functions')).data.data
   setColumns()
 })
+
+async function fetchFields() {
+  try {
+    loading.value = true
+    let params = { params: { candidate_id: props.candidateId } }
+    let response = (await api.get('evaluation_fields', params)).data.data
+    evaluationFields.value = response['a']
+    evaluationFieldsB.value = response['b']
+  } catch (error) {
+    console.log(error)
+  } finally {
+    loading.value = false
+  }
+}
 
 function setColumns() {
   let cols = [
@@ -54,6 +70,7 @@ function setColumns() {
   })
   columns.value = [...cols]
   rows.value = Object.values(evaluationFields.value)
+  evaluationFieldsB.value = evaluationFieldsB.value ? Object.values(evaluationFieldsB.value) : []
 }
 
 const allRanks = computed(() => {
@@ -82,6 +99,17 @@ function editRank(param) {
 
 function print() {
   window.print()
+}
+
+function btnLabel(cell) {
+  if (cell.row.P <= store.chronological_age) {
+    return cell.value.caracteristic ? cell.value.caracteristic : ''
+  }
+  return 'N/A'
+}
+
+function previousValue(cell) {
+  return evaluationFieldsB.value[cell.rowIndex].ranks[cell.value.brain_function_id]?.caracteristic
 }
 </script>
 
@@ -137,25 +165,16 @@ function print() {
             </ul>
           </template>
           <template v-else>
+            <template v-if="evaluationFieldsB">
+              {{ previousValue(props) }}
+            </template>
             <q-btn
-              v-if="props.row.P <= store.chronological_age"
               flat
               round
-              :label="props.value.caracteristic ? props.value.caracteristic : ''"
+              v-bind="!btnLabel(props) ? { icon: 'edit' } : {}"
+              :label="btnLabel(props)"
               @click="editRank(props.value)"
-            >
-              <q-icon
-                v-if="!props.value.caracteristic"
-                name="edit"
-              ></q-icon>
-            </q-btn>
-            <q-btn
-              v-else
-              flat
-              round
-              @click="editRank(props.value)"
-              label="N/A"
-            ></q-btn>
+            />
           </template>
         </q-td>
       </template>
