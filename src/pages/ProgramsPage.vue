@@ -45,8 +45,9 @@ onMounted(() => {
     <q-btn
       class="q-ml-auto"
       color="primary"
-      label="Nuevo"
       icon="sym_o_add"
+      label="Nuevo"
+      :to="`/beneficiarios/${props.candidateId}/crear-programa`"
     />
   </div>
 

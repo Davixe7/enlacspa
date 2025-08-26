@@ -150,6 +150,7 @@ onMounted(() => {
 
 const adminLinks = ref([
   { label: 'Notificaciones', link: '/notificaciones' },
+  { label: 'Actividades', link: '/actividades' },
   { label: 'Usuarios', link: '/usuarios' },
   { label: 'Areas', link: '/areas-de-trabajo' },
   { label: 'Puestos', link: '/puestos' },

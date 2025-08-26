@@ -5,7 +5,7 @@ import { useCandidateStore } from 'src/stores/candidate-store'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-const props = defineProps(['candidate', 'candidateId'])
+const props = defineProps(['candidate', 'candidateId', 'evaluationId'])
 const emits = defineEmits(['close'])
 
 const store = useCandidateStore()
@@ -13,36 +13,41 @@ const router = useRouter()
 const loading = ref(false)
 const errors = ref({})
 const programs = ref([])
-const localCandidate = ref({ ...props.candidate })
+const localCandidate = ref({ ...props.candidate, sign_evaluation: false })
 
 onMounted(async () => {
   programs.value = (await api.get('programs')).data.data
   localCandidate.value = { ...store.$state }
   localCandidate.value.admission_status =
     localCandidate.value.admission_status == null ? 1 : localCandidate.value.admission_status
+  localCandidate.value.sign_evaluation = false
 })
 
 async function updateAcceptance() {
   errors.value = {}
   loading.value = true
+  let route = `candidates/${props.candidateId}/admission`
   try {
     let data = {
       admission_status: localCandidate.value.admission_status,
       admission_comment: localCandidate.value.admission_comment,
       program_id: localCandidate.value.program_id,
+      evaluation_id: props.evaluationId,
       _method: 'PUT'
     }
-    localCandidate.value = (
-      await api.post(`candidates/${props.candidateId}/admission`, data)
-    ).data.data
+    if (localCandidate.value.sign_evaluation) {
+      data.sign_evaluation = true
+    }
+    localCandidate.value = (await api.post(route, data)).data.data
     Notify.positive('Guardado con exito')
     emits('close')
     setTimeout(() => router.push('/candidatos'), 2500)
   } catch (error) {
     errors.value = error.formatted ? error.formatted : {}
     Notify.negative('Por favor, valide la informacion')
+  } finally {
+    loading.value = false
   }
-  loading.value = false
 }
 </script>
 
@@ -74,7 +79,7 @@ async function updateAcceptance() {
             :label="program.name"
             :val="program.id"
             v-model="localCandidate.program_id"
-          ></q-radio>
+          />
         </div>
       </template>
       <q-input
@@ -85,24 +90,20 @@ async function updateAcceptance() {
         v-model="localCandidate.admission_comment"
         :error="!!errors.admission_comment"
         :error-message="errors.admission_comment"
-      ></q-input>
+      />
     </q-card-section>
-    <q-card-section class="flex justify-end">
-      <q-btn
-        @click="emits('close')"
-        class="q-mr-sm"
-        unelevated
-        outline
-        color="primary"
-        >Cerrar</q-btn
-      >
+    <q-card-section class="flex justify-between">
+      <q-checkbox
+        v-model="localCandidate.sign_evaluation"
+        label="Firmar evaluacion"
+      />
       <q-btn
         :loading="loading"
         @click="updateAcceptance"
         unelevated
         color="primary"
-        >Guardar</q-btn
-      >
+        label="Guardar"
+      />
     </q-card-section>
   </q-card>
 </template>

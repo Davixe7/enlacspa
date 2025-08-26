@@ -119,33 +119,33 @@ async function deleteFile(collectionName) {
             class="flex items-center justify-end q-ml-auto"
             v-if="!media['kardex_' + props.row.slug]"
           >
-            <div v-if="kardex[props.row.slug]">
-              <q-file
-                style="width: 240px"
-                clearable
-                dense
-                outlined
-                placeholder="Adjuntar archivo"
-                v-model="kardex[props.row.slug].file"
-                class="q-mr-sm"
-              >
-                <template v-slot:prepend>
-                  <q-icon name="sym_o_attach_file" />
-                </template>
-              </q-file>
-
-              <q-input
-                v-if="props.row.has_detail"
-                dense
-                outlined
-                v-model="kardex[props.row.slug].detail"
-                class="q-mr-sm"
-              >
-                <template v-slot:prepend>
-                  <q-icon name="sym_o_edit" />
-                </template>
-              </q-input>
-            </div>
+            <q-input
+              v-if="props.row.has_detail"
+              style="width: 240px"
+              clearable
+              dense
+              outlined
+              v-model="kardex[props.row.slug].detail"
+              class="q-mr-sm"
+            >
+              <template v-slot:prepend>
+                <q-icon name="sym_o_edit" />
+              </template>
+            </q-input>
+            <q-file
+              v-else
+              style="width: 240px"
+              clearable
+              dense
+              outlined
+              placeholder="Adjuntar archivo"
+              v-model="kardex[props.row.slug].file"
+              class="q-mr-sm"
+            >
+              <template v-slot:prepend>
+                <q-icon name="sym_o_attach_file" />
+              </template>
+            </q-file>
 
             <q-btn
               style="flex: 0 0"
@@ -159,31 +159,39 @@ async function deleteFile(collectionName) {
             />
           </div>
           <div v-else>
-            <div style="display: flex; flex-flow: column">
-              <div class="flex">
-                <q-btn
-                  style="width: 240px"
-                  color="primary"
-                  icon="sym_o_download"
-                  target="_blank"
-                  class="q-mr-sm"
-                  :href="media['kardex_' + props.row.slug].original_url"
-                  >{{ media['kardex_' + props.row.slug].file_name }}</q-btn
-                >
-                <q-btn
-                  @click="deleteFile(props.row.slug)"
-                  color="negative"
-                  round
-                  dense
-                  icon="sym_o_delete"
-                ></q-btn>
-              </div>
+            <div class="flex items-center justify-end q-ml-auto">
               <q-input
-                readonly
-                outlined
                 v-if="props.row.has_detail"
+                style="width: 240px"
+                clearable
+                dense
+                outlined
+                readonly
                 :model-value="media['kardex_' + props.row.slug].detail"
-              ></q-input>
+                class="q-mr-sm"
+              >
+                <template v-slot:prepend>
+                  <q-icon name="sym_o_edit" />
+                </template>
+              </q-input>
+              <q-btn
+                v-else
+                style="width: 240px"
+                color="primary"
+                icon="sym_o_download"
+                target="_blank"
+                class="q-mr-sm"
+                :href="media['kardex_' + props.row.slug].original_url"
+                :label="media['kardex_' + props.row.slug].file_name"
+              />
+              <q-btn
+                style="flex: 0 0; align-self: center"
+                @click="deleteFile(props.row.slug)"
+                color="negative"
+                round
+                dense
+                icon="sym_o_delete"
+              />
             </div>
           </div>
         </q-td>

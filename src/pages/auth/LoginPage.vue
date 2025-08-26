@@ -5,7 +5,7 @@ import { useAuthStore } from '../../stores/user-store'
 onMounted(() => authStore.csrfCookie())
 
 const authStore = useAuthStore()
-const email = ref('')
+const email = ref('ejemplo@mail.com')
 const password = ref('')
 const remeberme = ref(false)
 const showPassword = ref(false)
@@ -37,7 +37,17 @@ const showPassword = ref(false)
               hide-bottom-space
               :error="!!authStore.errors.email"
               :error-message="authStore.errors.email"
-            ></q-input>
+            >
+              <template v-slot:append="">
+                <q-btn
+                  flat
+                  dense
+                  round
+                  icon="sym_o_alternate_email"
+                  @click="() => (email = email + '@')"
+                />
+              </template>
+            </q-input>
             <q-input
               outlined
               stack-label

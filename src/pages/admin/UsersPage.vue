@@ -1,7 +1,7 @@
 <script setup>
-import Notify from 'src/utils/notify';
-import { api } from 'src/boot/axios';
-import { onMounted, ref } from 'vue';
+import Notify from 'src/utils/notify'
+import { api } from 'src/boot/axios'
+import { onMounted, ref } from 'vue'
 
 const errors = ref({})
 const loading = ref(false)
@@ -15,23 +15,41 @@ const user = ref({})
 const rows = ref([])
 const columns = ref([
   {
-    field: 'full_name', label: 'Nombre', sortable: true, align: 'left'
+    field: 'full_name',
+    label: 'Nombre',
+    sortable: true,
+    align: 'left'
   },
   {
-    field: 'email', label: 'Email', sortable: true, align: 'left'
+    field: 'email',
+    label: 'Email',
+    sortable: true,
+    align: 'left'
   },
   {
-    field: row => row.work_area.name, label: 'Area', sortable: true, align: 'left'
+    field: (row) => row.work_area.name,
+    label: 'Area',
+    sortable: true,
+    align: 'left'
   },
   {
-    field: row => row.role ? row.role.name : '', label: 'Puesto', sortable: true, align: 'left'
+    field: (row) => (row.role ? row.role.name : ''),
+    label: 'Puesto',
+    sortable: true,
+    align: 'left'
   },
   {
-    field: row => row.leader ? row.leader.name : 'Ninguno', label: 'Lider', sortable: true, align: 'left'
+    field: (row) => (row.leader ? row.leader.name : 'Ninguno'),
+    label: 'Lider',
+    sortable: true,
+    align: 'left'
   },
   {
-    name: 'actions', label: 'Acciones', sortable: false, align: 'right'
-  },
+    name: 'actions',
+    label: 'Acciones',
+    sortable: false,
+    align: 'right'
+  }
 ])
 
 async function save() {
@@ -41,9 +59,9 @@ async function save() {
   let data = user.value.id ? { ...user.value, _method: 'PUT' } : { ...user.value }
   let actionLabel = user.value.id ? 'actualizado' : 'creado'
   try {
-    let newUser = (await api.post(route, data)).data.data;
+    let newUser = (await api.post(route, data)).data.data
 
-    (user.value.id)
+    user.value.id
       ? rows.value.splice(rows.value.indexOf(user.value), 1, newUser)
       : rows.value.push(newUser)
 
@@ -67,15 +85,19 @@ onMounted(async () => {
 <template>
   <q-page>
     <div class="flex items-center q-mb-lg">
-      <h1 class="page-title q-mb-0">
-        Usuarios
-      </h1>
+      <h1 class="page-title q-mb-0">Usuarios</h1>
       <q-btn
-        @click="() => { user = { name: '' }; dialog = true }"
+        @click="
+          () => {
+            user = { name: '' }
+            dialog = true
+          }
+        "
         color="primary"
         icon="add"
         class="q-ml-auto"
-      >Agregar usuario</q-btn>
+        >Agregar usuario</q-btn
+      >
     </div>
 
     <q-table
@@ -89,7 +111,13 @@ onMounted(async () => {
       <template v-slot:body-cell-actions="props">
         <q-td class="justify-end text-right">
           <q-btn
-            @click="() => { user = props.row; dialog = true; errors = {} }"
+            @click="
+              () => {
+                user = props.row
+                dialog = true
+                errors = {}
+              }
+            "
             icon="edit"
             flat
             round
@@ -100,7 +128,7 @@ onMounted(async () => {
   </q-page>
 
   <q-dialog v-model="dialog">
-    <q-card style="width: 520px;">
+    <q-card style="width: 520px">
       <q-form @submit.prevent="save">
         <q-card-section>
           <div class="q-page-titlte">
@@ -224,6 +252,15 @@ onMounted(async () => {
             hide-bottom-space
             :error="!!errors.email"
             :error-message="errors.email"
+          >
+            <template v-slot:append="">
+              <q-btn
+                flat
+                dense
+                round
+                icon="sym_o_alternate_email"
+                @click="() => (user.email = user.email + '@')"
+              /> </template
           ></q-input>
 
           <q-input
@@ -294,7 +331,8 @@ onMounted(async () => {
               type="submit"
               color="primary"
               :loading="loading"
-            >Guardar</q-btn>
+              >Guardar</q-btn
+            >
           </q-card-section>
         </q-card-section>
       </q-form>

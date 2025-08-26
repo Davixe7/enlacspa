@@ -123,7 +123,17 @@ async function save() {
         :error="!!localErrors[`email`]"
         :error-message="localErrors[`email`]"
         type="email"
-      ></q-input>
+      >
+        <template v-slot:append="">
+          <q-btn
+            flat
+            dense
+            round
+            icon="sym_o_alternate_email"
+            @click="() => (contact.email = contact.email + '@')"
+          />
+        </template>
+      </q-input>
       <q-input
         outlined
         stack-label

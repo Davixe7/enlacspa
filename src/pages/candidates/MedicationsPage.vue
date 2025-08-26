@@ -1,6 +1,8 @@
 <script setup>
 import { api } from 'src/boot/axios'
 import { reactive, ref, watch } from 'vue'
+import MedicationLogs from './../../components/MedicationLogs.vue'
+import notify from 'src/utils/notify'
 
 const emits = defineEmits(['update:modelValue'])
 
@@ -17,6 +19,7 @@ const props = defineProps({
 
 const loading = ref(false)
 const localMedications = ref([...props.modelValue])
+const logsDialog = ref(false)
 
 watch(
   () => props.modelValue,
@@ -73,10 +76,13 @@ async function saveMedication(med) {
     loading.value = true
     let route = med.id ? `/medications/${med.id}` : 'medications'
     let data = { ...med, _method: med.id ? 'PUT' : 'POST', candidate_id: props.candidateId }
+    let action = med.id ? 'actualizado' : 'guardado'
     let response = (await api.post(route, data)).data.data
     localMedications.value.splice(localMedications.value.indexOf(med), 1, response)
+    notify.positive(`Medicamento ${action} exitosamente`)
   } catch (error) {
     console.log(error)
+    notify.negative(`No se pudo guardar`)
   } finally {
     loading.value = false
   }
@@ -94,8 +100,10 @@ async function deleteMedication(med) {
     localMedications.value.splice(localMedications.value.indexOf(med), 1)
   } catch (error) {
     console.log(error)
+    notify.negative(`No se pudo actualizar`)
+  } finally {
+    loading.value = false
   }
-  loading.value = false
 }
 
 const columns = ref([
@@ -207,25 +215,43 @@ const columns = ref([
             ></q-input>
           </q-td>
           <q-td>
-            <q-btn
-              flat
-              round
-              icon="delete"
-              @click="deleteMedication(props.row)"
-            ></q-btn>
-            <q-btn
-              v-if="candidateId"
-              flat
-              round
-              icon="save"
-              @click="saveMedication(props.row)"
-            ></q-btn>
+            <div class="q-table__actions">
+              <q-btn
+                flat
+                round
+                icon="delete"
+                @click="deleteMedication(props.row)"
+              />
+              <q-btn
+                v-if="candidateId"
+                flat
+                round
+                icon="save"
+                @click="saveMedication(props.row)"
+              />
+            </div>
           </q-td>
         </q-tr>
       </template>
     </q-table>
 
+    <q-dialog v-model="logsDialog">
+      <q-card style="width: 460px">
+        <q-card-section>
+          <div class="page-subtitle">Historial de Medicacion</div>
+        </q-card-section>
+        <MedicationLogs :candidateId="props.candidateId" />
+      </q-card>
+    </q-dialog>
+
     <div class="flex justify-end">
+      <q-btn
+        outline
+        color="primary"
+        @click="logsDialog = true"
+        label="Ver historial"
+        class="q-mr-md"
+      />
       <q-btn
         :disable="props.readonly"
         color="primary"

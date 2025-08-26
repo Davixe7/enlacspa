@@ -14,6 +14,7 @@ const props = defineProps(['candidateId'])
 const brainFunctions = ref([])
 const evaluationFields = ref([])
 const evaluationFieldsB = ref(null)
+const evaluationId = ref(null)
 
 const rank = ref({})
 const columns = ref([])
@@ -37,6 +38,7 @@ async function fetchFields() {
     let response = (await api.get('evaluation_fields', params)).data.data
     evaluationFields.value = response['a']
     evaluationFieldsB.value = response['b']
+    evaluationId.value = evaluationFields.value[0].ranks['1'].evaluation_id
   } catch (error) {
     console.log(error)
   } finally {
@@ -109,6 +111,7 @@ function btnLabel(cell) {
 }
 
 function previousValue(cell) {
+  if (!evaluationFieldsB.value[cell.rowIndex]) return null
   return evaluationFieldsB.value[cell.rowIndex].ranks[cell.value.brain_function_id]?.caracteristic
 }
 </script>
@@ -184,37 +187,35 @@ function previousValue(cell) {
       v-if="allRanks.length && evaluationFields"
       :ranks="allRanks"
       :evaluationFields="evaluationFields"
-    >
-    </EvaluationResults>
+    />
 
     <EvaluationComments
       :rows="rows"
       :brainFunctions="brainFunctions"
-    >
-    </EvaluationComments>
+    />
 
     <q-dialog v-model="dialog">
       <RankForm
         :rank="rank"
         @rank-updated="updateRank"
         @close="dialog = false"
-      ></RankForm>
+      />
     </q-dialog>
 
     <q-dialog v-model="dialog2">
       <AdmissionForm
+        :evaluationId="evaluationId"
         :candidateId="candidateId"
         @close="dialog2 = false"
-      ></AdmissionForm>
+      />
     </q-dialog>
 
     <div class="flex justify-end">
       <q-btn
         color="primary"
         @click="dialog2 = true"
-      >
-        Guardar
-      </q-btn>
+        label="Guardar"
+      />
     </div>
   </q-page>
 </template>

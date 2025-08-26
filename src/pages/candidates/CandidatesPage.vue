@@ -3,6 +3,7 @@ import { api } from 'src/boot/axios'
 import { onMounted } from 'vue'
 import { ref } from 'vue'
 import AppointmentForm from 'components/AppointmentForm.vue'
+import CandidateReviewForm from 'components/CandidateReviewForm.vue'
 import { formatDate } from 'src/utils/formatDate'
 
 onMounted(() => fetchCandidates())
@@ -56,10 +57,30 @@ const columns = ref([
     sortable: false
   }
 ])
+
+const candidate = ref(null)
+const reviewDialog = ref(false)
+
+function editReview(row) {
+  candidate.value = row
+  reviewDialog.value = true
+}
 </script>
 
 <template>
   <q-page>
+    <q-dialog v-model="reviewDialog">
+      <CandidateReviewForm
+        :candidate="candidate"
+        @saved="
+          (r) => {
+            candidate.review = r
+            reviewDialog = false
+          }
+        "
+        @close="reviewDialog = false"
+      />
+    </q-dialog>
     <h1 class="page-title">Candidatos y Evaluaciones</h1>
     <div class="flex q-mb-lg">
       <q-btn
@@ -121,6 +142,13 @@ const columns = ref([
               round
               icon="sym_o_content_paste"
               :to="`candidatos/${props.row.id}/evaluar`"
+            />
+            <q-btn
+              dense
+              flat
+              round
+              icon="sym_o_note_alt"
+              @click="editReview(props.row)"
             />
           </div>
         </q-td>

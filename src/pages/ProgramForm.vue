@@ -108,13 +108,6 @@ onMounted(() => {
     <div class="col-12 col-md-10">
       <div class="flex items-center">
         <div class="page-title">Elaborar Programa Individual</div>
-        <q-btn
-          outline
-          class="q-ml-auto"
-          color="primary"
-          label="Nuevo"
-          icon="sym_o_add"
-        />
       </div>
 
       <div class="row q-col-gutter-x-md q-mb-lg">
@@ -184,15 +177,17 @@ onMounted(() => {
               <q-icon name="sym_o_search" />
             </template>
           </q-input>
-          <q-list separator>
+          <q-list
+            separator
+            bordered
+          >
             <q-item
-              style="border: 1px solid red"
               draggable="true"
               @dragstart="onDragStart(item)"
               v-for="item in activitiesOptions"
               :key="item.id"
             >
-              <q-item-section style="border: 1px solid black">{{ item.name }}</q-item-section>
+              <q-item-section>{{ item.name }}</q-item-section>
             </q-item>
           </q-list>
         </div>
@@ -215,34 +210,46 @@ onMounted(() => {
                 <th></th>
               </tr>
             </thead>
-            <tbody>
-              <tr
-                v-for="activity in program.activities"
-                :key="activity.id"
-              >
-                <td>{{ activity.name }}</td>
-                <td>{{ activity.measurement_unit }}</td>
-                <td>{{ activity.goal_type }}</td>
-                <td>
-                  <q-input
-                    dense
-                    outlined
-                    stack-label
-                    hide-bottom-space
-                    v-model="activity.daily_goal"
-                  ></q-input>
-                </td>
-                <td>
-                  <q-btn
-                    flat
-                    round
-                    dense
-                    icon="sym_o_delete"
-                    @click="removeActivity(activity)"
-                  />
+            <template v-if="program.activities.length">
+              <tbody>
+                <tr
+                  v-for="activity in program.activities"
+                  :key="activity.id"
+                >
+                  <td>{{ activity.name }}</td>
+                  <td>{{ activity.measurement_unit }}</td>
+                  <td>{{ activity.goal_type }}</td>
+                  <td>
+                    <q-input
+                      dense
+                      outlined
+                      stack-label
+                      hide-bottom-space
+                      v-model="activity.daily_goal"
+                    ></q-input>
+                  </td>
+                  <td>
+                    <q-btn
+                      flat
+                      round
+                      dense
+                      icon="sym_o_delete"
+                      @click="removeActivity(activity)"
+                    />
+                  </td>
+                </tr>
+              </tbody>
+            </template>
+            <template v-else>
+              <tr>
+                <td
+                  colspan="4"
+                  style="border: 2px blue dashed; text-align: center; padding: 13px 16px"
+                >
+                  Arrastra actividades aqui para armar el plan
                 </td>
               </tr>
-            </tbody>
+            </template>
           </q-markup-table>
 
           <div class="flex justify-end q-py-lg">
