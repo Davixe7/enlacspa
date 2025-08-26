@@ -1,6 +1,6 @@
 <script setup>
-import { api } from 'src/boot/axios';
-import { onMounted, ref } from 'vue';
+import { api } from 'src/boot/axios'
+import { onMounted, ref } from 'vue'
 
 onMounted(() => fetchCandidates())
 
@@ -9,8 +9,10 @@ async function fetchCandidates() {
   let params = { ...query.value }
   let fields = ['name', 'birth_date', 'date_from', 'date_to']
 
-  fields.forEach(key => {
-    if (!query[key]) { delete query[key] }
+  fields.forEach((key) => {
+    if (!query[key]) {
+      delete query[key]
+    }
   })
 
   if (params.date_from && !params.date_to) {
@@ -38,52 +40,47 @@ const candidates = ref([])
 const counts = ref({})
 const candidateColumns = ref([
   {
-    name: "name",
-    label: "Nombre de Candidato",
-    align: "left",
-    field: "full_name",
-    sortable: true,
+    name: 'sheet',
+    label: 'Folio',
+    align: 'left',
+    field: 'sheet',
+    sortable: true
   },
   {
-    name: "sheet",
-    label: "Folio",
-    align: "left",
-    field: "sheet",
-    sortable: true,
+    name: 'name',
+    label: 'Nombre de Candidato',
+    align: 'left',
+    field: 'full_name',
+    sortable: true
   },
   {
-    name: "date",
-    label: "Fecha de Evaluación",
-    align: "left",
-    field: (row) => row.evaluation_schedule ? row.evaluation_schedule.date : 'NO DISPONIBLE',
-    sortable: true,
+    name: 'date',
+    label: 'Fecha de Evaluación',
+    align: 'left',
+    field: (row) => (row.evaluation_schedule ? row.evaluation_schedule.date : 'NO DISPONIBLE'),
+    sortable: true
   },
   {
-    name: "evaluator",
-    label: "Evaluador",
-    align: "left",
-    field: (row) => row.evaluation_schedule ? row.evaluation_schedule.evaluator.name : 'No disponible',
-    sortable: true,
+    name: 'evaluator',
+    label: 'Evaluador',
+    align: 'left',
+    field: (row) =>
+      row.evaluation_schedule ? row.evaluation_schedule.evaluator.name : 'No disponible',
+    sortable: true
   },
   {
-    name: "is_candidate",
-    label: "Candidato",
-    align: "left",
-    field: (row) => {
-      if (row.acceptance_status === 1) { return 'Si' }
-      if (row.acceptance_status === 0) { return 'No' }
-      if (row.acceptance_status === null) { return 'Pendiente' }
-    },
-    sortable: true,
-  },
-  {
-    name: "notes",
-    label: "Observaciones",
-    align: "right",
-    field: (row) => row.acceptance_status == 0 ? row.rejection_comment : (row.program ? row.program.name : 'Pendiente'),
-    sortable: true,
-  },
-]);
+    name: 'notes',
+    label: 'Observaciones',
+    align: 'right',
+    field: (row) =>
+      row.acceptance_status == 0
+        ? row.rejection_comment
+        : row.program
+          ? row.program.name
+          : 'Pendiente',
+    sortable: true
+  }
+])
 
 const columns = ref([
   { align: 'center', label: 'Candidatos en proceso' },
@@ -100,9 +97,7 @@ const columns = ref([
 
     <div class="row q-col-gutter-lg items-end q-mb-xl">
       <div class="col-12 col-md-auto">
-        <div class="label-alt-2">
-          Fecha a consultar
-        </div>
+        <div class="label-alt-2">Fecha a consultar</div>
         <q-input
           outlined
           stack-label
@@ -112,9 +107,8 @@ const columns = ref([
           :error="!!errors.date_from"
           :error-message="errors.date_from"
         >
-          <template v-slot:prepend>
-            <q-icon name="calendar_today"></q-icon>
-          </template></q-input>
+          <template v-slot:prepend> <q-icon name="calendar_today"></q-icon> </template
+        ></q-input>
       </div>
       <div class="col-12 col-md-auto">
         <q-input
@@ -129,9 +123,7 @@ const columns = ref([
         </q-input>
       </div>
       <div class="col-12 col-md-auto">
-        <div class="label-alt-2">
-          Buscar por
-        </div>
+        <div class="label-alt-2">Buscar por</div>
         <q-input
           outlined
           stack-label
@@ -140,9 +132,8 @@ const columns = ref([
           :error="!!errors.name"
           :error-message="errors.name"
         >
-          <template v-slot:prepend>
-            <q-icon name="search"></q-icon>
-          </template></q-input>
+          <template v-slot:prepend> <q-icon name="search"></q-icon> </template
+        ></q-input>
       </div>
       <div class="col-12 col-md-auto">
         <q-input
@@ -165,13 +156,12 @@ const columns = ref([
           color="primary"
           style="margin-bottom: 20px"
           @click="fetchCandidates"
-        >Buscar</q-btn>
+          >Buscar</q-btn
+        >
       </div>
     </div>
 
-    <div class="page-title q-mb-lg">
-      Información general
-    </div>
+    <div class="page-title q-mb-lg">Información general</div>
 
     <q-table
       flat
@@ -192,9 +182,7 @@ const columns = ref([
       </template>
     </q-table>
 
-    <div class="page-title q-my-lg">
-      Información en detalle
-    </div>
+    <div class="page-title q-my-lg">Información en detalle</div>
 
     <q-table
       flat
@@ -239,7 +227,7 @@ const columns = ref([
   margin-bottom: 24px;
 }
 
-.q-field__prepend+.q-field__control-container .q-field__label {
+.q-field__prepend + .q-field__control-container .q-field__label {
   margin-left: -2.25rem;
 }
 </style>

@@ -297,7 +297,7 @@ const chronological_age = computed(() => {
             :options="evaluators"
             v-model="evaluation_schedule.evaluator_id"
             emit-value
-            option-label="name"
+            option-label="full_name"
             option-value="id"
             map-options
             :error="!!errors['evaluation_schedule.evaluator_id']"

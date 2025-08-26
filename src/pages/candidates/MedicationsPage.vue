@@ -35,6 +35,7 @@ watch(
 )
 
 const medication = reactive({
+  status: 1,
   name: '',
   dose: '',
   frequency: '',
@@ -42,12 +43,29 @@ const medication = reactive({
 })
 
 function addMedication() {
+  medication.status = 1
   medication.name = ''
   medication.dose = ''
   medication.frequency = ''
   medication.duration = ''
   medication.observations = ''
   localMedications.value.push({ ...medication })
+}
+
+async function logStatus(status, med) {
+  if (!med.id) {
+    return
+  }
+  try {
+    loading.value = true
+    let route = `/medication_logs/${med.id}`
+    let data = { ...med, status }
+    await api.post(route, data)
+  } catch (error) {
+    console.log(error)
+  } finally {
+    loading.value = false
+  }
 }
 
 async function saveMedication(med) {
@@ -59,8 +77,9 @@ async function saveMedication(med) {
     localMedications.value.splice(localMedications.value.indexOf(med), 1, response)
   } catch (error) {
     console.log(error)
+  } finally {
+    loading.value = false
   }
-  loading.value = false
 }
 
 async function deleteMedication(med) {
@@ -81,9 +100,15 @@ async function deleteMedication(med) {
 
 const columns = ref([
   {
+    name: 'status',
+    field: 'status',
+    label: 'Estado',
+    align: 'left'
+  },
+  {
     name: 'name',
     field: 'name',
-    label: 'Nombre del medication',
+    label: 'Nombre del medicamento',
     align: 'left'
   },
   { name: 'dosis', field: 'dose', label: 'Dosis', align: 'left' },
@@ -129,6 +154,15 @@ const columns = ref([
     >
       <template v-slot:body="props">
         <q-tr :props="props">
+          <q-td>
+            <q-toggle
+              @update:model-value="(value, event) => logStatus(value, props.row)"
+              v-model="props.row.status"
+              :true-value="1"
+              :false-value="0"
+              color="positive"
+            />
+          </q-td>
           <q-td>
             <q-input
               outlined

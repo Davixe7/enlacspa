@@ -160,7 +160,34 @@ const routes = [
       },
       ...candidates,
       ...padrinos,
-      ...beneficiary
+      ...beneficiary,
+      {
+        path: 'actividades',
+        name: 'actividades.index',
+        meta: { label: 'Actividades' },
+        component: () => import('pages/ActivitiesPage.vue')
+      },
+      {
+        path: 'beneficiarios/:candidateId/programas',
+        name: 'programs.index',
+        meta: { label: 'Programas' },
+        props: true,
+        component: () => import('pages/ProgramsPage.vue')
+      },
+      {
+        path: 'beneficiarios/:candidateId/crear-programa',
+        name: 'programs.create',
+        meta: { label: 'Elaborar Programa' },
+        props: true,
+        component: () => import('pages/ProgramForm.vue')
+      },
+      {
+        path: 'programas/:programId',
+        name: 'programs.show',
+        meta: { label: 'Detalles del Programa' },
+        props: true,
+        component: () => import('pages/ProgramPage.vue')
+      }
     ]
   },
 

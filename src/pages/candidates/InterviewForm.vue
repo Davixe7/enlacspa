@@ -6,6 +6,7 @@ import { api } from 'src/boot/axios'
 import Notify from 'src/utils/notify'
 import { scrollToFirstError } from 'src/utils/focusError'
 import { useCandidateStore } from 'src/stores/candidate-store'
+import MedicationsPage from './MedicationsPage.vue'
 
 const props = defineProps(['candidateId'])
 const store = useCandidateStore()
@@ -73,7 +74,75 @@ async function signInterview() {
 
 <template>
   <q-page>
-    <div class="page-title">Entrevista</div>
+    <div class="flex justify-between items-center">
+      <div class="div">
+        <div class="page-title q-mb-none">Entrevista</div>
+      </div>
+      <div class="div">
+        <div
+          v-if="!interview.signed_at"
+          class="flex justify-end items-center q-py-xl"
+        >
+          <div class="q-mr-lg">
+            <q-tooltip
+              anchor="top right"
+              self="bottom end"
+              class="bg-black text-white q-py-sm q-px-md"
+              style="font-size: 14px; width: 154px"
+            >
+              Al guardarlo podrá seguir editando
+            </q-tooltip>
+            <q-icon
+              name="info"
+              size="24px"
+              class="q-mr-sm"
+            >
+            </q-icon>
+
+            <q-btn
+              :loading="loading"
+              outline
+              color="primary"
+              @click="storeInterview()"
+            >
+              Guardar
+            </q-btn>
+          </div>
+
+          <div
+            class="q-mr-lg"
+            v-if="interview.id"
+          >
+            <q-tooltip
+              anchor="top right"
+              self="bottom end"
+              class="bg-black text-white q-py-sm q-px-md"
+              style="font-size: 14px; width: 154px"
+            >
+              Al firmar ya no podrá editarlo
+            </q-tooltip>
+            <q-icon
+              name="info"
+              size="24px"
+              class="q-mr-sm"
+            >
+            </q-icon>
+
+            <q-btn
+              :loading="loading"
+              color="primary"
+              @click="signInterview()"
+            >
+              Firmar
+            </q-btn>
+          </div>
+        </div>
+
+        <div v-else>
+          <div class="label-alt">Firmado el: {{ interview.signed_at }}</div>
+        </div>
+      </div>
+    </div>
 
     <CandidateProfile
       :candidate-id="candidateId"
@@ -83,7 +152,10 @@ async function signInterview() {
 
     <div class="label-alt-2">Lista de preguntas</div>
 
-    <div class="row q-mb-xl">
+    <div
+      class="row q-mb-xl"
+      style="position: relative"
+    >
       <div class="col-6">
         <q-list dense>
           <q-item
@@ -105,7 +177,10 @@ async function signInterview() {
           </q-item>
         </q-list>
       </div>
-      <div class="col-6">
+      <div
+        class="col-6 editorContainer"
+        style="position: sticky; top: 144px; height: calc(100vh - 144px)"
+      >
         <q-editor
           dense
           v-model="interview.content"
@@ -130,7 +205,14 @@ async function signInterview() {
       </div>
     </div>
 
-    <div class="label-alt">30 - ¿Controla esfínteres?</div>
+    <div class="label-alt">30 - Lista de medicamentos que toma, ¿hay alguno adicional?</div>
+    <MedicationsPage
+      v-model="store.medications"
+      :candidateId="props.candidateId"
+      :errors="errors"
+    />
+
+    <div class="label-alt">31 - ¿Controla esfínteres?</div>
     <div class="q-mb-xl">
       <q-radio
         v-model="interview.sphincters_control"
@@ -225,7 +307,7 @@ async function signInterview() {
 <style>
 .q-list--dense .q-item {
   min-height: 0;
-  padding-left: 0;
+  padding-left: 2px;
   margin-bottom: 24px;
 }
 
@@ -286,5 +368,11 @@ async function signInterview() {
   font-size: 18px;
   font-weight: 600;
   margin-bottom: 24px;
+}
+
+.editorContainer {
+  position: sticky;
+  top: 144px;
+  height: calc(100vh - 144px);
 }
 </style>

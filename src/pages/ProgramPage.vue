@@ -1,0 +1,94 @@
+<script setup>
+import { api } from 'src/boot/axios'
+import { onMounted } from 'vue'
+import { ref } from 'vue'
+import BeneficiaryProfile from './../components/BeneficiaryProfile.vue'
+import { useCandidateStore } from 'src/stores/candidate-store'
+
+const store = useCandidateStore()
+const props = defineProps(['programId'])
+const loading = ref(false)
+const program = ref({
+  activities: []
+})
+
+async function fetchProgram() {
+  try {
+    loading.value = true
+    program.value = (await api.get(`personal_programs/${props.programId}`)).data.data
+  } catch (error) {
+    console.log(error)
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(async () => {
+  await store.fetchCandidate()
+  fetchProgram()
+})
+</script>
+
+<template>
+  <div class="flex items-center">
+    <div class="page-title">Programa Individual</div>
+    <q-btn
+      outline
+      class="q-ml-auto"
+      color="primary"
+      label="Nuevo"
+      icon="sym_o_add"
+    />
+  </div>
+
+  <BeneficiaryProfile
+    :candidateId="program.candidate_id"
+    class="q-mb-lg"
+  />
+
+  <div
+    class="page-subtitle q-mb-lg text-center"
+    v-if="program && program.id"
+  >
+    {{ program.plan_type.label }} <span class="text-grey">/</span> {{ program.plan.name }}
+    <span class="text-grey">/</span> {{ program.name }}
+  </div>
+
+  <div class="row">
+    <div
+      class="col-md-10 q-mx-auto"
+      @drop="onDrop"
+      @dragover.prevent=""
+    >
+      <q-markup-table
+        flat
+        bordered
+      >
+        <thead>
+          <tr>
+            <th class="text-left">Nombre</th>
+            <th class="text-left">Unidad</th>
+            <th
+              class="text-left"
+              style="white-space: nowrap"
+            >
+              Tipo de Meta
+            </th>
+            <th class="text-left">Meta diaria</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            v-for="activity in program.activities"
+            :key="activity.id"
+          >
+            <td>{{ activity.name }}</td>
+            <td>{{ activity.measurement_unit }}</td>
+            <td>{{ activity.goal_type }}</td>
+            <td>{{ activity.daily_goal }}</td>
+          </tr>
+        </tbody>
+      </q-markup-table>
+    </div>
+  </div>
+</template>

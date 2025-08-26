@@ -28,7 +28,7 @@ async function updateAcceptance() {
   try {
     let data = {
       admission_status: localCandidate.value.admission_status,
-      rejection_comment: localCandidate.value.rejection_comment,
+      admission_comment: localCandidate.value.admission_comment,
       program_id: localCandidate.value.program_id,
       _method: 'PUT'
     }
@@ -66,7 +66,7 @@ async function updateAcceptance() {
       </div>
       <template v-if="localCandidate.admission_status">
         <div class="text-weight-bold q-pb-lg">Seleccione las opciones del programa</div>
-        <div class="row q-col-gutter-lg">
+        <div class="row q-col-gutter-lg q-pb-lg">
           <q-radio
             class="col-6"
             v-for="program in programs"
@@ -77,17 +77,15 @@ async function updateAcceptance() {
           ></q-radio>
         </div>
       </template>
-      <template v-else>
-        <q-input
-          outlined
-          stack-label
-          type="textarea"
-          label="¿Por qué no?"
-          v-model="localCandidate.rejection_comment"
-          :error="!!errors.rejection_comment"
-          :error-message="errors.rejection_comment"
-        ></q-input>
-      </template>
+      <q-input
+        outlined
+        stack-label
+        type="textarea"
+        :label="localCandidate.admission_status ? 'Comentarios (opcionales)' : '¿Por qué no?'"
+        v-model="localCandidate.admission_comment"
+        :error="!!errors.admission_comment"
+        :error-message="errors.admission_comment"
+      ></q-input>
     </q-card-section>
     <q-card-section class="flex justify-end">
       <q-btn

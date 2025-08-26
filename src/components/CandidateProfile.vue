@@ -1,6 +1,6 @@
 <script setup>
-import { useCandidateStore } from 'src/stores/candidate-store';
-import { onMounted, ref } from 'vue';
+import { useCandidateStore } from 'src/stores/candidate-store'
+import { onMounted, ref } from 'vue'
 
 const props = defineProps({
   candidateId: {
@@ -15,38 +15,40 @@ const props = defineProps({
 })
 
 onMounted(async () => {
-  if (!props.candidateId) { return }
+  if (!props.candidateId) {
+    return
+  }
   if (!store.full_name) {
     store.id = props.candidateId
     store.fetchCandidate()
   }
 })
 
-const store = useCandidateStore();
+const store = useCandidateStore()
 const errors = ref({})
 
 const relationships = [
-  { label: "Abuelo(a)", value: "abuelo" },
-  { label: "Hermano(a)", value: "hermano" },
-  { label: "Hermanastro(a)", value: "hermanastro" },
-  { label: "Madre/Padre", value: "madre_padre" },
-  { label: "Padrastro/Madrastra", value: "padrastro_madrastra" },
-  { label: "Primo(a)", value: "primo" },
-  { label: "Tío(a)", value: "tio" },
-];
+  { label: 'Abuelo(a)', value: 'abuelo' },
+  { label: 'Hermano(a)', value: 'hermano' },
+  { label: 'Hermanastro(a)', value: 'hermanastro' },
+  { label: 'Madre/Padre', value: 'madre_padre' },
+  { label: 'Padrastro/Madrastra', value: 'padrastro_madrastra' },
+  { label: 'Primo(a)', value: 'primo' },
+  { label: 'Tío(a)', value: 'tio' }
+]
 </script>
 
 <template>
   <div
     class="flex"
-    style="margin-bottom: 65px;"
+    style="margin-bottom: 65px"
   >
     <q-img
       width="174px"
       height="169px"
       color="grey"
       class="bg-grey-4"
-      style="margin-right: 20px; object-fit: cover;"
+      style="margin-right: 20px; object-fit: cover"
       :src="store.picture"
     ></q-img>
 
@@ -64,8 +66,8 @@ const relationships = [
         {{ store.chronological_age }} meses
       </div>
       <div>
-        <label class="text-weight-bold">Folio:</label>
-        {{ store.sheet }}
+        <label class="text-weight-bold">Edad cronológica </label>
+        {{ store.chronological_age2 }} años
       </div>
     </div>
 
@@ -97,7 +99,7 @@ const relationships = [
           map-options
         ></q-select>
       </div>
-      <div style="margin-left: -8px;">
+      <div style="margin-left: -8px">
         <q-radio
           v-model="store.interviewee.legal_relationship"
           val="biologico"
@@ -124,5 +126,4 @@ const relationships = [
       ></q-input>
     </div>
   </div>
-
 </template>

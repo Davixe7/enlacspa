@@ -43,13 +43,6 @@ const columns = ref([
     sortable: true
   },
   {
-    name: 'is_candidate',
-    label: 'Candidato',
-    align: 'left',
-    field: (row) => (row.admission_status ? 'Sí' : 'No'),
-    sortable: true
-  },
-  {
     name: 'notes',
     label: 'Observaciones',
     align: 'left',

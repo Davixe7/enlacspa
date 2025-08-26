@@ -11,6 +11,7 @@ export const useCandidateStore = defineStore('candidate', {
     birth_date: null,
     age: null,
     chronological_age: null,
+    chronological_age2: null,
     diagnosis: '',
     info_channel: null,
     sheet: 1,
@@ -22,6 +23,7 @@ export const useCandidateStore = defineStore('candidate', {
     evaluation_schedule: null,
     interviewee: {},
     program: null,
+    medications: [],
     errors: {}
   }),
 
