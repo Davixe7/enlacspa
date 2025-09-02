@@ -25,6 +25,12 @@ export default [
         })
       },
       {
+        path: ':candidateId/evaluar',
+        meta: { label: 'Evaluación', layout: 'main' },
+        component: () => import('src/pages/candidates/EvaluationForm.vue'),
+        props: true
+      },
+      {
         path: ':candidateId/cuotas',
         meta: { label: 'Configuración de Cuotas' },
         component: () => import('src/pages/beneficiaries/PaymentConfigDashboard.vue'),

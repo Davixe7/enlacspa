@@ -70,6 +70,7 @@ const entryStatuses = [
 
 const actions = ref([
   { disable: false, icon: 'visibility', route: 'perfil', label: 'Perfil' },
+  { disable: false, icon: 'content_paste', route: 'evaluar', label: 'Evaluar' },
   { disable: !authStore.can('kardexes.update'), icon: 'folder', route: 'kardex', label: 'Kardex' },
   { disable: false, icon: 'calendar_month', route: 'citas', label: 'Citas' },
   { disable: false, icon: 'attach_money', route: 'cuotas', label: 'Control de Cuotas' },

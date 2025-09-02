@@ -69,9 +69,12 @@ const developmentRateB = computed(() => {
   return ((months / evaluated) * 100).toFixed(2)
 })
 
-const neurologicalAge = computed(() =>
-  ((store.chronological_age * developmentRateA.value) / 100).toFixed(2)
-)
+const neurologicalAge = computed(() => {
+  if (isNaN(developmentRate.value)) {
+    return 0
+  }
+  return ((store.chronological_age * developmentRateA.value) / 100).toFixed(2)
+})
 const neurologicalAge2 = computed(() => (neurologicalAge.value / 12).toFixed(2))
 const developmentRate = computed(() =>
   ((neurologicalAge.value / store.chronological_age) * 100).toFixed(2)
@@ -156,7 +159,7 @@ const damageLevel = computed(() => {
         stack-label
         label="Edad cronológica (meses)"
         :modelValue="chronologicalAge"
-      ></q-input>
+      />
     </div>
 
     <div class="col-12 col-md-3">
@@ -165,7 +168,7 @@ const damageLevel = computed(() => {
         stack-label
         label="Edad cronológica (años)"
         :modelValue="chronologicalAge2"
-      ></q-input>
+      />
     </div>
 
     <div class="col-12 col-md-3">
@@ -174,7 +177,7 @@ const damageLevel = computed(() => {
         stack-label
         label="Edad neurológica (meses)(*)"
         :modelValue="neurologicalAge + ' meses'"
-      ></q-input>
+      />
     </div>
 
     <div class="col-12 col-md-3">
@@ -183,7 +186,7 @@ const damageLevel = computed(() => {
         stack-label
         label="Edad neurológica (años)(*)"
         :modelValue="neurologicalAge2 + ' años'"
-      ></q-input>
+      />
     </div>
 
     <div class="col-12 col-md-3">
@@ -192,7 +195,7 @@ const damageLevel = computed(() => {
         stack-label
         label="Extension de la lesion(*)"
         :modelValue="damageExtension"
-      ></q-input>
+      />
     </div>
 
     <div class="col-12 col-md-3">
@@ -201,7 +204,7 @@ const damageLevel = computed(() => {
         stack-label
         label="Grado de la lesion(*)"
         :modelValue="damageGrade"
-      ></q-input>
+      />
     </div>
 
     <div class="col-12 col-md-3">
@@ -210,7 +213,7 @@ const damageLevel = computed(() => {
         stack-label
         label="Tasa de desarrollo (sin N/A)"
         :modelValue="developmentRateA + '%'"
-      ></q-input>
+      />
     </div>
 
     <div class="col-12 col-md-3">
@@ -219,7 +222,7 @@ const damageLevel = computed(() => {
         stack-label
         label="Tasa de desarrollo (con N/A)"
         :modelValue="developmentRateB + '%'"
-      ></q-input>
+      />
     </div>
   </div>
 
@@ -230,7 +233,7 @@ const damageLevel = computed(() => {
         stack-label
         label="Lateralidad"
         :modelValue="damageLaterality"
-      ></q-input>
+      />
     </div>
     <div class="col-12 col-md-3">
       <label

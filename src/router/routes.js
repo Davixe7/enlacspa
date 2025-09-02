@@ -187,6 +187,24 @@ const routes = [
         meta: { label: 'Detalles del Programa' },
         props: true,
         component: () => import('pages/ProgramPage.vue')
+      },
+      {
+        path: '/grupos',
+        meta: { label: 'Grupos' },
+        component: () => import('pages/GroupPrograms.vue'),
+        children: [
+          {
+            path: 'catalogo',
+            meta: { label: 'Catalogo', layout: 'main' },
+            component: () => import('pages/GroupPrograms.vue')
+          },
+          {
+            path: 'crear',
+            meta: { label: 'Crear grupo', layout: 'main' },
+            props: true,
+            component: () => import('pages/GroupMembers.vue')
+          }
+        ]
       }
     ]
   },
