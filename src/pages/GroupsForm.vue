@@ -1,8 +1,12 @@
 <script setup>
 import { api } from 'src/boot/axios'
 import { computed, onMounted, ref } from 'vue'
+import notify from 'src/utils/notify'
+import { useRouter } from 'vue-router'
 
-defineProps(['groupId'])
+const props = defineProps(['groupId'])
+
+const router = useRouter()
 const programs = ref([])
 const data = ref([])
 const loading = ref(false)
@@ -36,7 +40,40 @@ async function fetchPrograms() {
   }
 }
 
+async function save() {
+  try {
+    loading.value = true
+    group.value.candidates = [...picked.value]
+    let route = props.groupId ? `/groups/${props.groupId}` : '/groups'
+    let data = props.groupId ? { ...group.value, _method: 'PUT' } : { ...group.value }
+    let action = props.groupId ? 'actualizado' : 'creado'
+    await api.post(route, data)
+    notify.positive(`Grupo ${action} exitosamente`)
+    router.push('/grupos')
+  } catch (error) {
+    console.log(error)
+    notify.negative('Error al crear el grupo')
+  } finally {
+    loading.value = false
+  }
+}
+
+async function fetchGroup() {
+  if (!props.groupId) return
+  try {
+    loading.value = true
+    group.value = (await api.get(`/groups/${props.groupId}`)).data.data
+    picked.value = group.value.candidates.map((candidate) => candidate.id)
+  } catch (error) {
+    console.log(error)
+    notify.negative('Error al cargar el grupo')
+  } finally {
+    loading.value = false
+  }
+}
+
 onMounted(() => {
+  fetchGroup()
   fetchData()
   fetchPrograms()
 })
@@ -52,7 +89,9 @@ onMounted(() => {
       <div class="row">
         <div class="col-12 col-md-4">
           <q-card-section>
-            <h1 class="page-title page-title--no-margin q-pb-md">Crear grupo</h1>
+            <h1 class="page-title page-title--no-margin q-pb-md">
+              {{ props.groupId ? 'Actualizar' : 'Crear' }} grupo
+            </h1>
             <div style="font-size: 18px; padding-bottom: 16px">Informacion Basica</div>
             <div class="q-gutter-y-md">
               <q-input
@@ -68,18 +107,15 @@ onMounted(() => {
                 v-model="group.program_id"
                 :options="programs"
                 option-label="name"
+                option-value="id"
+                emit-value
+                map-options
               />
             </div>
           </q-card-section>
         </div>
         <div class="col-12 col-md-8">
           <q-card-section>
-            <!-- <div
-            style="font-size: 18px"
-            class="q-mb-md"
-          >
-            Agregar beneficiarios al grupo
-          </div> -->
             <q-input
               type="search"
               clearable
@@ -120,14 +156,16 @@ onMounted(() => {
                 </q-item-section>
               </q-item>
             </q-virtual-scroll>
-
-            <div class="flex justify-end q-pt-md">
-              <q-btn
-                color="primary"
-                label="Continuar"
-              />
-            </div>
           </q-card-section>
+
+          <div class="flex justify-end q-pa-md">
+            <q-btn
+              color="primary"
+              label="Continuar"
+              :loading="loading"
+              @click="save"
+            />
+          </div>
         </div>
       </div>
     </q-card>

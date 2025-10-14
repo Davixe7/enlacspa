@@ -24,15 +24,17 @@ export const useCandidateStore = defineStore('candidate', {
     interviewee: {},
     program: null,
     medications: [],
+    group_id: null,
     errors: {}
   }),
 
   actions: {
-    async fetchCandidate() {
+    async fetchCandidate(type = 'candidate') {
       if (!this.id) return
       try {
         this.loading = true
-        let data = (await api.get(`candidates/${this.id}`)).data.data
+        let route = type == 'candidate' ? `candidates/${this.id}` : `beneficiaries/${this.id}`
+        let data = (await api.get(route)).data.data
         this.$patch(data)
         this.loading = false
       } catch (error) {

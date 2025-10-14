@@ -172,37 +172,69 @@ const routes = [
         name: 'programs.index',
         meta: { label: 'Programas' },
         props: true,
-        component: () => import('pages/ProgramsPage.vue')
+        component: () => import('src/pages/BeneficiaryProgramsPage.vue')
       },
       {
-        path: 'beneficiarios/:candidateId/crear-programa',
+        path: 'beneficiarios/:candidateId/grupos/:groupId/planes/crear',
         name: 'programs.create',
         meta: { label: 'Elaborar Programa' },
         props: true,
         component: () => import('pages/ProgramForm.vue')
       },
       {
-        path: 'programas/:programId',
+        path: 'planes/:programId',
         name: 'programs.show',
         meta: { label: 'Detalles del Programa' },
         props: true,
         component: () => import('pages/ProgramPage.vue')
       },
       {
+        path: 'planes/crear',
+        name: 'plans.create',
+        meta: { label: 'Crear programa' },
+        props: true,
+        component: () => import('pages/ProgramForm.vue')
+      },
+      {
+        path: 'planes/:planId/editar',
+        name: 'plans.edit',
+        meta: { label: 'Editar plan' },
+        props: true,
+        component: () => import('pages/ProgramForm.vue')
+      },
+      {
         path: '/grupos',
         meta: { label: 'Grupos' },
-        component: () => import('pages/GroupPrograms.vue'),
+        component: () => import('pages/GroupsPage.vue'),
         children: [
           {
             path: 'catalogo',
             meta: { label: 'Catalogo', layout: 'main' },
-            component: () => import('pages/GroupPrograms.vue')
+            component: () => import('pages/GroupsPage.vue')
           },
           {
             path: 'crear',
             meta: { label: 'Crear grupo', layout: 'main' },
             props: true,
-            component: () => import('pages/GroupMembers.vue')
+            component: () => import('pages/GroupsForm.vue')
+          },
+          {
+            path: ':groupId',
+            meta: { label: 'Detalles del grupo', layout: 'main' },
+            props: true,
+            component: () => import('src/pages/GroupProgramsPage.vue')
+          },
+          {
+            path: ':groupId/editar',
+            meta: { label: 'Editar grupo', layout: 'main' },
+            props: true,
+            component: () => import('pages/GroupsForm.vue')
+          },
+          {
+            path: ':groupId/planes/crear',
+            meta: { label: 'Agregar plan al grupo', layout: 'main' },
+            props: true,
+            component: () => import('pages/ProgramForm.vue')
           }
         ]
       }

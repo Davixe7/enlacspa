@@ -1,20 +1,23 @@
 <script setup>
 import { api } from 'src/boot/axios'
+import { computed, onMounted, ref } from 'vue'
 import notify from 'src/utils/notify'
-import { onMounted, ref } from 'vue'
 
 const data = ref({
   id: null,
-  plan_type_id: '',
+  plan_category_id: '',
   name: '',
   measurement_unit: '',
   goal_type: ''
 })
 const loading = ref(true)
 const dialog = ref(false)
-const search = ref('')
-const planTypes = ref([])
-const planType = ref(null)
+const searchFilter = ref({
+  planCategory: null,
+  text: ''
+})
+const categories = ref([])
+const baseCategories = computed(() => categories.value.filter((cat) => cat.parent_id == null))
 
 const measurementUnits = ref([
   { label: 'Cantidad', value: 'cantidad' },
@@ -26,9 +29,10 @@ const measurementUnits = ref([
 ])
 
 const goalTypes = ref([
-  { label: 'Incremental', value: 'incremental' },
-  { label: 'Acumulada', value: 'acumulada' },
-  { label: 'Dominación', value: 'dominación' }
+  { label: 'Normal', value: 'Normal' },
+  { label: 'Incremental', value: 'Incremental' },
+  { label: 'Acumulada', value: 'Acumulada' },
+  { label: 'Dominio', value: 'Dominio' }
 ])
 
 const columns = ref([
@@ -36,7 +40,7 @@ const columns = ref([
     align: 'left',
     name: 'plan',
     label: 'Plan',
-    field: (row) => row.plan_type.label,
+    field: (row) => row.plan_category.label,
     sortable: true
   },
   { align: 'left', name: 'name', label: 'Actividad', field: 'name', sortable: true },
@@ -46,6 +50,13 @@ const columns = ref([
 ])
 
 const rows = ref([])
+
+const results = computed(() => {
+  if (searchFilter.value.planCategory == null) {
+    return [...rows.value]
+  }
+  return rows.value.filter((row) => row.plan_category_id == searchFilter.value.planCategory)
+})
 
 async function fetchActivities() {
   try {
@@ -58,10 +69,10 @@ async function fetchActivities() {
   }
 }
 
-async function fetchPlanTypes() {
+async function fetchCategories() {
   try {
     loading.value = true
-    planTypes.value = (await api.get('plan_types')).data.data
+    categories.value = (await api.get('plan_categories')).data.data
   } catch (error) {
     console.log(error)
   } finally {
@@ -85,8 +96,8 @@ async function save() {
     notify.positive(`Actividad ${action} exitosamente`)
     dialog.value = false
   } catch (error) {
+    notify.negative('Error al guardar los cambios')
     console.log(error)
-    notify.positive('Error al guardar los cambios')
   } finally {
     loading.value = false
   }
@@ -94,7 +105,7 @@ async function save() {
 
 onMounted(async () => {
   await fetchActivities()
-  fetchPlanTypes()
+  fetchCategories()
 })
 </script>
 
@@ -106,8 +117,12 @@ onMounted(async () => {
         outlined
         stack-label
         label="Plan"
-        v-model="planType"
-        :options="planTypes"
+        v-model="searchFilter.planCategory"
+        :options="baseCategories"
+        option-value="id"
+        option-label="label"
+        emit-value
+        map-options
       />
     </div>
     <div class="col-md-3">
@@ -115,8 +130,12 @@ onMounted(async () => {
         outlined
         type="search"
         label="Actividad"
-        v-model="search"
-      />
+        v-model="searchFilter.text"
+      >
+        <template v-slot:append>
+          <q-icon name="sym_o_search" />
+        </template>
+      </q-input>
     </div>
     <div class="col-md-3"></div>
     <div class="col-md-3 flex justify-end">
@@ -125,42 +144,52 @@ onMounted(async () => {
         color="primary"
         label="Nueva actividad"
         icon="sym_o_add"
-        @click="dialog = true"
+        @click="
+          () => {
+            dialog = true
+            data = {}
+          }
+        "
       />
     </div>
   </div>
-  <q-table
-    flat
-    bordered
-    :pagination="{ rowsPerPage: 0 }"
-    :columns="columns"
-    :rows="rows"
-  >
-    <template v-slot:body-cell-actions="props">
-      <q-td>
-        <div class="q-table__actions">
-          <q-btn
-            flat
-            round
-            dense
-            icon="sym_o_edit"
-            @click="
-              () => {
-                data = props.row
-                dialog = true
-              }
-            "
-          />
-          <!-- <q-btn
+
+  <div class="activities">
+    <q-table
+      flat
+      bordered
+      :pagination="{ rowsPerPage: 0 }"
+      :columns="columns"
+      :rows="results"
+      :filter="searchFilter.text"
+      class="activities-table"
+    >
+      <template v-slot:body-cell-actions="props">
+        <q-td>
+          <div class="q-table__actions">
+            <q-btn
+              flat
+              round
+              dense
+              icon="sym_o_edit"
+              @click="
+                () => {
+                  data = props.row
+                  dialog = true
+                }
+              "
+            />
+            <!-- <q-btn
             flat
             round
             dense
             icon="sym_o_delete"
           /> -->
-        </div>
-      </q-td>
-    </template>
-  </q-table>
+          </div>
+        </q-td>
+      </template>
+    </q-table>
+  </div>
 
   <q-dialog v-model="dialog">
     <q-card style="width: 420px">
@@ -175,8 +204,8 @@ onMounted(async () => {
               <q-select
                 dense
                 outlined
-                v-model="data.plan_type_id"
-                :options="planTypes"
+                v-model="data.plan_category_id"
+                :options="baseCategories"
                 emit-value
                 map-options
                 option-value="id"
@@ -233,3 +262,12 @@ onMounted(async () => {
     </q-card>
   </q-dialog>
 </template>
+
+<style lang="scss">
+table.activities-table td:nth-child(2),
+.activities table td:nth-child(2) {
+  max-width: 250px;
+  white-space: wrap;
+  padding-right: 2rem;
+}
+</style>

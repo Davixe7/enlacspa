@@ -1,11 +1,8 @@
 <script setup>
 import { api } from 'src/boot/axios'
-import { onMounted } from 'vue'
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import BeneficiaryProfile from './../components/BeneficiaryProfile.vue'
-import { useCandidateStore } from 'src/stores/candidate-store'
 
-const store = useCandidateStore()
 const props = defineProps(['programId'])
 const loading = ref(false)
 const program = ref({
@@ -24,14 +21,13 @@ async function fetchProgram() {
 }
 
 onMounted(async () => {
-  await store.fetchCandidate()
-  fetchProgram()
+  await fetchProgram()
 })
 </script>
 
 <template>
   <div class="flex items-center">
-    <div class="page-title">Programa Individual</div>
+    <div class="page-title">Detalles del Programa</div>
     <q-btn
       outline
       class="q-ml-auto"
@@ -42,7 +38,8 @@ onMounted(async () => {
   </div>
 
   <BeneficiaryProfile
-    :candidateId="program.candidate_id"
+    v-if="program && program.id"
+    :candidateId="program.candidate.id"
     class="q-mb-lg"
   />
 
@@ -50,7 +47,7 @@ onMounted(async () => {
     class="page-subtitle q-mb-lg text-center"
     v-if="program && program.id"
   >
-    {{ program.plan_type.label }} <span class="text-grey">/</span> {{ program.plan.name }}
+    {{ program.category.label }} <span class="text-grey">/</span> {{ program.subcategory.label }}
     <span class="text-grey">/</span> {{ program.name }}
   </div>
 
@@ -63,10 +60,11 @@ onMounted(async () => {
       <q-markup-table
         flat
         bordered
+        v-if="program && program.id"
       >
         <thead>
           <tr>
-            <th class="text-left">Nombre</th>
+            <th class="text-left">Actividad</th>
             <th class="text-left">Unidad</th>
             <th
               class="text-left"

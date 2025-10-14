@@ -1,5 +1,6 @@
 <script setup>
 //import { api } from 'src/boot/axios'
+import { api } from 'src/boot/axios'
 import { onMounted, ref } from 'vue'
 
 const loading = ref(false)
@@ -7,8 +8,7 @@ const data = ref([])
 async function fetchData() {
   try {
     loading.value = true
-    //data.value = (await api.get('programs/?type=group')).data.data
-    data.value = []
+    data.value = (await api.get('groups')).data.data
   } catch (error) {
     console.log(error)
   } finally {
@@ -28,7 +28,7 @@ const columns = ref([
   {
     name: 'candidates_count',
     label: 'Número de Beneficiarios',
-    field: 'beneficiaries_count',
+    field: 'candidates_count',
     sortable: false,
     align: 'left'
   },
@@ -59,14 +59,22 @@ onMounted(() => fetchData())
     flat
     bordered
   >
-    <template v-slot:body-cell-actions>
+    <template v-slot:body-cell-actions="props">
       <q-td>
         <div class="q-table__actions">
           <q-btn
             flat
             dense
             round
+            icon="visibility"
+            :to="`grupos/${props.row.id}`"
+          />
+          <q-btn
+            flat
+            dense
+            round
             icon="edit"
+            :to="`grupos/${props.row.id}/editar`"
           />
         </div>
       </q-td>
