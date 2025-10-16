@@ -1,13 +1,21 @@
 <script setup>
 import { api } from 'src/boot/axios'
-import { ref, onMounted } from 'vue'
-import notify from 'src/utils/notify'
+import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import notify from 'src/utils/notify'
 
 const route = useRoute()
-const props = defineProps(['groupId'])
+const props = defineProps(['groupId', 'newCopy'])
 const loading = ref(false)
 const recentId = ref(route.query.recent ? route.query.recent : null)
+
+watch(
+  () => props.newCopy,
+  (newVal) => {
+    console.log('newcopy')
+    rows.value.push(newVal)
+  }
+)
 
 const columns = ref([
   { name: 'category', label: 'Plan', field: (row) => row.category.label },
