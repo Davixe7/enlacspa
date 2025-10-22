@@ -74,7 +74,7 @@ const actions = ref([
   { disable: !authStore.can('kardexes.update'), icon: 'folder', route: 'kardex', label: 'Kardex' },
   { disable: false, icon: 'calendar_month', route: 'citas', label: 'Citas' },
   { disable: false, icon: 'attach_money', route: 'cuotas', label: 'Control de Cuotas' },
-  { disable: false, icon: 'list_alt_check', route: 'programas', label: 'Programacion Individual' }
+  { disable: false, icon: 'list_alt_check', route: 'planes', label: 'Programacion Individual' }
 ])
 </script>
 

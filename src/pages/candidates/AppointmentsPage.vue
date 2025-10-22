@@ -4,7 +4,7 @@ import { computed, onMounted, ref } from 'vue'
 import AppointmentForm from 'src/components/AppointmentForm.vue'
 
 const props = defineProps({
-  candidateId: { type: Number, required: true },
+  candidateId: { required: true },
   readonly: { type: Boolean, default: false }
 })
 const candidate = ref()

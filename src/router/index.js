@@ -1,5 +1,10 @@
 import { defineRouter } from '#q-app/wrappers'
-import { createRouter, createMemoryHistory, createWebHistory, createWebHashHistory } from 'vue-router'
+import {
+  createRouter,
+  createMemoryHistory,
+  createWebHistory,
+  createWebHashHistory
+} from 'vue-router'
 
 import routes from './routes'
 import admin from './admin'
@@ -14,7 +19,11 @@ import admin from './admin'
  */
 
 export default defineRouter(function (/* { store, ssrContext } */) {
-  const createHistory = process.env.SERVER ? createMemoryHistory : process.env.VUE_ROUTER_MODE === 'history' ? createWebHistory : createWebHashHistory
+  const createHistory = process.env.SERVER
+    ? createMemoryHistory
+    : process.env.VUE_ROUTER_MODE === 'history'
+      ? createWebHistory
+      : createWebHashHistory
 
   const Router = createRouter({
     scrollBehavior: () => ({ left: 0, top: 0 }),
@@ -24,18 +33,6 @@ export default defineRouter(function (/* { store, ssrContext } */) {
     // quasar.conf.js -> build -> vueRouterMode
     // quasar.conf.js -> build -> publicPath
     history: createHistory(process.env.VUE_ROUTER_BASE)
-  })
-
-  Router.beforeEach((to, from, next) => {
-    let layout = to.meta.layout || 'default'
-    if (layout === 'main') {
-      to.matched.splice(1, 1, {
-        ...to.matched[2],
-        path: to.matched[1].path,
-        meta: to.matched[1].meta
-      })
-    }
-    next()
   })
 
   return Router

@@ -1,9 +1,8 @@
 <script setup>
 import { api } from 'src/boot/axios'
 import { ref, onMounted } from 'vue'
-import BeneficiaryProfile from './../components/BeneficiaryProfile.vue'
 
-const props = defineProps(['programId'])
+const props = defineProps(['planId'])
 const loading = ref(false)
 const program = ref({
   activities: []
@@ -12,7 +11,7 @@ const program = ref({
 async function fetchProgram() {
   try {
     loading.value = true
-    program.value = (await api.get(`personal_programs/${props.programId}`)).data.data
+    program.value = (await api.get(`personal_programs/${props.planId}`)).data.data
   } catch (error) {
     console.log(error)
   } finally {
@@ -36,12 +35,6 @@ onMounted(async () => {
       icon="sym_o_add"
     />
   </div>
-
-  <BeneficiaryProfile
-    v-if="program && program.id"
-    :candidateId="program.candidate.id"
-    class="q-mb-lg"
-  />
 
   <div
     class="page-subtitle q-mb-lg text-center"

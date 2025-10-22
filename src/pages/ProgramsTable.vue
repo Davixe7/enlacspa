@@ -5,7 +5,7 @@ import { useRoute } from 'vue-router'
 import notify from 'src/utils/notify'
 
 const route = useRoute()
-const props = defineProps(['groupId', 'newCopy'])
+const props = defineProps(['groupId', 'candidateId', 'newCopy'])
 const loading = ref(false)
 const recentId = ref(route.query.recent ? route.query.recent : null)
 
@@ -64,14 +64,22 @@ onMounted(async () => {
             round
             dense
             icon="sym_o_edit"
-            :to="`/planes/${props.row.id}/editar`"
+            :to="
+              candidateId
+                ? `/beneficiarios/${candidateId}/planes/${props.row.id}/editar`
+                : `/grupos/${groupId}/planes/${props.row.id}/editar`
+            "
           />
           <q-btn
             flat
             round
             dense
             icon="sym_o_visibility"
-            :to="`/planes/${props.row.id}`"
+            :to="
+              candidateId
+                ? `/beneficiarios/${candidateId}/planes/${props.row.id}`
+                : `/grupos/${groupId}/planes/${props.row.id}`
+            "
           />
         </div>
       </q-td>

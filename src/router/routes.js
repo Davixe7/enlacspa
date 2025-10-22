@@ -1,3 +1,4 @@
+import admin from './admin'
 import beneficiary from './beneficiary'
 
 const auth = [
@@ -22,35 +23,47 @@ const candidates = [
   {
     path: '/candidatos',
     meta: { label: 'Candidatos y Evaluaciones' },
-    component: () => import('src/pages/candidates/CandidatesPage.vue'),
+    name: 'candidates',
+    redirect: { name: 'candidates.index' },
     children: [
       {
+        path: '',
+        component: () => import('src/pages/candidates/CandidatesPage.vue'),
+        meta: { hideBreadcrumbEl: true },
+        name: 'candidates.index'
+      },
+      {
         path: 'reportes',
-        meta: { label: 'Reportes de candidatos', layout: 'main' },
-        component: () => import('src/pages/candidates/CandidateReports.vue')
+        meta: { label: 'Reportes de candidatos' },
+        component: () => import('src/pages/candidates/CandidateReports.vue'),
+        name: 'candidates.reports'
       },
       {
         path: 'registrar',
-        meta: { label: 'Nuevo Candidato', layout: 'main' },
-        component: () => import('src/pages/candidates/CandidateForm.vue')
+        meta: { label: 'Nuevo Candidato' },
+        component: () => import('src/pages/candidates/CandidateForm.vue'),
+        name: 'candidates.create'
       },
       {
         path: ':candidateId/editar',
-        meta: { label: 'Editar Candidato', layout: 'main' },
+        meta: { label: 'Editar Candidato' },
         component: () => import('src/pages/candidates/CandidateForm.vue'),
-        props: true
+        props: true,
+        name: 'candidates.edit'
       },
       {
         path: ':candidateId/evaluar',
-        meta: { label: 'Evaluación', layout: 'main' },
+        meta: { label: 'Evaluación' },
         component: () => import('src/pages/candidates/EvaluationForm.vue'),
-        props: true
+        props: true,
+        name: 'candidates.evaluate'
       },
       {
         path: ':candidateId/entrevistar',
-        meta: { label: 'Entrevistar', layout: 'main' },
+        meta: { label: 'Entrevistar' },
         component: () => import('src/pages/candidates/InterviewForm.vue'),
-        props: true
+        props: true,
+        name: 'candidates.interview'
       }
     ]
   }
@@ -66,20 +79,20 @@ const padrinos = [
       {
         name: 'sponsors.create',
         path: 'registrar',
-        meta: { label: 'Formato de Padrino / Madrina', layout: 'main' },
+        meta: { label: 'Formato de Padrino / Madrina' },
         component: () => import('components/SponsorForm.vue'),
         props: true
       },
       {
         name: 'sponsors.edit',
         path: ':sponsorId/editar',
-        meta: { label: 'Editar padrino', layout: 'main' },
+        meta: { label: 'Editar padrino' },
         component: () => import('components/SponsorForm.vue'),
         props: true
       },
       {
         path: ':sponsorId',
-        meta: { label: 'Ahijados', layout: 'main' },
+        meta: { label: 'Ahijados' },
         component: () => import('src/pages/sponsors/SponsorPage.vue'),
         props: true
       }
@@ -92,6 +105,7 @@ const routes = [
   {
     path: '',
     meta: { label: 'Home', icon: 'home' },
+    name: 'home.home',
     redirect: '/home',
     component: () => import('layouts/MainLayout.vue'),
 
@@ -122,42 +136,7 @@ const routes = [
         component: () => import('pages/FinancialHistory.vue'),
         props: true
       },
-      {
-        path: '/notificaciones',
-        name: 'notifications',
-        meta: { label: 'Notificaciones', hideBreadcrumb: true },
-        component: () => import('pages/admin/NotificationsPage.vue')
-      },
-      {
-        path: '/usuarios',
-        name: 'users',
-        meta: { label: 'Usuarios', hideBreadcrumb: true },
-        component: () => import('pages/admin/UsersPage.vue')
-      },
-      {
-        path: '/puestos',
-        name: 'places',
-        meta: { label: 'Puestos', hideBreadcrumb: true },
-        component: () => import('pages/admin/RolesPage.vue')
-      },
-      {
-        path: '/areas-de-trabajo',
-        name: 'workareas',
-        meta: { label: 'Areas de trabajo', hideBreadcrumb: true },
-        component: () => import('pages/admin/WorkAreasPage.vue')
-      },
-      {
-        path: '/carrusel',
-        name: 'carrusel',
-        meta: { label: 'Carrusel', hideBreadcrumb: true },
-        component: () => import('pages/admin/DashboardSlides.vue')
-      },
-      {
-        path: '/anadir-diapositiva',
-        name: 'carrusel.addSlide',
-        meta: { label: 'Agregar diapositiva', hideBreadcrumb: true },
-        component: () => import('pages/admin/DashboardSlideForm.vue')
-      },
+      ...admin,
       ...candidates,
       ...padrinos,
       ...beneficiary,
@@ -168,71 +147,54 @@ const routes = [
         component: () => import('pages/ActivitiesPage.vue')
       },
       {
-        path: 'beneficiarios/:candidateId/programas',
-        name: 'programs.index',
-        meta: { label: 'Programas' },
-        props: true,
-        component: () => import('src/pages/BeneficiaryProgramsPage.vue')
-      },
-      {
-        path: 'beneficiarios/:candidateId/grupos/:groupId/planes/crear',
-        name: 'programs.create',
-        meta: { label: 'Elaborar Programa' },
-        props: true,
-        component: () => import('pages/ProgramForm.vue')
-      },
-      {
-        path: 'planes/:programId',
-        name: 'programs.show',
-        meta: { label: 'Detalles del Programa' },
-        props: true,
-        component: () => import('pages/ProgramPage.vue')
-      },
-      {
-        path: 'planes/crear',
-        name: 'plans.create',
-        meta: { label: 'Crear programa' },
-        props: true,
-        component: () => import('pages/ProgramForm.vue')
-      },
-      {
-        path: 'planes/:planId/editar',
-        name: 'plans.edit',
-        meta: { label: 'Editar plan' },
-        props: true,
-        component: () => import('pages/ProgramForm.vue')
-      },
-      {
         path: '/grupos',
         meta: { label: 'Grupos' },
-        component: () => import('pages/GroupsPage.vue'),
+        name: 'groups',
+        redirect: { name: 'groups.index' },
         children: [
           {
             path: 'catalogo',
-            meta: { label: 'Catalogo', layout: 'main' },
+            name: 'groups.index',
+            meta: { hideBreadcrumbEl: true },
             component: () => import('pages/GroupsPage.vue')
           },
           {
             path: 'crear',
-            meta: { label: 'Crear grupo', layout: 'main' },
+            name: 'groups.create',
+            meta: { label: 'Crear grupo' },
             props: true,
             component: () => import('pages/GroupsForm.vue')
           },
           {
             path: ':groupId',
-            meta: { label: 'Detalles del grupo', layout: 'main' },
+            name: 'groups.show',
+            meta: { label: 'Detalles del grupo' },
             props: true,
             component: () => import('src/pages/GroupProgramsPage.vue')
           },
           {
             path: ':groupId/editar',
-            meta: { label: 'Editar grupo', layout: 'main' },
+            name: 'groups.edit',
+            meta: { label: 'Editar grupo' },
             props: true,
             component: () => import('pages/GroupsForm.vue')
           },
+          // PLANES GRUPALES
           {
             path: ':groupId/planes/crear',
-            meta: { label: 'Agregar plan al grupo', layout: 'main' },
+            meta: { label: 'Agregar plan al grupo' },
+            props: true,
+            component: () => import('pages/ProgramForm.vue')
+          },
+          {
+            path: ':groupId/planes/:planId',
+            meta: { label: 'Detalles del plan grupal' },
+            props: true,
+            component: () => import('pages/ProgramPage.vue')
+          },
+          {
+            path: ':groupId/planes/:planId/editar',
+            meta: { label: 'Actualizar plan grupal' },
             props: true,
             component: () => import('pages/ProgramForm.vue')
           }

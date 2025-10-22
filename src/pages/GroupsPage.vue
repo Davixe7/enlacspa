@@ -67,14 +67,14 @@ onMounted(() => fetchData())
             dense
             round
             icon="visibility"
-            :to="`grupos/${props.row.id}`"
+            :to="`/grupos/${props.row.id}`"
           />
           <q-btn
             flat
             dense
             round
             icon="edit"
-            :to="`grupos/${props.row.id}/editar`"
+            :to="`/grupos/${props.row.id}/editar`"
           />
         </div>
       </q-td>

@@ -67,14 +67,15 @@
       >
         <q-breadcrumbs>
           <q-breadcrumbs-el
-            v-for="rt in route.matched"
+            v-for="rt in matchedRoutes"
             :key="rt.path"
             :label="rt.meta.label"
             :icon="rt.meta.icon"
-            :to="rt.path ?? null"
+            :to="rt.name ? { name: rt.name, props: rt.props } : null"
           />
         </q-breadcrumbs>
       </div>
+
       <div :style="{ padding: route.meta.noPadding ? 0 : '16px 32px 32px' }">
         <router-view />
       </div>
@@ -87,11 +88,13 @@ import AdminMenu from './AdminMenu.vue'
 import { useAuthStore } from 'src/stores/user-store'
 import { useNotificationStore } from 'src/stores/notification-store'
 
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useMeta } from 'quasar'
+const route = useRoute()
 
 onMounted(() => {
+  route.matched.forEach((rt) => console.log(rt.name + ' ' + rt.path))
   useAuthStore().fetchUser()
   useNotificationStore().fetchNotifications()
   useMeta(() => ({ title: route.meta.label }))
@@ -100,8 +103,10 @@ onMounted(() => {
 const authStore = useAuthStore()
 const notificationStore = useNotificationStore()
 
-const route = useRoute()
 const span = ref({ label: 'semanal', value: '1' })
+const matchedRoutes = computed(() =>
+  route.matched.filter((rt) => Boolean(!rt.meta.hideBreadcrumbEl))
+)
 </script>
 
 <style>

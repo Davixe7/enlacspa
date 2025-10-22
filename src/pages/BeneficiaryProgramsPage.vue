@@ -2,12 +2,13 @@
 import { useCandidateStore } from 'src/stores/candidate-store'
 import { onMounted, ref } from 'vue'
 import { api } from 'src/boot/axios'
-import BeneficiaryProfile from 'src/components/BeneficiaryProfile.vue'
 import ProgramsTable from './ProgramsTable.vue'
 import ProgramCopy from './ProgramCopy.vue'
 
 const loading = ref(true)
-const props = defineProps(['candidateId'])
+const props = defineProps({
+  candidateId: { required: true }
+})
 const store = useCandidateStore()
 const groups = ref([])
 const copyDialog = ref(false)
@@ -27,11 +28,6 @@ onMounted(async () => {
 </script>
 
 <template>
-  <BeneficiaryProfile
-    :candidateId="candidateId"
-    class="q-mb-lg"
-  />
-
   <div class="flex items-center justify-between">
     <div class="page-title">Programa Individual</div>
 
@@ -51,10 +47,7 @@ onMounted(async () => {
         color="primary"
         icon="sym_o_add"
         label="Nuevo"
-        :to="{
-          name: 'programs.create',
-          params: { candidateId: props.candidateId, groupId: store.group_id }
-        }"
+        :to="{ name: 'programs.create', params: { candidateId: props.candidateId } }"
       />
     </div>
   </div>
@@ -63,6 +56,7 @@ onMounted(async () => {
     <ProgramCopy
       :groupId="store.group_id"
       @save="appendCopy"
+      @close="copyDialog = false"
     />
   </q-dialog>
 
@@ -70,5 +64,6 @@ onMounted(async () => {
     v-if="!loading"
     :newCopy="newCopy"
     :groupId="store.group_id"
+    :candidateId="props.candidateId"
   />
 </template>

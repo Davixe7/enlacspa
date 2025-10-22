@@ -40,6 +40,7 @@ const activities = computed(() => {
 const program = ref({
   id: null,
   group_id: props.groupId,
+  candidate_id: props.candidateId,
   category_id: null,
   subcategory_id: null,
   name: '',
@@ -111,22 +112,26 @@ function formatActivities() {
   }, {})
 }
 
+const redirectTo = computed(() =>
+  props.candidateId
+    ? { name: 'programs.index', props: { candidateId: props.candidateId } }
+    : { name: 'groups.show', props: { groupId: props.groupId ?? program.value.group_id } }
+)
+
 async function saveProgram() {
   try {
     loading.value = true
-    let data = { ...program.value, activities: formatActivities() }
-    data = props.planId ? { ...data, _method: 'PUT' } : data
+    let data = {
+      ...program.value,
+      activities: formatActivities(),
+      _method: props.planId ? 'PUT' : 'POST'
+    }
     let route = props.planId ? `plans/${props.planId}` : 'plans'
     let result = (await api.post(route, data)).data.data
     notify.positive('Programa guardado exitosamente.')
-    let redirectTo = props.candidateId
-      ? `/beneficiarios/${props.candidateId}/programas/?recent=${result.id}`
-      : `/grupos/${props.groupId ? props.groupId : program.value.group_id}/?recent=${result.id}`
-    router.push(redirectTo)
+    router.push({ ...redirectTo, params: { recent: result.id } })
   } catch (error) {
-    if (error.formatted) {
-      errors.value = error.formatted
-    }
+    errors.value = error.response.status == '422' ? error.formatted : errors.value
     notify.negative('No se pudo registrar el programa.')
     console.log(error)
   } finally {

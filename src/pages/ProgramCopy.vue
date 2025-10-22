@@ -54,7 +54,7 @@ onMounted(() => fetchPrograms())
             flat
             round
             icon="close"
-            @click="copyDialog = false"
+            @click="$emit('close')"
             class="q-ml-auto"
           />
         </div>
