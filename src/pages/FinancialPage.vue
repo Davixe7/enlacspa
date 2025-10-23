@@ -10,8 +10,8 @@ const columns = ref([
   { name: 'id', label: 'Folio', field: 'id', align: 'left', sortable: true },
   { name: 'program', label: 'Programa', field: (row) => row.program.name, align: 'left' },
   { name: 'parents', label: 'Cuota Padres (mes)', align: 'left' },
-  { name: 'sponsors', label: 'Cuota Padrinos (mes)', align: 'left' },
-  { name: 'enlac', label: 'Beca ENLAC (mes)', field: (row) => row.enlacs_amount, align: 'left' }
+  { name: 'sponsors', label: 'Aportación de Padrinos (mes)', align: 'left' },
+  { name: 'enlac', label: 'Cuota ENLAC (mes)', field: (row) => row.enlacs_amount, align: 'left' }
 ])
 
 const fecha = new Date()
