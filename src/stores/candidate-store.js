@@ -42,6 +42,10 @@ export const useCandidateStore = defineStore('candidate', {
       } finally {
         this.loading = false
       }
+    },
+
+    async updateTransport(payload) {
+      return api.put(`/beneficiaries/${this.id}`, payload)
     }
   }
 })
