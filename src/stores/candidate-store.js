@@ -1,5 +1,6 @@
 import { defineStore, acceptHMRUpdate } from 'pinia'
 import { api } from 'src/boot/axios'
+import notify from 'src/utils/notify'
 
 export const useCandidateStore = defineStore('candidate', {
   state: () => ({
@@ -15,6 +16,10 @@ export const useCandidateStore = defineStore('candidate', {
     diagnosis: '',
     info_channel: null,
     sheet: 1,
+    requires_transport: false,
+    transport_address: null,
+    transport_location_link: null,
+    curp: null,
     onboard_at: null,
     loading: false,
     contacts: [],
@@ -24,6 +29,8 @@ export const useCandidateStore = defineStore('candidate', {
     interviewee: {},
     program: null,
     medications: [],
+    equinetherapy_permission_medical: 0,
+    equinetherapy_permission_legal_guardian: 0,
     group_id: null,
     errors: {}
   }),
@@ -45,7 +52,33 @@ export const useCandidateStore = defineStore('candidate', {
     },
 
     async updateTransport(payload) {
-      return api.put(`/beneficiaries/${this.id}`, payload)
+      return api.put(`/transport/${this.id}`, payload)
+    },
+
+    async updateEquineTherapyPermission(payload) {
+      try {
+        this.loading = true
+        await api.put(`/beneficiaries/${this.id}/equinetherapy`, payload)
+        notify.positive('Permisos de equinoterapia actualizados.')
+      } catch (error) {
+        notify.negative('Error al actualizar permisos de equinoterapia.')
+        throw Error(error)
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async cancelTransport() {
+      try {
+        this.loading = true
+        await api.post(`transport/${this.id}`, { _method: 'DELETE' })
+        notify.positive('Datos de transporte actualizados.')
+      } catch (error) {
+        console.log(error)
+        notify.negative('Error al actualizar datos de transporte.')
+      } finally {
+        this.loading = false
+      }
     }
   }
 })

@@ -141,6 +141,17 @@ onMounted(async () => {
             required
             outlined
             stack-label
+            label="Número de Empleado"
+            v-model="user.employee_number"
+            hide-bottom-space
+            :error="!!errors.employee_number"
+            :error-message="errors.employee_number"
+          ></q-input>
+
+          <q-input
+            required
+            outlined
+            stack-label
             label="Nombre"
             v-model="user.name"
             hide-bottom-space

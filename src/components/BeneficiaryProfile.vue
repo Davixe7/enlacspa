@@ -1,13 +1,13 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useCandidateStore } from 'src/stores/candidate-store'
-import { useQuasar } from 'quasar'
+import TransportModal from 'src/components/TransportModal.vue'
 
-const $q = useQuasar()
 const props = defineProps(['candidateId'])
 const candidateStore = useCandidateStore()
 
-const requiresTransport = ref(false)
+const showTransportModal = ref(false)
+const requiresTransport = ref(0)
 const transportAddress = ref('')
 const transportLocationLink = ref('')
 const curp = ref('')
@@ -30,15 +30,23 @@ const relationships = {
   tio: 'Tío(a)'
 }
 
+watch(requiresTransport, (newVal) => {
+  if (newVal == false) {
+    candidateStore.cancelTransport()
+  }
+})
+
 onMounted(async () => {
   candidateStore.id = props.candidateId
   await candidateStore.fetchCandidate()
 
+  const isTransportRequired = parseInt(candidateStore.requires_transport) || 0
+
   originalValues = {
-    requires_transport: candidateStore.requires_transport || false,
-    transport_address: candidateStore.transport_address || '',
-    transport_location_link: candidateStore.transport_location_link || '',
-    curp: candidateStore.curp || ''
+    requires_transport: isTransportRequired,
+    transport_address: candidateStore.transport_address ?? '',
+    transport_location_link: candidateStore.transport_location_link ?? '',
+    curp: candidateStore.curp ?? ''
   }
 
   requiresTransport.value = originalValues.requires_transport
@@ -46,65 +54,6 @@ onMounted(async () => {
   transportLocationLink.value = originalValues.transport_location_link
   curp.value = originalValues.curp
 })
-
-const isValidGoogleMapsLink = (url) => {
-  return /^https?:\/\/(www\.)?google\.[a-z]+\/maps/.test(url)
-}
-
-const openGoogleMaps = () => {
-  if (isValidGoogleMapsLink(transportLocationLink.value)) {
-    window.open(transportLocationLink.value, '_blank')
-  } else {
-    $q.notify({
-      type: 'negative',
-      message: 'El enlace de ubicación no es válido.'
-    })
-  }
-}
-
-const saveTransportData = async () => {
-  if (requiresTransport.value && !curp.value) {
-    $q.notify({
-      type: 'negative',
-      message: 'CURP es obligatorio si requiere transporte.'
-    })
-    return
-  }
-
-  const payload = {
-    requires_transport: requiresTransport.value,
-    transport_address: transportAddress.value,
-    transport_location_link: transportLocationLink.value,
-    curp: curp.value
-  }
-
-  try {
-    await candidateStore.updateTransport(payload)
-    originalValues = { ...payload }
-    $q.notify({
-      type: 'positive',
-      message: 'Datos de transporte actualizados correctamente.'
-    })
-  } catch (error) {
-    $q.notify({
-      type: 'negative',
-      message: 'Error al guardar los datos.'
-    })
-    console.log(error)
-  }
-}
-
-const cancelChanges = () => {
-  requiresTransport.value = originalValues.requires_transport
-  transportAddress.value = originalValues.transport_address
-  transportLocationLink.value = originalValues.transport_location_link
-  curp.value = originalValues.curp
-
-  $q.notify({
-    type: 'info',
-    message: 'Cambios descartados.'
-  })
-}
 </script>
 
 <template>
@@ -160,82 +109,102 @@ const cancelChanges = () => {
           <div class="form-value">{{ candidateStore.program?.name }}</div>
         </div>
       </div>
-
-      <!-- Transporte editable -->
+      <!-- Transporte -->
       <div
         class="form-row"
         style="border-top: 1px solid #ccc; padding-top: 15px; margin-top: 15px"
       >
         <div class="form-group">
           <div class="form-label">¿Requiere transporte Cuauhtémoc - Rubio?</div>
-          <q-option-group
-            v-model="requiresTransport"
-            :options="[
-              { label: 'Sí', value: true },
-              { label: 'No', value: false }
-            ]"
-            type="radio"
-            inline
+          <q-radio
+            label="Sí"
+            :val="1"
+            v-model.number="requiresTransport"
+          />
+          <q-radio
+            label="No"
+            :val="0"
+            v-model.number="requiresTransport"
+          />
+        </div>
+
+        <div v-if="requiresTransport === 1">
+          <q-btn
+            label="Ver / Editar transporte"
+            color="primary"
+            class="q-mt-sm"
+            @click="showTransportModal = true"
           />
         </div>
       </div>
 
-      <template v-if="requiresTransport">
-        <div class="form-row">
-          <div class="form-group">
-            <div class="form-label">Dirección</div>
-            <q-input
-              v-model="transportAddress"
-              filled
-              placeholder="Dirección de recolección"
-            />
-          </div>
-
-          <div class="form-group">
-            <div class="form-label">Ubicación (Google Maps)</div>
-            <q-input
-              v-model="transportLocationLink"
-              filled
-              placeholder="https://maps.google.com/..."
-              type="url"
-            />
-            <q-btn
-              label="Abrir en Google Maps"
-              color="secondary"
-              flat
-              size="sm"
-              class="q-mt-sm"
-              @click="openGoogleMaps"
-            />
-          </div>
-
-          <div class="form-group">
-            <div class="form-label">CURP <span class="text-negative">*</span></div>
-            <q-input
-              v-model="curp"
-              filled
-              placeholder="CURP del beneficiario"
-            />
-          </div>
-        </div>
-      </template>
-
-      <!-- Botones -->
       <div class="form-row">
-        <q-btn
-          label="Guardar Transporte"
-          color="primary"
-          @click="saveTransportData"
-          class="q-mr-sm q-mt-sm"
-        />
-        <q-btn
-          label="Cancelar"
-          color="grey"
-          class="q-mt-sm"
-          flat
-          @click="cancelChanges"
-        />
+        <div class="form-group">
+          <div class="form-label">Permiso para Equinoterapia por Médico</div>
+          <q-radio
+            label="Sí"
+            :val="1"
+            v-model.number="candidateStore.equinetherapy_permission_medical"
+            @update:model-value="
+              candidateStore.updateEquineTherapyPermission({
+                equinetherapy_permission_medical: candidateStore.equinetherapy_permission_medical
+              })
+            "
+          />
+          <q-radio
+            label="No"
+            :val="0"
+            v-model.number="candidateStore.equinetherapy_permission_medical"
+            @update:model-value="
+              candidateStore.updateEquineTherapyPermission({
+                equinetherapy_permission_medical: candidateStore.equinetherapy_permission_medical
+              })
+            "
+          />
+        </div>
+
+        <div class="form-group">
+          <div class="form-label">Permiso para Equinoterapia por Tutor Legal</div>
+          <q-radio
+            label="Sí"
+            :val="1"
+            v-model.number="candidateStore.equinetherapy_permission_legal_guardian"
+            @update:model-value="
+              candidateStore.updateEquineTherapyPermission({
+                equinetherapy_permission_legal_guardian:
+                  candidateStore.equinetherapy_permission_legal_guardian
+              })
+            "
+          />
+          <q-radio
+            label="No"
+            :val="0"
+            v-model.number="candidateStore.equinetherapy_permission_legal_guardian"
+            @update:model-value="
+              candidateStore.updateEquineTherapyPermission({
+                equinetherapy_permission_legal_guardian:
+                  candidateStore.equinetherapy_permission_legal_guardian
+              })
+            "
+          />
+        </div>
       </div>
     </div>
+
+    <TransportModal
+      v-model="showTransportModal"
+      :requires-transport="requiresTransport"
+      :transport-address="transportAddress"
+      :transport-location-link="transportLocationLink"
+      :curp="curp"
+      @save="
+        (payload) => {
+          requiresTransport = payload.requires_transport ? 1 : 0
+          transportAddress = payload.transport_address
+          transportLocationLink = payload.transport_location_link
+          curp = payload.curp
+        }
+      "
+    />
   </div>
 </template>
