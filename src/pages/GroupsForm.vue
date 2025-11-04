@@ -18,6 +18,18 @@ const items = computed(() => {
   return data.value.filter((item) => item.name.toLowerCase().includes(search.value.toLowerCase()))
 })
 
+const enlacUsers = ref([])
+
+async function fetchEnlacUsers() {
+  try {
+    const response = await api.get('/users')
+    enlacUsers.value = response.data.data
+  } catch (error) {
+    console.error(error)
+    notify.negative('No se pudieron cargar los usuarios ENLAC')
+  }
+}
+
 async function fetchData() {
   try {
     loading.value = true
@@ -62,8 +74,9 @@ async function fetchGroup() {
   if (!props.groupId) return
   try {
     loading.value = true
-    group.value = (await api.get(`/groups/${props.groupId}`)).data.data
-    picked.value = group.value.candidates.map((candidate) => candidate.id)
+    const response = await api.get(`/groups/${props.groupId}`)
+    group.value = response.data.data
+    picked.value = (group.value.candidates || []).map((candidate) => candidate.id)
   } catch (error) {
     console.log(error)
     notify.negative('Error al cargar el grupo')
@@ -76,6 +89,7 @@ onMounted(() => {
   fetchGroup()
   fetchData()
   fetchPrograms()
+  fetchEnlacUsers()
 })
 </script>
 
@@ -92,7 +106,7 @@ onMounted(() => {
             <h1 class="page-title page-title--no-margin q-pb-md">
               {{ props.groupId ? 'Actualizar' : 'Crear' }} grupo
             </h1>
-            <div style="font-size: 18px; padding-bottom: 16px">Informacion Basica</div>
+            <div style="font-size: 18px; padding-bottom: 16px">Información Básica</div>
             <div class="q-gutter-y-md">
               <q-input
                 outlined
@@ -107,6 +121,30 @@ onMounted(() => {
                 v-model="group.program_id"
                 :options="programs"
                 option-label="name"
+                option-value="id"
+                emit-value
+                map-options
+              />
+
+              <q-select
+                outlined
+                stack-label
+                label="Titular del Grupo"
+                v-model="group.group_leader_id"
+                :options="enlacUsers"
+                option-label="full_name"
+                option-value="id"
+                emit-value
+                map-options
+              />
+
+              <q-select
+                outlined
+                stack-label
+                label="Asistente"
+                v-model="group.assistant_id"
+                :options="enlacUsers"
+                option-label="full_name"
                 option-value="id"
                 emit-value
                 map-options

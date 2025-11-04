@@ -33,6 +33,20 @@ const columns = ref([
     align: 'left'
   },
   {
+    name: 'leader',
+    label: 'Titular',
+    field: (row) => row.titular,
+    sortable: false,
+    align: 'left'
+  },
+  {
+    name: 'assistant',
+    label: 'Asistente',
+    field: (row) => row.asistente,
+    sortable: false,
+    align: 'left'
+  },
+  {
     name: 'actions',
     label: 'Acciones',
     sortable: false,
