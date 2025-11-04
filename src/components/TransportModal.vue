@@ -12,6 +12,12 @@ const props = defineProps({
   curp: String
 })
 
+const showMapHelpModal = ref(false)
+
+const openGoogleMapsSearch = () => {
+  window.open('https://www.google.com/maps', '_blank')
+}
+
 const emit = defineEmits(['update:modelValue', 'save'])
 
 const dialogVisible = ref(props.modelValue)
@@ -49,17 +55,6 @@ watch(
 
 const isValidGoogleMapsLink = (url) => {
   return /^https?:\/\/(www\.)?google\.[a-z]+\/maps/.test(url)
-}
-
-const openGoogleMaps = () => {
-  if (isValidGoogleMapsLink(localTransportLocationLink.value)) {
-    window.open(localTransportLocationLink.value, '_blank')
-  } else {
-    $q.notify({
-      type: 'negative',
-      message: 'El enlace de ubicación no es válido.'
-    })
-  }
 }
 
 const saveTransport = async () => {
@@ -117,11 +112,12 @@ const saveTransport = async () => {
           class="q-mb-sm"
         />
         <q-btn
-          label="Abrir en Google Maps"
-          color="secondary"
+          label="Buscar ubicación en Google Maps"
+          color="primary"
           flat
           size="sm"
-          @click="openGoogleMaps"
+          class="q-mt-sm"
+          @click="showMapHelpModal = true"
         />
 
         <template v-if="isValidGoogleMapsLink(localTransportLocationLink)">
@@ -155,6 +151,44 @@ const saveTransport = async () => {
           label="Cancelar"
           flat
           @click="emit('update:modelValue', false)"
+        />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
+
+  <!-- Modal de google maps -->
+  <q-dialog v-model="showMapHelpModal">
+    <q-card style="width: 400px; max-width: 90vw">
+      <q-card-section class="row items-center justify-between">
+        <div class="text-h6">¿Cómo obtener el enlace?</div>
+        <q-btn
+          icon="close"
+          flat
+          round
+          dense
+          @click="showMapHelpModal = false"
+        />
+      </q-card-section>
+
+      <q-card-section>
+        <p>Haz clic en el botón para abrir Google Maps en una nueva pestaña.</p>
+        <p>
+          Busca la dirección, haz clic derecho sobre el marcador y selecciona
+          <strong>“Compartir”</strong>.
+        </p>
+        <p>Copia el enlace y pégalo en el campo de ubicación.</p>
+      </q-card-section>
+
+      <q-card-actions align="right">
+        <q-btn
+          label="Abrir Google Maps"
+          color="primary"
+          @click="openGoogleMapsSearch"
+        />
+        <q-btn
+          label="Cerrar"
+          flat
+          @click="showMapHelpModal = false"
         />
       </q-card-actions>
     </q-card>

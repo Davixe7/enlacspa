@@ -2,6 +2,7 @@
 import { ref, onMounted, watch } from 'vue'
 import { useCandidateStore } from 'src/stores/candidate-store'
 import TransportModal from 'src/components/TransportModal.vue'
+import { nextTick } from 'vue'
 
 const props = defineProps(['candidateId'])
 const candidateStore = useCandidateStore()
@@ -20,6 +21,22 @@ let originalValues = {
   curp: ''
 }
 
+// variable bandera para prevenir el lanzamiento automatico de la modal del transporte sin accion directa del usuario al cargar la pagina
+const hasInteracted = ref(false)
+
+const isValidGoogleMapsLink = (url) => {
+  return (
+    /^https?:\/\/(www\.)?google\.[a-z]+\/maps/.test(url) ||
+    /^https?:\/\/maps\.app\.goo\.gl/.test(url)
+  )
+}
+
+const openGoogleMaps = () => {
+  if (isValidGoogleMapsLink(transportLocationLink.value)) {
+    window.open(transportLocationLink.value, '_blank')
+  }
+}
+
 const relationships = {
   abuelo: 'Abuelo(a)',
   hermano: 'Hermano(a)',
@@ -30,8 +47,16 @@ const relationships = {
   tio: 'Tío(a)'
 }
 
-watch(requiresTransport, (newVal) => {
-  if (newVal == false) {
+watch(requiresTransport, async (newVal, oldVal) => {
+  if (!hasInteracted.value) {
+    hasInteracted.value = true
+    return
+  }
+
+  if (newVal === 1 && oldVal !== 1) {
+    await nextTick()
+    showTransportModal.value = true
+  } else if (newVal === 0) {
     candidateStore.cancelTransport()
   }
 })
@@ -109,86 +134,106 @@ onMounted(async () => {
           <div class="form-value">{{ candidateStore.program?.name }}</div>
         </div>
       </div>
-      <!-- Transporte -->
-      <div
-        class="form-row"
-        style="border-top: 1px solid #ccc; padding-top: 15px; margin-top: 15px"
+
+      <q-expansion-item
+        label="Información adicional del beneficiario"
+        icon="expand_more"
+        expand-separator
+        dense
+        header-class="text-primary"
       >
-        <div class="form-group">
-          <div class="form-label">¿Requiere transporte Cuauhtémoc - Rubio?</div>
-          <q-radio
-            label="Sí"
-            :val="1"
-            v-model.number="requiresTransport"
-          />
-          <q-radio
-            label="No"
-            :val="0"
-            v-model.number="requiresTransport"
-          />
+        <!-- Transporte -->
+        <div class="form-row q-mt-md">
+          <div class="form-group">
+            <div class="form-label">¿Requiere transporte Cuauhtémoc - Rubio?</div>
+            <q-radio
+              label="Sí"
+              :val="1"
+              v-model.number="requiresTransport"
+            />
+            <q-radio
+              label="No"
+              :val="0"
+              v-model.number="requiresTransport"
+            />
+          </div>
+
+          <div v-if="requiresTransport === 1">
+            <q-btn
+              label="Ver / Editar transporte"
+              color="primary"
+              class="q-mt-sm"
+              @click="showTransportModal = true"
+            />
+            <div
+              v-if="isValidGoogleMapsLink(transportLocationLink)"
+              class="form-group q-mt-sm"
+            >
+              <div class="form-label">Ubicación en Google Maps</div>
+              <q-btn
+                label="Ver ubicación"
+                color="secondary"
+                flat
+                size="sm"
+                @click="openGoogleMaps"
+              />
+            </div>
+          </div>
         </div>
 
-        <div v-if="requiresTransport === 1">
-          <q-btn
-            label="Ver / Editar transporte"
-            color="primary"
-            class="q-mt-sm"
-            @click="showTransportModal = true"
-          />
-        </div>
-      </div>
+        <!-- Equinoterapia -->
+        <div class="form-row q-mt-md">
+          <div class="form-group">
+            <div class="form-label">Permiso para Equinoterapia por Médico</div>
+            <q-radio
+              label="Sí"
+              :val="1"
+              v-model.number="candidateStore.equinetherapy_permission_medical"
+              @update:model-value="
+                candidateStore.updateEquineTherapyPermission({
+                  equinetherapy_permission_medical: candidateStore.equinetherapy_permission_medical
+                })
+              "
+            />
+            <q-radio
+              label="No"
+              :val="0"
+              v-model.number="candidateStore.equinetherapy_permission_medical"
+              @update:model-value="
+                candidateStore.updateEquineTherapyPermission({
+                  equinetherapy_permission_medical: candidateStore.equinetherapy_permission_medical
+                })
+              "
+            />
+          </div>
 
-      <div class="form-row">
-        <div class="form-group">
-          <div class="form-label">Permiso para Equinoterapia por Médico</div>
-          <q-radio
-            label="Sí"
-            :val="1"
-            v-model.number="candidateStore.equinetherapy_permission_medical"
-            @update:model-value="
-              candidateStore.updateEquineTherapyPermission({
-                equinetherapy_permission_medical: candidateStore.equinetherapy_permission_medical
-              })
-            "
-          />
-          <q-radio
-            label="No"
-            :val="0"
-            v-model.number="candidateStore.equinetherapy_permission_medical"
-            @update:model-value="
-              candidateStore.updateEquineTherapyPermission({
-                equinetherapy_permission_medical: candidateStore.equinetherapy_permission_medical
-              })
-            "
-          />
+          <div class="form-group">
+            <div class="form-label">Permiso para Equinoterapia por Tutor Legal</div>
+            <q-radio
+              label="Sí"
+              :val="1"
+              v-model.number="candidateStore.equinetherapy_permission_legal_guardian"
+              @update:model-value="
+                candidateStore.updateEquineTherapyPermission({
+                  equinetherapy_permission_legal_guardian:
+                    candidateStore.equinetherapy_permission_legal_guardian
+                })
+              "
+            />
+            <q-radio
+              label="No"
+              :val="0"
+              v-model.number="candidateStore.equinetherapy_permission_legal_guardian"
+              @update:model-value="
+                candidateStore.updateEquineTherapyPermission({
+                  equinetherapy_permission_legal_guardian:
+                    candidateStore.equinetherapy_permission_legal_guardian
+                })
+              "
+            />
+          </div>
         </div>
-
-        <div class="form-group">
-          <div class="form-label">Permiso para Equinoterapia por Tutor Legal</div>
-          <q-radio
-            label="Sí"
-            :val="1"
-            v-model.number="candidateStore.equinetherapy_permission_legal_guardian"
-            @update:model-value="
-              candidateStore.updateEquineTherapyPermission({
-                equinetherapy_permission_legal_guardian:
-                  candidateStore.equinetherapy_permission_legal_guardian
-              })
-            "
-          />
-          <q-radio
-            label="No"
-            :val="0"
-            v-model.number="candidateStore.equinetherapy_permission_legal_guardian"
-            @update:model-value="
-              candidateStore.updateEquineTherapyPermission({
-                equinetherapy_permission_legal_guardian:
-                  candidateStore.equinetherapy_permission_legal_guardian
-              })
-            "
-          />
-        </div>
-      </div>
+      </q-expansion-item>
     </div>
 
     <TransportModal
