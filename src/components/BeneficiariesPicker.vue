@@ -1,7 +1,6 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { api } from 'src/boot/axios'
-import { onMounted } from 'vue'
 
 const props = defineProps(['modelValue', 'disable'])
 const emits = defineEmits(['update:modelValue'])
@@ -65,7 +64,7 @@ const cargarMasOpciones = async (evt) => {
     :disable="props.disable"
     outlined
     dense
-    @change="emits('update:modelValue', selectedId)"
+    @update:model-value="emits('update:modelValue', selectedId)"
     use-input
     :key="selectedId"
     v-model="selectedId"

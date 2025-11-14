@@ -45,8 +45,8 @@ const columns = ref([
       color="primary"
       icon="sym_o_add"
       to="/padrinos/registrar"
-      >Agregar Padrino
-    </q-btn>
+      label="Agregar Padrino"
+    />
   </div>
 
   <q-table

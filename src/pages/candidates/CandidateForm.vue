@@ -7,6 +7,11 @@ import MedicationsPage from './MedicationsPage.vue'
 import Notify from 'src/utils/notify'
 import { scrollToFirstError } from 'src/utils/focusError'
 import { useRouter } from 'vue-router'
+import { useQuasar } from 'quasar'
+import ProgramarIngresoDialog from 'src/pages/beneficiaries/ProgramarIngresoDialog.vue'
+import { formatDate } from 'src/utils/formatDate'
+
+const $q = useQuasar()
 
 const router = useRouter()
 const props = defineProps({
@@ -131,8 +136,11 @@ const candidate = ref({
   chronological_age: null,
   diagnosis: '',
   info_channel: infoChannels.value[infoChannels.value.length - 1],
-  sheet: 1
+  sheet: 1,
+  program_id: null,
+  program_name: ''
 })
+
 const contacts = ref([])
 const medications = ref([])
 const evaluators = ref([])
@@ -166,75 +174,157 @@ const chronological_age = computed(() => {
   let diff = now.diff(birth_date, 'months')
   return `${Math.floor(diff.months)} meses`
 })
+
+/* ---------------- Métodos de estados ---------------- */
+
+const onReingresar = async () => {
+  const { comment } = await $q
+    .dialog({
+      title: 'Reingreso',
+      message: 'Ingrese comentario para el reingreso',
+      prompt: { model: '', type: 'text' },
+      cancel: true,
+      ok: { label: 'Reingresar', color: 'primary' }
+    })
+    .onOk((val) => ({ comment: val }))
+
+  await api.post(`beneficiaries/${props.candidateId}/reingreso`, { comment })
+  $q.notify({ type: 'positive', message: 'Beneficiario reingresado' })
+}
+
+const onListoIngresar = async () => {
+  const { comment } = await $q
+    .dialog({
+      title: 'Listo para ingresar',
+      message: 'Ingrese comentario para el cambio de estatus',
+      prompt: { model: '', type: 'text' },
+      cancel: true,
+      ok: { label: 'Guardar', color: 'primary' }
+    })
+    .onOk((val) => ({ comment: val }))
+
+  await api.post(`beneficiaries/${props.candidateId}/status`, {
+    status: 'listo_ingresar',
+    comment
+  })
+  $q.notify({ type: 'positive', message: 'Beneficiario marcado como listo para ingresar' })
+}
+
+const onProgramarIngreso = (param) => {
+  console.log(param)
+  $q.dialog({
+    component: ProgramarIngresoDialog,
+    componentProps: { candidate: param }
+  }).onOk(async (payload) => {
+    await api.post(`beneficiaries/${param.id}/status`, {
+      status: 'programar_ingreso',
+      comment: 'Programar ingreso',
+      program_id: payload.programId,
+      scheduled_entry_date: payload.entryDate,
+      observations: payload.observations.value
+    })
+
+    candidate.value.status = 'ingreso_programado'
+    candidate.value.scheduled_entry_date = formatDate(payload.entryDate)
+
+    $q.notify({ type: 'positive', message: 'Ingreso programado correctamente' })
+  })
+}
 </script>
 
 <template>
   <q-page>
-    <div class="form-section">
-      <div class="page-title">Datos del Candidato</div>
-      <div class="row q-col-gutter-lg">
-        <div class="col-12 col-md-6 q-gutter-y-lg">
-          <q-input
-            outlined
-            stack-label
-            hide-bottom-space
-            label="Nombre (s)"
-            v-model="candidate.first_name"
-            class="q-field--required"
-            :error="!!errors['candidate.first_name']"
-            :error-message="errors['candidate.first_name']"
-          ></q-input>
-          <q-input
-            outlined
-            stack-label
-            hide-bottom-space
-            label="Apellido Paterno"
-            v-model="candidate.last_name"
-            class="q-field--required"
-            :error="!!errors['candidate.last_name']"
-            :error-message="errors['candidate.last_name']"
-          ></q-input>
-          <q-input
-            outlined
-            stack-label
-            hide-bottom-space
-            label="Apellido Materno"
-            v-model="candidate.middle_name"
-            class="q-field--required"
-            :error="!!errors['candidate.middle_name']"
-            :error-message="errors['candidate.middle_name']"
-          ></q-input>
-        </div>
-        <div class="col-12 col-md-6 q-gutter-y-lg">
-          <q-input
-            outlined
-            stack-label
-            hide-bottom-space
-            label="Fecha de Nacimiento"
-            v-model="candidate.birth_date"
-            class="q-field--required"
-            :error="!!errors['candidate.birth_date']"
-            :error-message="errors['candidate.birth_date']"
-            type="date"
-          ></q-input>
-          <q-input
-            readonly
-            outlined
-            stack-label
-            hide-bottom-space
-            label="Edad"
-            v-model.number="age"
-          ></q-input>
-          <q-input
-            readonly
-            outlined
-            stack-label
-            hide-bottom-space
-            label="Edad Cronológica*"
-            v-model="chronological_age"
-          ></q-input>
-        </div>
+    <div
+      class="row items-center justify-end q-mb-lg q-gutter-sm"
+      v-if="candidate.id"
+    >
+      <q-btn
+        color="primary"
+        label="Reingresar"
+        @click="onReingresar"
+      />
+      <q-btn
+        color="primary"
+        label="Listo para ingresar"
+        @click="onListoIngresar"
+      />
+      <q-btn
+        color="primary"
+        label="Programar ingreso"
+        icon="event"
+        @click="onProgramarIngreso({ ...candidate })"
+      />
+    </div>
+
+    <div class="page-title">Datos del Candidato</div>
+    <div class="row q-col-gutter-lg q-mb-lg">
+      <div class="col-12 col-md-6 q-gutter-y-lg">
+        <q-input
+          outlined
+          stack-label
+          hide-bottom-space
+          label="Nombre (s)"
+          v-model="candidate.first_name"
+          class="q-field--required"
+          :error="!!errors['candidate.first_name']"
+          :error-message="errors['candidate.first_name']"
+        ></q-input>
+        <q-input
+          outlined
+          stack-label
+          hide-bottom-space
+          label="Apellido Paterno"
+          v-model="candidate.last_name"
+          class="q-field--required"
+          :error="!!errors['candidate.last_name']"
+          :error-message="errors['candidate.last_name']"
+        ></q-input>
+        <q-input
+          outlined
+          stack-label
+          hide-bottom-space
+          label="Apellido Materno"
+          v-model="candidate.middle_name"
+          class="q-field--required"
+          :error="!!errors['candidate.middle_name']"
+          :error-message="errors['candidate.middle_name']"
+        ></q-input>
       </div>
+      <div class="col-12 col-md-6 q-gutter-y-lg">
+        <q-input
+          outlined
+          stack-label
+          hide-bottom-space
+          label="Fecha de Nacimiento"
+          v-model="candidate.birth_date"
+          class="q-field--required"
+          :error="!!errors['candidate.birth_date']"
+          :error-message="errors['candidate.birth_date']"
+          type="date"
+        ></q-input>
+        <q-input
+          readonly
+          outlined
+          stack-label
+          hide-bottom-space
+          label="Edad"
+          v-model.number="age"
+        ></q-input>
+        <q-input
+          readonly
+          outlined
+          stack-label
+          hide-bottom-space
+          label="Edad Cronológica*"
+          v-model="chronological_age"
+        ></q-input>
+      </div>
+      <q-btn
+        v-if="candidate?.can_reingresar"
+        color="primary"
+        label="Reingresar"
+        @click="onReingresar"
+      />
     </div>
 
     <ContactsPage

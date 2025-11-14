@@ -140,7 +140,7 @@ async function deleteFile(collectionName) {
               outlined
               placeholder="Adjuntar archivo"
               v-model="kardex[props.row.slug].file"
-              class="q-mr-sm"
+              class="q-mr-sm q-field--kardex"
             >
               <template v-slot:prepend>
                 <q-icon name="sym_o_attach_file" />
@@ -171,7 +171,10 @@ async function deleteFile(collectionName) {
                 class="q-mr-sm"
               >
                 <template v-slot:prepend>
-                  <q-icon name="sym_o_edit" />
+                  <q-icon
+                    name="sym_o_edit"
+                    class="no-pointer-events"
+                  />
                 </template>
               </q-input>
               <q-btn
@@ -201,10 +204,12 @@ async function deleteFile(collectionName) {
 </template>
 
 <style>
+.q-field--kardex .q-field__prepend {
+  pointer-events: none !important;
+}
 td:first-child {
   max-width: 150px;
 }
-
 .page-subtitle {
   color: #202020;
   font-size: 24px;

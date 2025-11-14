@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, reactive } from 'vue'
+import { onMounted, ref, reactive, computed } from 'vue'
 import { api } from 'src/boot/axios'
 import { storeToRefs } from 'pinia'
 import { useSponsorStore } from 'src/stores/sponsor-store'
@@ -31,19 +31,51 @@ const defaultAddress = reactive({
   whatsapp: ''
 })
 
+const mediaId = computed(() => {
+  if (!sponsor.value.profile_picture) return null
+  let regex = /\/storage\/(\d+)\//
+  let matches = regex.exec(sponsor.value.profile_picture)
+  if (!matches || matches.length < 1) {
+    return null
+  }
+  return parseInt(matches[1], 10)
+})
+
 const sponsor = ref({
   candidate_id: props.candidateId ? props.candidateId : null,
   name: '',
   last_name: '',
   second_last_name: '',
+  gender: null,
   company_name: null,
   birthdate: '',
   marital_status: null,
+  profile_picture: null,
+  profilePicture: null,
   addresses: [
     { ...defaultAddress, type: 'home' },
     { ...defaultAddress, type: 'office' }
-  ]
+  ],
+  contact_by: 'parent'
 })
+
+const genderOptions = [
+  { label: 'Hombre', value: 'male' },
+  { label: 'Mujer', value: 'female' },
+  { label: 'Entidad Comercial', value: 'entity' }
+]
+
+const profilePictureInput = ref(null)
+
+async function deletePicture() {
+  if (!window.confirm('Seguro que desea eliminar la foto de perfil del padrino?')) return
+  try {
+    await api.post(`media/${mediaId.value}`, { _method: 'DELETE' })
+    sponsor.value.profile_picture = ''
+  } catch (error) {
+    console.log(error)
+  }
+}
 
 onMounted(async () => {
   if (!props.sponsorId) return
@@ -68,17 +100,74 @@ onMounted(async () => {
         @submit.prevent="store.saveData(sponsor)"
         class="q-gutter-y-md"
       >
-        <div
-          v-if="!props.sponsorId"
-          class="row items-center"
-        >
-          <label class="col-12 col-md-6">Seleccione Candidato</label>
-          <BeneficiariesPicker
-            :disable="!!props.candidateId"
-            class="col-12 col-md-6"
-            v-model="sponsor.candidate_id"
-          />
+        <div class="row items-center">
+          <template v-if="!sponsor.profile_picture">
+            <div>
+              <label
+                for="#"
+                class="q-mb-md block"
+                >Foto de perfil / Logo</label
+              >
+              <q-img
+                width="120px"
+                style="border: 1px solid var(--primary); border-radius: 3px"
+                src="/profile_placeholder.jpg"
+                @click="() => profilePictureInput.pickFiles()"
+              />
+            </div>
+          </template>
+
+          <template v-else>
+            <div>
+              <label
+                for="#"
+                class="q-mb-md block"
+                >Foto de perfil / Logo</label
+              >
+              <q-img
+                width="120px"
+                :src="sponsor.profile_picture"
+                style="border: 1px solid var(--primary); border-radius: 3px"
+              />
+            </div>
+          </template>
+
+          <q-file
+            ref="profilePictureInput"
+            class="col-12 col-md-6 q-ml-auto"
+            dense
+            outlined
+            stack-label
+            v-model="sponsor.profilePicture"
+            hide-bottom-space
+            :error="!!errors.profilePicture"
+            :error-message="errors.profilePicture"
+          >
+            <template v-slot:append>
+              <q-btn
+                v-if="sponsor.profile_picture"
+                unelevated
+                dense
+                color="negative"
+                label="Eliminar actual"
+                class="bg-red-3 text-red-10"
+                @click="deletePicture()"
+              />
+              <q-icon name="attach_file" />
+            </template>
+          </q-file>
         </div>
+
+        <template v-if="!props.sponsorId">
+          <div class="row items-center">
+            <label class="col-12 col-md-6">Seleccione Candidato</label>
+            <BeneficiariesPicker
+              :disable="!!props.candidateId"
+              class="col-12 col-md-6"
+              v-model="sponsor.candidate_id"
+            />
+          </div>
+        </template>
 
         <div class="row items-center">
           <label class="col-12 col-md-6">Nombre(s)</label>
@@ -120,6 +209,23 @@ onMounted(async () => {
         </div>
 
         <div class="row items-center">
+          <label class="col-12 col-md-6">Género (optional)</label>
+          <q-select
+            class="col-12 col-md-6"
+            outlined
+            stack-label
+            dense
+            v-model="sponsor.gender"
+            :options="genderOptions"
+            hide-bottom-space
+            emit-value
+            map-options
+            :error="!!errors.gender"
+            :error-message="errors.gender"
+          />
+        </div>
+
+        <div class="row items-center">
           <label class="col-12 col-md-6">Razón o Denominación Social</label>
           <q-input
             class="col-12 col-md-6"
@@ -153,6 +259,7 @@ onMounted(async () => {
             class="col-12 col-md-6 col-md-4"
             outlined
             stack-label
+            dense
             v-model="sponsor.marital_status"
             :options="maritalStatusOptions"
             hide-bottom-space
@@ -161,6 +268,29 @@ onMounted(async () => {
             :error="!!errors.marital_status"
             :error-message="errors.marital_status"
           />
+        </div>
+
+        <div class="row items-center">
+          <label class="col-12 col-md-6">¿Quién lo consiguió?</label>
+          <div>
+            <q-radio
+              label="ENLAC"
+              val="enlac"
+              v-model="sponsor.contact_by"
+              :error="!!errors.contact_by"
+              :error-message="errors.contact_by"
+              hide-bottom-space
+            />
+
+            <q-radio
+              label="Padre de Familia"
+              val="parent"
+              v-model="sponsor.contact_by"
+              :error="!!errors.contact_by"
+              :error-message="errors.contact_by"
+              hide-bottom-space
+            />
+          </div>
         </div>
       </q-form>
     </q-card-section>
@@ -178,7 +308,9 @@ onMounted(async () => {
           :name="`sym_o_${address.type == 'home' ? 'home' : 'domain'}`"
           class="q-mr-md"
         ></q-icon>
-        <h1 class="page-subtitle q-my-none">Domicilio {{ address.type == 'home' ? 'Local' : 'Oficina' }}</h1>
+        <h1 class="page-subtitle q-my-none">
+          Domicilio {{ address.type == 'home' ? 'Local' : 'Oficina' }}
+        </h1>
       </div>
       <q-form
         @submit.prevent="step = 3"
@@ -323,7 +455,7 @@ onMounted(async () => {
       color="primary"
       :loading="store.loading"
       type="submit"
-      >Enviar</q-btn
-    >
+      label="Enviar"
+    />
   </div>
 </template>

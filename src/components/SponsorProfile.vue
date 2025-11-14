@@ -1,13 +1,13 @@
 <script setup>
-import { api } from "src/boot/axios";
-import { onMounted, ref } from "vue";
+import { api } from 'src/boot/axios'
+import { onMounted, ref } from 'vue'
 
-const props = defineProps(["sponsorId"]);
-const sponsor = ref({});
+const props = defineProps(['sponsorId'])
+const sponsor = ref({})
 
 onMounted(async () => {
-  sponsor.value = (await api.get(`/sponsors/${props.sponsorId}`)).data.data;
-});
+  sponsor.value = (await api.get(`/sponsors/${props.sponsorId}`)).data.data
+})
 </script>
 
 <template>
@@ -18,7 +18,8 @@ onMounted(async () => {
         width="100%"
         height="100%"
         style="background: lightgrey"
-      ></q-img>
+        :src="sponsor.profile_picture"
+      />
     </div>
     <div class="profile__content">
       <div class="form-row">
@@ -40,6 +41,15 @@ onMounted(async () => {
         <div class="form-group">
           <div class="form-label">Estado Civil</div>
           <div class="form-value">{{ sponsor.marital_status }}</div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <div class="form-label">¿Quién lo consiguió?</div>
+          <div class="form-value">
+            {{ sponsor.contact_by == 'enlac' ? 'ENLAC' : 'Padre de Familia' }}
+          </div>
         </div>
       </div>
     </div>

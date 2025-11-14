@@ -16,7 +16,7 @@ const template = {
   candidate_id: props.candidateId ? Number(props.candidateId) : null,
   amount: 0,
   month_payday: 1,
-  frequency: 1,
+  frequency: 12,
   address_type: 'home',
   wants_pickup: 0,
   wants_reminder: 0,
@@ -51,7 +51,7 @@ async function saveData() {
       : { ...paymentConfig.value }
 
     if (!paymentConfig.value.wants_deductible_receipt) {
-      alert('Doesnt want receipt')
+      console.log('Doesnt want receipt')
       delete data.receipt
     }
 
@@ -67,26 +67,12 @@ async function saveData() {
 }
 
 const frequencies = ref([
-  {
-    label: 'Mensual',
-    val: 1
-  },
-  {
-    label: 'Bimestral',
-    val: 2
-  },
-  {
-    label: 'Trimestral',
-    val: 3
-  },
-  {
-    label: 'Semestral',
-    val: 6
-  },
-  {
-    label: 'Anual',
-    val: 12
-  }
+  { label: 'Quincenal', val: 0.5 },
+  { label: 'Mensual', val: 1 },
+  { label: 'Bimestral', val: 2 },
+  { label: 'Trimestral', val: 3 },
+  { label: 'Semestral', val: 6 },
+  { label: 'Anual', val: 12 }
 ])
 
 const yearlyAmount = computed(() => {
@@ -136,7 +122,7 @@ onMounted(async () => {
             hide-bottom-space
             :error="!!errors.amount"
             :error-message="errors.amount"
-          ></q-input>
+          />
         </div>
 
         <div class="form-row">

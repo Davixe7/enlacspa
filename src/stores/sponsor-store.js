@@ -10,18 +10,47 @@ export const useSponsorStore = defineStore('sponsor', {
   }),
   actions: {
     validateAddresses(addresses) {
-      const requiredFields = ['street', 'inner_number', 'outer_number', 'neighborhood', 'city', 'state', 'country', 'email', 'phone', 'whatsapp']
-      return addresses.filter((address) => Object.values(requiredFields).some((field) => !!address[field]))
+      const requiredFields = [
+        'street',
+        'inner_number',
+        'outer_number',
+        'neighborhood',
+        'city',
+        'state',
+        'country',
+        'email',
+        'phone',
+        'whatsapp'
+      ]
+      return addresses.filter((address) =>
+        Object.values(requiredFields).some((field) => !!address[field])
+      )
     },
     async saveData(sponsor) {
       this.loading = true
       this.errors = {}
 
+      let data = new FormData()
+
+      Object.keys(sponsor).forEach((key) => {
+        if (sponsor[key] == null || key == 'addresses') return
+        data.append(key, sponsor[key])
+      })
+
+      let addresses = this.validateAddresses(sponsor.addresses)
+      addresses.forEach((address, i) => {
+        Object.keys(address).forEach((key) => {
+          console.log(address[key])
+          data.append(`addresses[${i}][${key}]`, address[key])
+        })
+      })
+
+      if (sponsor.id) {
+        data.append('_method', 'PUT')
+      }
+
       try {
         let route = sponsor.id ? `/sponsors/${sponsor.id}` : '/sponsors'
-        let data = sponsor.id ? { ...sponsor, _method: 'PUT' } : { ...sponsor }
-        data.addresses = this.validateAddresses(sponsor.addresses)
-
         let newSponsor = (await api.post(route, data)).data.data
 
         if (!sponsor.id) {
@@ -32,7 +61,10 @@ export const useSponsorStore = defineStore('sponsor', {
         }
 
         Notify.positive('Guardado con éxito')
-        let redirectTo = this.router.currentRoute.value.name == 'sponsors.edit' ? `/padrinos/${sponsor.id}` : `/beneficiarios/${sponsor.candidate_id}/padrinos/${newSponsor.id}`
+        let redirectTo =
+          this.router.currentRoute.value.name == 'sponsors.edit'
+            ? `/padrinos/${sponsor.id}`
+            : `/beneficiarios/${sponsor.candidate_id}/padrinos/${newSponsor.id}`
         this.router.push(redirectTo)
       } catch (error) {
         console.log(error)

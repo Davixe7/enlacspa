@@ -73,9 +73,15 @@ const padrinos = [
   {
     path: '/padrinos',
     meta: { label: 'Padrinos' },
-    name: 'sponsors.index',
-    component: () => import('src/pages/sponsors/SponsorsPage.vue'),
+    redirect: { name: 'sponsors.index' },
     children: [
+      {
+        name: 'sponsors.index',
+        path: '',
+        meta: { label: 'Padrinos' },
+        component: () => import('pages/sponsors/SponsorsPage.vue'),
+        props: true
+      },
       {
         name: 'sponsors.create',
         path: 'registrar',
