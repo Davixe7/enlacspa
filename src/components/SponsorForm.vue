@@ -43,6 +43,7 @@ const mediaId = computed(() => {
 
 const sponsor = ref({
   candidate_id: props.candidateId ? props.candidateId : null,
+  is_anonymous: 0,
   name: '',
   last_name: '',
   second_last_name: '',
@@ -168,6 +169,24 @@ onMounted(async () => {
             />
           </div>
         </template>
+
+        <div class="row items-center">
+          <label class="col-12 col-md-6">Es anónimo</label>
+          <q-radio
+            :val="1"
+            label="Sí"
+            v-model="sponsor.is_anonymous"
+            :error="!!errors.is_anonymous"
+            :error-message="errors.nais_anonymousme"
+          />
+          <q-radio
+            :val="0"
+            label="No"
+            v-model="sponsor.is_anonymous"
+            :error="!!errors.is_anonymous"
+            :error-message="errors.nais_anonymousme"
+          />
+        </div>
 
         <div class="row items-center">
           <label class="col-12 col-md-6">Nombre(s)</label>

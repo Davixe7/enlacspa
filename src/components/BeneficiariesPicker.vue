@@ -1,9 +1,15 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { api } from 'src/boot/axios'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
 
 const props = defineProps(['modelValue', 'disable'])
 const emits = defineEmits(['update:modelValue'])
+const fetchRoute = computed(() => {
+  return route.path == '/horarios-equinoterapia' ? `/beneficiaries/equinetherapy` : '/beneficiaries'
+})
 
 const selectedId = ref(null)
 const options = ref([])
@@ -20,8 +26,9 @@ onMounted(async () => {
 })
 
 async function fetchBeneficiaries() {
-  console.log('Carga inicial de opciones')
-  options.value = (await api.get('/beneficiaries')).data.data
+  loading.value = true
+  options.value = (await api.get(fetchRoute.value)).data.data
+  loading.value = false
 }
 
 const buscarOpciones = async (val, update, abort) => {
@@ -29,9 +36,9 @@ const buscarOpciones = async (val, update, abort) => {
 
   if (loading.value) return
 
-  loading.value = true
   try {
-    const { data } = (await api.get(`/beneficiaries/?name=${val}`)).data
+    loading.value = true
+    const data = (await api.get(`${fetchRoute.value}/?name=${val}`)).data.data
     update(() => (options.value = data))
   } catch (error) {
     console.error('Error al buscar:', error)
@@ -64,10 +71,15 @@ const cargarMasOpciones = async (evt) => {
     :disable="props.disable"
     outlined
     dense
-    @update:model-value="emits('update:modelValue', selectedId)"
+    :model-value="selectedId"
+    @update:model-value="
+      (val) => {
+        emits('update:modelValue', val)
+        selectedId = val
+      }
+    "
     use-input
     :key="selectedId"
-    v-model="selectedId"
     input-debounce="500"
     :options="options"
     :option-value="'id'"

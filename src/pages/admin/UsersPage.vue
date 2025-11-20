@@ -3,6 +3,7 @@ import Notify from 'src/utils/notify'
 import { api } from 'src/boot/axios'
 import { onMounted, ref } from 'vue'
 
+const search = ref('')
 const errors = ref({})
 const loading = ref(false)
 const dialog = ref(false)
@@ -74,6 +75,11 @@ async function save() {
   loading.value = false
 }
 
+function createUser() {
+  user.value = { name: '' }
+  dialog.value = true
+}
+
 onMounted(async () => {
   workAreas.value = (await api.get('work_areas')).data.data
   roles.value = (await api.get('roles')).data.data
@@ -85,19 +91,30 @@ onMounted(async () => {
 <template>
   <q-page>
     <div class="flex items-center q-mb-lg">
-      <h1 class="page-title q-mb-0">Usuarios</h1>
+      <h1
+        class="page-title"
+        style="margin: 0"
+      >
+        Usuarios
+      </h1>
+
+      <q-input
+        class="q-ml-auto q-mr-md"
+        outlined
+        type="search"
+        clearable
+        v-model="search"
+      >
+        <template v-slot:prepend>
+          <q-icon name="search" />
+        </template>
+      </q-input>
       <q-btn
-        @click="
-          () => {
-            user = { name: '' }
-            dialog = true
-          }
-        "
+        @click="createUser"
         color="primary"
         icon="add"
-        class="q-ml-auto"
-        >Agregar usuario</q-btn
-      >
+        label="Agregar usuario"
+      />
     </div>
 
     <q-table
@@ -106,8 +123,21 @@ onMounted(async () => {
       :rows="rows"
       :columns="columns"
       :pagination="{ rowsPerPage: 0 }"
+      :filter="search"
       hide-bottom
     >
+      <template v-slot:loading>
+        <div class="flex q-my-lg justify-center">
+          <div>
+            <q-spinner
+              size="30px"
+              color="primary"
+              class="q-mr-md"
+            ></q-spinner>
+            Cargando...
+          </div>
+        </div>
+      </template>
       <template v-slot:body-cell-actions="props">
         <q-td class="justify-end text-right">
           <q-btn

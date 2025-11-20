@@ -4,11 +4,13 @@ import { api } from 'src/boot/axios'
 import { formatDate } from 'src/utils/formatDate'
 import { useAuthStore } from 'src/stores/user-store'
 import { useQuasar } from 'quasar'
+
+import BeneficiaryStatusChangeForm from 'components/BeneficiaryStatusChangeForm.vue'
 import ProgramarIngresoDialog from './ProgramarIngresoDialog.vue'
 
-const authStore = useAuthStore()
 const $q = useQuasar()
-
+const authStore = useAuthStore()
+const searchQuery = ref('')
 const loading = ref(false)
 
 onMounted(async () => {
@@ -17,67 +19,24 @@ onMounted(async () => {
   loading.value = false
 })
 
-const openStatusDialog = (row, newStatus) => {
-  $q.dialog({
-    title: 'Cambiar estatus',
-    message: 'Ingrese comentario para el cambio de estatus',
-    prompt: {
-      model: '',
-      type: 'text'
-    },
-    cancel: true,
-    ok: {
-      label: 'Guardar',
-      color: 'primary'
-    }
-  }).onOk(async (comment) => {
-    if (!comment) {
-      $q.notify({ type: 'negative', message: 'El comentario es obligatorio' })
-      return
-    }
-    await changeStatus(row, newStatus, comment)
-  })
+const statusDialog = ref(false)
+const selectedRow = ref(null)
+
+function openStatusDialog(row, newStatus) {
+  selectedRow.value = row
+  selectedRow.value.newStatus = newStatus
+  statusDialog.value = true
 }
 
-const changeStatus = async (row, newStatus, comment, file) => {
-  try {
-    const formData = new FormData()
-    formData.append('status', newStatus)
-    formData.append('comment', comment || '')
-    if (file) formData.append('document', file)
-
-    await api.post(`beneficiaries/${row.id}/status`, formData)
-
-    // Actualiza estado local
-    row.status = newStatus
-
-    // Estado que desaparecen de la vista principal
-    const shouldDisappear = ['graduado', 'inactivo', 'exenlac', 'fallecido'].includes(newStatus)
-    if (shouldDisappear) {
-      rows.value = rows.value.filter((r) => r.id !== row.id)
-      $q.notify({ type: 'info', message: 'Movido a reportes' })
-    } else {
-      $q.notify({ type: 'positive', message: 'Estatus actualizado' })
-    }
-  } catch (e) {
-    console.log(e)
-    $q.notify({ type: 'negative', message: 'Error al actualizar estatus' })
-  }
-}
+const sortable = true
 
 const rows = ref([])
 const columns = ref([
-  { name: 'name', label: 'Nombre del Beneficiario', field: 'name', align: 'left', sortable: true },
-  { name: 'sheet', label: 'Folio', field: 'id', align: 'left', sortable: true },
-  { name: 'status', label: 'Estatus', field: 'status', align: 'left', sortable: true },
-  {
-    name: 'scheduled_entry_date',
-    label: 'Fecha de ingreso',
-    field: (row) => (row.scheduled_entry_date ? formatDate(row.scheduled_entry_date) : '--'),
-    align: 'left',
-    sortable: true
-  },
-  { name: 'program_name', label: 'Programa', field: 'program_name', align: 'left', sortable: true },
+  { name: 'name', label: 'Nombre del Beneficiario', field: 'name', align: 'left', sortable },
+  { name: 'sheet', label: 'Folio', field: 'id', align: 'left', sortable },
+  { name: 'status', label: 'Estatus', field: 'status', align: 'left', sortable },
+  { name: 'entry_date', label: 'Fecha de ingreso', field: 'scheduled_entry_date', sortable },
+  { name: 'program_name', label: 'Programa', field: 'program_name', align: 'left', sortable },
   { name: 'actions', label: 'Acciones', field: 'actions', align: 'right' }
 ])
 
@@ -125,7 +84,19 @@ const onProgramarIngreso = (row) => {
 </script>
 
 <template>
-  <h1 class="page-title">Admisiones y Beneficiarios</h1>
+  <div class="flex">
+    <h1 class="page-title">Admisiones y Beneficiarios</h1>
+    <div class="q-ml-auto flex">
+      <q-input
+        outlined
+        v-model="searchQuery"
+        debounce="500"
+        clearable
+      >
+        <template v-slot:prepend> <q-icon name="search" /></template>
+      </q-input>
+    </div>
+  </div>
   <q-table
     bordered
     flat
@@ -134,6 +105,7 @@ const onProgramarIngreso = (row) => {
     :columns="columns"
     :pagination="{ rowsPerPage: 0 }"
     :loading="loading"
+    :filter="searchQuery"
   >
     <template v-slot:loading>
       <div class="flex q-my-lg justify-center">
@@ -153,26 +125,16 @@ const onProgramarIngreso = (row) => {
           dense
           outlined
           hide-bottom-space
-          :options="entryStatuses"
-          v-model="props.row.status"
           emit-value
           map-options
+          :options="entryStatuses"
           :disable="props.row.status === 'fallecido'"
-          @update:model-value="
-            (val) => {
-              if (val === 'programar_ingreso') {
-                onProgramarIngreso(props.row)
-              } else {
-                openStatusDialog(props.row, val)
-              }
-            }
-          "
+          :model-value="props.row.status"
+          @update:model-value="(val) => openStatusDialog(props.row, val)"
         />
       </q-td>
     </template>
-    <template v-slot:body-cell-scheduled_entry_date="props">
-      <q-td :props="props"> {{ props.row.scheduled_entry_date }} </q-td>
-    </template>
+
     <template v-slot:body-cell-actions="props">
       <q-td class="text-right q-py-xs">
         <div q-table__actions>
@@ -208,4 +170,11 @@ const onProgramarIngreso = (row) => {
       </q-td>
     </template>
   </q-table>
+
+  <q-dialog v-model="statusDialog">
+    <BeneficiaryStatusChangeForm
+      v-model="selectedRow"
+      @close="statusDialog = false"
+    />
+  </q-dialog>
 </template>

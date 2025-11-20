@@ -162,8 +162,21 @@ onMounted(async () => {
       :columns="columns"
       :rows="results"
       :filter="searchFilter.text"
+      :loading="loading"
       class="activities-table"
     >
+      <template v-slot:loading>
+        <div class="flex q-my-lg justify-center">
+          <div>
+            <q-spinner
+              size="30px"
+              color="primary"
+              class="q-mr-md"
+            ></q-spinner>
+            Cargando...
+          </div>
+        </div>
+      </template>
       <template v-slot:body-cell-actions="props">
         <q-td>
           <div class="q-table__actions">

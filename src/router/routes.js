@@ -117,6 +117,10 @@ const routes = [
 
     children: [
       {
+        path: '/horarios',
+        component: () => import('pages/HorariosPage.vue')
+      },
+      {
         path: '/home',
         name: 'index',
         meta: { label: '', hideBreadcrumb: true },
@@ -125,20 +129,20 @@ const routes = [
       {
         path: '/tesoreria',
         name: 'financial',
-        meta: { label: 'Tesoreria', hideBreadcrumb: false },
+        meta: { label: 'Tesorería', hideBreadcrumb: false },
         component: () => import('pages/FinancialPage.vue')
       },
       {
         path: '/tesoreria/:candidateId',
         name: 'financial.control',
-        meta: { label: 'Tesoreria / Control de Cuotas', hideBreadcrumb: false },
+        meta: { label: 'Tesorería / Control de Cuotas', hideBreadcrumb: false },
         component: () => import('pages/FinancialControl.vue'),
         props: true
       },
       {
         path: '/tesoreria/:candidateId/historial',
         name: 'financial.history',
-        meta: { label: 'Tesoreria / Historial de pagos', hideBreadcrumb: false },
+        meta: { label: 'Tesorería / Historial de pagos', hideBreadcrumb: false },
         component: () => import('pages/FinancialHistory.vue'),
         props: true
       },

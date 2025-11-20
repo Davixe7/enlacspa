@@ -21,8 +21,8 @@ const columns = ref([
   { name: 'id', field: 'id', label: 'Folio', sortable: true, align: 'left' },
   {
     name: 'created_at',
-    field: 'entry_date',
-    label: 'Fecha de ingreso',
+    field: 'created_at',
+    label: 'Fecha de registro',
     sortable: true,
     align: 'left'
   },

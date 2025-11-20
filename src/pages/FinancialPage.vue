@@ -80,7 +80,7 @@ onMounted(async () => {
 
 <template>
   <div class="flex">
-    <div class="page-title">Tesoreria</div>
+    <div class="page-title">Tesorería</div>
     <q-input
       outlined
       v-model="search"

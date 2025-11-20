@@ -10,6 +10,11 @@ export default [
     component: () => import('src/pages/admin/UsersPage.vue')
   },
   {
+    path: '/horarios-equinoterapia',
+    meta: { label: 'Horarios de Equinoterapia' },
+    component: () => import('src/pages/HorariosPage.vue')
+  },
+  {
     path: '/areas-de-trabajo',
     meta: { label: 'Áreas de Trabajo' },
     component: () => import('src/pages/admin/WorkAreasPage.vue')

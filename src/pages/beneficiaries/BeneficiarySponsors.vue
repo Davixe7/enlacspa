@@ -48,6 +48,7 @@ onMounted(async () => {
               :to="`padrinos/${paymentConfig.sponsor_id}`"
               >Editar
             </router-link>
+            <div class="text-caption">Actualizado el {{ paymentConfig.updated_at }}</div>
           </td>
         </tr>
       </tbody>
@@ -70,8 +71,8 @@ onMounted(async () => {
         color="primary"
         icon="sym_o_add"
         @click="dialog = true"
-        >Asociar padrino</q-btn
-      >
+        label="Asociar padrino"
+      />
       <q-btn
         :disable="props.readonly"
         unelevated
@@ -79,8 +80,8 @@ onMounted(async () => {
         color="primary"
         icon="sym_o_add"
         to="registrar-padrino"
-        >Registrar nuevo</q-btn
-      >
+        label="Registrar nuevo"
+      />
     </q-card-section>
   </q-card>
 </template>

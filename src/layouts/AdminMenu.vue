@@ -7,6 +7,7 @@ const adminLinks = ref([
   { label: 'Notificaciones', link: '/notificaciones' },
   { label: 'Catálogo de Actividades', link: '/actividades' },
   { label: 'Administración de Grupos', link: '/grupos' },
+  { label: 'Horarios de Equinoterapia', link: '/horarios-equinoterapia' },
   { label: 'Usuarios', link: '/usuarios' },
   { label: 'Areas', link: '/areas-de-trabajo' },
   { label: 'Puestos', link: '/puestos' },

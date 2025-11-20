@@ -16,7 +16,7 @@ const form = ref({
   name: props.row
     ? props.row.name
     : `${props.candidate?.first_name ?? ''} ${props.candidate?.last_name ?? ''}`.trim(),
-  programId: props.row ? props.row.program_id : (props.candidate?.program_id ?? null),
+  programId: props.row ? props.row.program.id : (props.candidate?.program.id ?? null),
   entryDate: new Date().toISOString().slice(0, 10),
   observations: ''
 })
@@ -38,6 +38,8 @@ async function fetchPrograms() {
 
 onMounted(async () => {
   console.log(props.candidate)
+  console.log(props.row.program.id)
+
   fetchPrograms()
 })
 

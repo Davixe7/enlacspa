@@ -142,45 +142,6 @@ onMounted(async () => {
         dense
         header-class="text-primary"
       >
-        <!-- Transporte -->
-        <div class="form-row q-mt-md">
-          <div class="form-group">
-            <div class="form-label">¿Requiere transporte Cuauhtémoc - Rubio?</div>
-            <q-radio
-              label="Sí"
-              :val="1"
-              v-model.number="requiresTransport"
-            />
-            <q-radio
-              label="No"
-              :val="0"
-              v-model.number="requiresTransport"
-            />
-          </div>
-
-          <div v-if="requiresTransport === 1">
-            <q-btn
-              label="Ver / Editar transporte"
-              color="primary"
-              class="q-mt-sm"
-              @click="showTransportModal = true"
-            />
-            <div
-              v-if="isValidGoogleMapsLink(transportLocationLink)"
-              class="form-group q-mt-sm"
-            >
-              <div class="form-label">Ubicación en Google Maps</div>
-              <q-btn
-                label="Ver ubicación"
-                color="secondary"
-                flat
-                size="sm"
-                @click="openGoogleMaps"
-              />
-            </div>
-          </div>
-        </div>
-
         <!-- Equinoterapia -->
         <div class="form-row q-mt-md">
           <div class="form-group">
@@ -231,6 +192,45 @@ onMounted(async () => {
                 })
               "
             />
+          </div>
+        </div>
+
+        <!-- Transporte -->
+        <div class="form-row q-mt-md">
+          <div class="form-group">
+            <div class="form-label">¿Requiere transporte Cuauhtémoc - Rubio?</div>
+            <q-radio
+              label="Sí"
+              :val="1"
+              v-model.number="requiresTransport"
+            />
+            <q-radio
+              label="No"
+              :val="0"
+              v-model.number="requiresTransport"
+            />
+          </div>
+
+          <div v-if="requiresTransport === 1">
+            <q-btn
+              label="Ver / Editar transporte"
+              color="primary"
+              class="q-mt-sm"
+              @click="showTransportModal = true"
+            />
+            <div
+              v-if="isValidGoogleMapsLink(transportLocationLink)"
+              class="form-group q-mt-sm"
+            >
+              <div class="form-label">Ubicación en Google Maps</div>
+              <q-btn
+                label="Ver ubicación"
+                color="secondary"
+                flat
+                size="sm"
+                @click="openGoogleMaps"
+              />
+            </div>
           </div>
         </div>
       </q-expansion-item>

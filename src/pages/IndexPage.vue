@@ -77,7 +77,7 @@ const modules = ref([
     path: '/beneficiarios'
   },
   {
-    label: 'Tesoreria',
+    label: 'Tesorería',
     color: '#8DAF1280',
     icon: 'tesoreria',
     path: '/tesoreria'

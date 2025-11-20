@@ -9,6 +9,15 @@ const props = defineProps(['sponsorId'])
 const paymentConfigs = ref([])
 const dialog = ref(false)
 
+const frecuencies = {
+  0.5: 'Quincenal',
+  1: 'Mensual',
+  2: 'Bimestral',
+  3: 'Trimestral',
+  6: 'Semestral',
+  12: 'Anual'
+}
+
 const columns = ref([
   {
     name: 'name',
@@ -18,8 +27,27 @@ const columns = ref([
     align: 'left'
   },
   { name: 'amount', field: 'id', label: 'Folio', sortable: true, align: 'left' },
-  { name: 'created_at', field: 'amount', label: 'Monto', sortable: true, align: 'left' },
-  { name: 'frequency', field: 'frequency', label: 'Frecuencia ', sortable: true, align: 'left' },
+  {
+    name: 'created_at',
+    field: 'amount',
+    label: 'Monto de la aportación',
+    sortable: true,
+    align: 'left'
+  },
+  {
+    name: 'created_at',
+    field: 'created_at',
+    label: 'Patrocina desde',
+    sortable: true,
+    align: 'left'
+  },
+  {
+    name: 'frequency',
+    field: (row) => frecuencies[row.frequency],
+    label: 'Frecuencia del aporte',
+    sortable: true,
+    align: 'left'
+  },
   { name: 'actions', label: 'Acciones', sortable: false, align: 'right' }
 ])
 

@@ -2,8 +2,9 @@
 import { api } from 'src/boot/axios'
 import { useAuthStore } from 'src/stores/user-store'
 import notify from 'src/utils/notify'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 
+const authStore = useAuthStore()
 const rows = ref([])
 const props = defineProps(['candidateId'])
 const errors = ref({})
@@ -22,7 +23,7 @@ const amountEnlac = computed(() => {
   return (candidate.value.program.price - amountSponsors.value).toFixed(2)
 })
 
-const payment = ref({
+const paymentTemplate = ref({
   candidate_id: props.candidateId,
   sponsor_id: null,
   payment_type: '',
@@ -31,8 +32,11 @@ const payment = ref({
   payment_method: '',
   ref: null,
   comments: null,
-  amount: 0.0
+  amount: 0.0,
+  maxAmount: 0.0
 })
+
+const payment = ref({ ...paymentTemplate.value })
 
 const configs = ref([])
 const paymentMethods = ref([
@@ -50,20 +54,15 @@ async function fetchConfigs() {
   configs.value = { ...response, ['']: response[''] }
 }
 
-onMounted(async () => {
-  payment.value.payment_method = paymentMethods.value[0]
-
-  candidate.value = (await api.get(`/candidates/${props.candidateId}`)).data.data
-
-  rows.value = (await api.get(`payment_configs/?candidate_id=${props.candidateId}`)).data.data
-
-  await fetchConfigs()
-})
+const selectedConfig = ref(null)
 
 function setPayment(config) {
+  selectedConfig.value = configs.value[config]
   let firstDue = configs.value[config].find((i) => i.status == 'red')
   firstDue = firstDue ? firstDue : configs.value[config].find((i) => i.status == 'yellow')
 
+  let sponsorId = config ? config : null
+  payment.value.maxAmount = rows.value.find((r) => r.sponsor_id == sponsorId).monthly_amount
   payment.value.sponsor_id = config
   payment.value.payment_type = config ? 'sponsor' : 'parent'
   payment.value.date = firstDue.date
@@ -72,9 +71,11 @@ function setPayment(config) {
 
 async function storePayment() {
   loading.value = true
+  errors.value = {}
   try {
     let data = { ...payment.value }
     ;(await api.post('payments', data)).data.data
+    payment.value = { ...paymentTemplate.value }
     notify.positive('Pago registrado con exito')
     dialog.value = false
     await fetchConfigs()
@@ -84,6 +85,24 @@ async function storePayment() {
   }
   loading.value = false
 }
+
+watch(
+  () => payment.value,
+  (newVal) => {
+    if (!newVal || !selectedConfig.value) return
+    if (newVal.is_partial === 0) {
+      payment.value.amount = payment.value.maxAmount
+    }
+  },
+  { deep: true }
+)
+
+onMounted(async () => {
+  payment.value.payment_method = paymentMethods.value[0]
+  candidate.value = (await api.get(`/candidates/${props.candidateId}`)).data.data
+  rows.value = (await api.get(`payment_configs/?candidate_id=${props.candidateId}`)).data.data
+  await fetchConfigs()
+})
 </script>
 
 <template>
@@ -180,13 +199,13 @@ async function storePayment() {
                   v-model="payment.is_partial"
                   :val="1"
                   :true-val="1"
-                ></q-radio>
+                />
                 <q-radio
                   label="Total"
                   v-model="payment.is_partial"
                   :val="0"
                   :true-val="0"
-                ></q-radio>
+                />
               </td>
             </tr>
             <tr>
@@ -199,7 +218,7 @@ async function storePayment() {
                   :error-message="errors.date"
                   hide-bottom-space
                   type="date"
-                ></q-input>
+                />
               </td>
             </tr>
             <tr>
@@ -213,7 +232,7 @@ async function storePayment() {
                   :error="!!errors.payment_method"
                   :error-message="errors.payment_method"
                   hide-bottom-space
-                ></q-select>
+                />
               </td>
             </tr>
             <tr>
@@ -225,7 +244,7 @@ async function storePayment() {
                   :error="!!errors.ref"
                   :error-message="errors.ref"
                   hide-bottom-space
-                ></q-input>
+                />
               </td>
             </tr>
             <tr>
@@ -237,7 +256,7 @@ async function storePayment() {
                   :error="!!errors.comments"
                   :error-message="errors.comments"
                   hide-bottom-space
-                ></q-input>
+                />
               </td>
             </tr>
             <tr>
@@ -245,23 +264,31 @@ async function storePayment() {
               <td>
                 <q-input
                   outlined
+                  :disable="!payment.is_partial"
                   v-model="payment.amount"
                   :error="!!errors.amount"
                   :error-message="errors.amount"
                   hide-bottom-space
-                ></q-input>
+                />
               </td>
             </tr>
           </tbody>
         </q-markup-table>
         <q-card-section>
-          <div class="flex justify-end">
+          <div class="flex">
+            <div>
+              <div class="text-caption color-grey">Registrado por:</div>
+              <div>
+                {{ authStore.data.user.name }}
+              </div>
+            </div>
             <q-btn
+              class="q-ml-auto"
               @click="storePayment"
               :loading="loading"
               color="primary"
-              >Guardar</q-btn
-            >
+              label="Guardar"
+            />
           </div>
         </q-card-section>
       </q-card>

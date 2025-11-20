@@ -50,6 +50,7 @@ const amountSponsors = computed(() => {
   let total = rows.value
     .filter((row) => row.sponsor_id != null)
     .reduce((sum, row) => sum + row.monthly_amount, 0)
+
   return total.toFixed(2)
 })
 
@@ -85,14 +86,19 @@ const amountEnlac = computed(() =>
                   v-model="parentPaymentConfig.amount"
                 />
               </td>
+              <td>
+                {{ ((parentPaymentConfig.amount / candidate?.program_price) * 100).toFixed(2) }} %
+              </td>
             </tr>
             <tr>
               <td>Cuota de Padrinos:</td>
               <td>${{ amountSponsors }}</td>
+              <td>{{ ((amountSponsors / candidate?.program_price) * 100).toFixed(2) }} %</td>
             </tr>
             <tr>
               <td>Cuota de ENLAC:</td>
               <td>${{ amountEnlac }}</td>
+              <td>${{ ((amountEnlac / candidate?.program_price) * 100).toFixed(2) }} %</td>
             </tr>
             <tr>
               <td>Total del Programa:</td>
@@ -105,7 +111,7 @@ const amountEnlac = computed(() =>
             outline
             color="primary"
             class="q-mr-sm"
-            :to="{ name: 'beneficiary.paymentConfig.control' }"
+            :to="{ name: 'beneficiaries.balances.control' }"
             >Ver detalles</q-btn
           >
           <q-btn

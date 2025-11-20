@@ -4,7 +4,7 @@ const props = defineProps(['candidateId'])
 </script>
 <template>
   <div class="flex">
-    <h1 class="page-title">Tesoreria / Control de Cuotas</h1>
+    <h1 class="page-title">Tesorería / Control de Cuotas</h1>
     <router-link
       class="q-mr-md q-ml-auto"
       :to="`/tesoreria/${props.candidateId}/historial`"
