@@ -35,6 +35,7 @@ onMounted(async () => {
   <q-table
     :rows="rows"
     :columns="columns"
+    :pagination="{ rowsPerPage: 0 }"
     hide-bottom
   />
 </template>

@@ -57,6 +57,11 @@ async function fetchConfigs() {
 const selectedConfig = ref(null)
 
 function setPayment(config) {
+  if (configs.value[config].every((i) => i.status == 'green')) {
+    alert('No hay pagos pendientes con este padrino.')
+    return
+  }
+
   selectedConfig.value = configs.value[config]
   let firstDue = configs.value[config].find((i) => i.status == 'red')
   firstDue = firstDue ? firstDue : configs.value[config].find((i) => i.status == 'yellow')
