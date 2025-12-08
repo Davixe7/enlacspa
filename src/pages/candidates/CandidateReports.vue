@@ -6,6 +6,7 @@ onMounted(() => fetchCandidates())
 
 async function fetchCandidates() {
   errors.value = {}
+  loading.value = true
   let params = { ...query.value }
   let fields = ['name', 'birth_date', 'date_from', 'date_to']
 
@@ -25,7 +26,6 @@ async function fetchCandidates() {
     return
   }
 
-  loading.value = true
   let response = (await api.get('candidates', { params })).data
   candidates.value = response.data
   counts.value = response.counts
@@ -54,6 +54,13 @@ const candidateColumns = ref([
     sortable: true
   },
   {
+    name: 'status',
+    label: 'Estatus',
+    align: 'left',
+    field: 'candidate_status_id',
+    sortable: true
+  },
+  {
     name: 'date',
     label: 'Fecha de Evaluación',
     align: 'left',
@@ -65,7 +72,7 @@ const candidateColumns = ref([
     label: 'Evaluador',
     align: 'left',
     field: (row) =>
-      row.evaluation_schedule ? row.evaluation_schedule.evaluator.name : 'No disponible',
+      row.evaluation_schedule ? row.evaluation_schedule.evaluator?.name : 'No disponible',
     sortable: true
   },
   {

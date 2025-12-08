@@ -1,41 +1,16 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useCandidateStore } from 'src/stores/candidate-store'
 import TransportModal from 'src/components/TransportModal.vue'
-import { nextTick } from 'vue'
 
-const props = defineProps(['candidateId'])
+//const props = defineProps(['candidateId'])
+
+const props = defineProps({
+  candidateId: Number,
+  locationId: Number
+})
 const candidateStore = useCandidateStore()
-
-const showTransportModal = ref(false)
-const requiresTransport = ref(0)
-const transportAddress = ref('')
-const transportLocationLink = ref('')
-const curp = ref('')
-
-// Valores originales para restaurar si se cancela
-let originalValues = {
-  requires_transport: false,
-  transport_address: '',
-  transport_location_link: '',
-  curp: ''
-}
-
-// variable bandera para prevenir el lanzamiento automatico de la modal del transporte sin accion directa del usuario al cargar la pagina
-const hasInteracted = ref(false)
-
-const isValidGoogleMapsLink = (url) => {
-  return (
-    /^https?:\/\/(www\.)?google\.[a-z]+\/maps/.test(url) ||
-    /^https?:\/\/maps\.app\.goo\.gl/.test(url)
-  )
-}
-
-const openGoogleMaps = () => {
-  if (isValidGoogleMapsLink(transportLocationLink.value)) {
-    window.open(transportLocationLink.value, '_blank')
-  }
-}
+const transportDialog = ref(false)
 
 const relationships = {
   abuelo: 'Abuelo(a)',
@@ -47,37 +22,10 @@ const relationships = {
   tio: 'Tío(a)'
 }
 
-watch(requiresTransport, async (newVal, oldVal) => {
-  if (!hasInteracted.value) {
-    hasInteracted.value = true
-    return
-  }
-
-  if (newVal === 1 && oldVal !== 1) {
-    await nextTick()
-    showTransportModal.value = true
-  } else if (newVal === 0) {
-    candidateStore.cancelTransport()
-  }
-})
-
 onMounted(async () => {
   candidateStore.id = props.candidateId
+  candidateStore.location_id = props.locationId
   await candidateStore.fetchCandidate()
-
-  const isTransportRequired = parseInt(candidateStore.requires_transport) || 0
-
-  originalValues = {
-    requires_transport: isTransportRequired,
-    transport_address: candidateStore.transport_address ?? '',
-    transport_location_link: candidateStore.transport_location_link ?? '',
-    curp: candidateStore.curp ?? ''
-  }
-
-  requiresTransport.value = originalValues.requires_transport
-  transportAddress.value = originalValues.transport_address
-  transportLocationLink.value = originalValues.transport_location_link
-  curp.value = originalValues.curp
 })
 </script>
 
@@ -102,7 +50,7 @@ onMounted(async () => {
         </div>
         <div class="form-group">
           <div class="form-label">Fecha de ingreso</div>
-          <div class="form-value">{{ candidateStore.onboard_at }}</div>
+          <div class="form-value">{{ candidateStore.entry_date ?? '--' }}</div>
         </div>
         <div class="form-group">
           <div class="form-label">Folio</div>
@@ -144,7 +92,7 @@ onMounted(async () => {
       >
         <!-- Equinoterapia -->
         <div class="form-row q-mt-md">
-          <div class="form-group">
+          <div class="form-group form-group--half">
             <div class="form-label">Permiso para Equinoterapia por Médico</div>
             <q-radio
               label="Sí"
@@ -168,7 +116,7 @@ onMounted(async () => {
             />
           </div>
 
-          <div class="form-group">
+          <div class="form-group form-group--half">
             <div class="form-label">Permiso para Equinoterapia por Tutor Legal</div>
             <q-radio
               label="Sí"
@@ -195,61 +143,75 @@ onMounted(async () => {
           </div>
         </div>
 
-        <!-- Transporte -->
+        <!-- Transporte (100%) -->
         <div class="form-row q-mt-md">
-          <div class="form-group">
+          <div class="form-group form-group--full">
             <div class="form-label">¿Requiere transporte Cuauhtémoc - Rubio?</div>
-            <q-radio
-              label="Sí"
-              :val="1"
-              v-model.number="requiresTransport"
-            />
-            <q-radio
-              label="No"
-              :val="0"
-              v-model.number="requiresTransport"
-            />
-          </div>
 
-          <div v-if="requiresTransport === 1">
-            <q-btn
-              label="Ver / Editar transporte"
-              color="primary"
-              class="q-mt-sm"
-              @click="showTransportModal = true"
-            />
-            <div
-              v-if="isValidGoogleMapsLink(transportLocationLink)"
-              class="form-group q-mt-sm"
-            >
-              <div class="form-label">Ubicación en Google Maps</div>
-              <q-btn
-                label="Ver ubicación"
-                color="secondary"
-                flat
-                size="sm"
-                @click="openGoogleMaps"
-              />
+            <!-- Fila con radios a la izquierda y botón a la derecha -->
+            <div class="row items-center justify-between q-gutter-sm">
+              <div>
+                <q-radio
+                  label="Sí"
+                  :val="1"
+                  v-model.number="candidateStore.requires_transport"
+                />
+                <q-radio
+                  label="No"
+                  :val="0"
+                  v-model.number="candidateStore.requires_transport"
+                  @click="candidateStore.deleteLocation()"
+                />
+              </div>
+
+              <div v-if="candidateStore.requires_transport === 1">
+                <q-btn
+                  label="Ver / Editar transporte"
+                  color="primary"
+                  @click="transportDialog = true"
+                />
+              </div>
             </div>
           </div>
         </div>
       </q-expansion-item>
     </div>
 
-    <TransportModal
-      v-model="showTransportModal"
-      :requires-transport="requiresTransport"
-      :transport-address="transportAddress"
-      :transport-location-link="transportLocationLink"
-      :curp="curp"
-      @save="
-        (payload) => {
-          requiresTransport = payload.requires_transport ? 1 : 0
-          transportAddress = payload.transport_address
-          transportLocationLink = payload.transport_location_link
-          curp = payload.curp
-        }
-      "
-    />
+    <q-dialog v-model="transportDialog">
+      <TransportModal
+        v-model="candidateStore.location_detail"
+        @close="transportDialog = false"
+      />
+    </q-dialog>
   </div>
 </template>
+<style>
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.form-group {
+  flex: 0 0 auto;
+  width: 33.333%;
+  min-width: 200px;
+}
+
+/* 6/6 */
+.form-group--half {
+  width: 50%;
+  min-width: 280px; /* protege en pantallas pequeñas */
+}
+
+/* 100% */
+.form-group--full {
+  width: 100%;
+}
+
+/* En móviles, apilar sin romper líneas */
+@media (max-width: 768px) {
+  .form-group--half {
+    width: 100%;
+  }
+}
+</style>

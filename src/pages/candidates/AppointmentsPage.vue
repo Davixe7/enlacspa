@@ -81,6 +81,7 @@ function updateAppointments(appointment) {
     class="q-mb-xl"
     :rows="pendingAppointments"
     :columns="columns"
+    :pagination="{ rowsPerPage: 0 }"
     hide-bottom
   >
   </q-table>
@@ -90,6 +91,7 @@ function updateAppointments(appointment) {
     :rows="pastAppointments"
     :columns="columns"
     hide-bottom
+    :pagination="{ rowsPerPage: 0 }"
   >
   </q-table>
 

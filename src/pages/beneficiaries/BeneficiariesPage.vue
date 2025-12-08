@@ -1,20 +1,32 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import { api } from 'src/boot/axios'
-import { formatDate } from 'src/utils/formatDate'
 import { useAuthStore } from 'src/stores/user-store'
 import { useQuasar } from 'quasar'
 
 import BeneficiaryStatusChangeForm from 'components/BeneficiaryStatusChangeForm.vue'
 import ProgramarIngresoDialog from './ProgramarIngresoDialog.vue'
+import notify from 'src/utils/notify'
 
 const $q = useQuasar()
 const authStore = useAuthStore()
 const searchQuery = ref('')
 const loading = ref(false)
+const entryStatuses = ref([])
+
+async function fetchStatuses() {
+  try {
+    entryStatuses.value = (
+      await api.get('candidate_statuses/?exclude=pendiente,rechazado')
+    ).data.data
+  } catch (error) {
+    console.log(error)
+  }
+}
 
 onMounted(async () => {
   loading.value = true
+  await fetchStatuses()
   rows.value = (await api.get('beneficiaries')).data.data
   loading.value = false
 })
@@ -34,24 +46,11 @@ const rows = ref([])
 const columns = ref([
   { name: 'name', label: 'Nombre del Beneficiario', field: 'name', align: 'left', sortable },
   { name: 'sheet', label: 'Folio', field: 'id', align: 'left', sortable },
-  { name: 'status', label: 'Estatus', field: 'status', align: 'left', sortable },
-  { name: 'entry_date', label: 'Fecha de ingreso', field: 'scheduled_entry_date', sortable },
+  { name: 'status', label: 'Estado del beneficiario', align: 'left', sortable },
   { name: 'program_name', label: 'Programa', field: 'program_name', align: 'left', sortable },
+  { name: 'entry_date', label: 'Fecha de ingreso', field: 'entry_date', sortable },
   { name: 'actions', label: 'Acciones', field: 'actions', align: 'right' }
 ])
-
-const entryStatuses = [
-  { value: 'pendiente_ingresar', label: 'Pendiente de ingresar' },
-  { value: 'ingreso_programado', label: 'Ingreso programado' },
-  { value: 'listo_ingresar', label: 'Listo para ingresar' },
-  { value: 'activo', label: 'Activo' },
-  { value: 'permiso_temporal', label: 'Permiso temporal' },
-  { value: 'prueba_vida', label: 'Prueba de vida' },
-  { value: 'inactivo', label: 'Inactivo' },
-  { value: 'exenlac', label: 'Ex-ENLAC' },
-  { value: 'graduado', label: 'Graduado' },
-  { value: 'fallecido', label: 'Fallecido' }
-]
 
 const actions = ref([
   { disable: false, icon: 'visibility', route: 'perfil', label: 'Perfil' },
@@ -62,42 +61,70 @@ const actions = ref([
   { disable: false, icon: 'list_alt_check', route: 'planes', label: 'Programacion Individual' }
 ])
 
-const onProgramarIngreso = (row) => {
+const onScheduleEntry = (row) => {
+  const normalized = {
+    id: row.id,
+    name: row.name,
+    programId: row.program.id
+  }
+
   $q.dialog({
     component: ProgramarIngresoDialog,
-    componentProps: { row }
+    componentProps: { entry: normalized }
   }).onOk(async (payload) => {
-    await api.post(`beneficiaries/${row.id}/status`, {
-      status: 'programar_ingreso',
-      comment: 'Programar ingreso',
-      program_id: payload.programId,
-      scheduled_entry_date: payload.entryDate,
-      observations: payload.observations
-    })
-
-    row.status = 'ingreso_programado'
-    row.scheduled_entry_date = formatDate(payload.entryDate)
-
+    console.log(payload)
+    refreshBeneficiary(row)
     $q.notify({ type: 'positive', message: 'Ingreso programado correctamente' })
   })
+}
+
+async function refreshBeneficiary(row) {
+  let newRow = (await api.get(`/beneficiaries/${row.id}`)).data.data
+  rows.value.splice(rows.value.indexOf(row), 1, newRow)
+}
+
+function onStatusUpdated({ id, status }) {
+  if ([7, 8, 9].includes(status)) {
+    rows.value = rows.value.filter((row) => row.id !== id)
+    notify.positive('Movido a la tabla de reportes.')
+  }
 }
 </script>
 
 <template>
-  <div class="flex">
+  <div class="column q-my-sm">
     <h1 class="page-title">Admisiones y Beneficiarios</h1>
-    <div class="q-ml-auto flex">
-      <q-input
-        outlined
-        v-model="searchQuery"
-        debounce="500"
-        clearable
-      >
-        <template v-slot:prepend> <q-icon name="search" /></template>
-      </q-input>
+
+    <div class="row items-center q-my-sm">
+      <div class="col-auto">
+        <q-btn
+          :loading="loading"
+          color="primary"
+          icon="description"
+          outline
+          to="/beneficiarios/reportes"
+        >
+          Reporte de Bajas
+        </q-btn>
+      </div>
+
+      <div class="col-auto q-ml-auto">
+        <q-input
+          outlined
+          v-model="searchQuery"
+          debounce="500"
+          clearable
+          style="width: 250px"
+        >
+          <template v-slot:prepend>
+            <q-icon name="search" />
+          </template>
+        </q-input>
+      </div>
     </div>
   </div>
   <q-table
+    row-key="id"
     bordered
     flat
     hide-bottom
@@ -127,9 +154,10 @@ const onProgramarIngreso = (row) => {
           hide-bottom-space
           emit-value
           map-options
+          option-value="id"
+          option-label="label"
           :options="entryStatuses"
-          :disable="props.row.status === 'fallecido'"
-          :model-value="props.row.status"
+          :model-value="props.row.candidate_status_id"
           @update:model-value="(val) => openStatusDialog(props.row, val)"
         />
       </q-td>
@@ -140,11 +168,12 @@ const onProgramarIngreso = (row) => {
         <div q-table__actions>
           <!-- Botón programar ingreso -->
           <q-btn
+            :disable="props.row.candidate_status_id !== 4"
             round
             unelevated
             dense
             icon="sym_o_event"
-            @click="onProgramarIngreso(props.row)"
+            @click="onScheduleEntry(props.row)"
           >
             <q-tooltip>Programar ingreso</q-tooltip>
           </q-btn>
@@ -174,6 +203,7 @@ const onProgramarIngreso = (row) => {
   <q-dialog v-model="statusDialog">
     <BeneficiaryStatusChangeForm
       v-model="selectedRow"
+      @status-updated="onStatusUpdated"
       @close="statusDialog = false"
     />
   </q-dialog>

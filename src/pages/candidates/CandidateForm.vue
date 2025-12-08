@@ -2,16 +2,13 @@
 import { computed, nextTick, onMounted, ref } from 'vue'
 import { api } from 'src/boot/axios'
 import { DateTime } from 'luxon'
-import ContactsPage from './ContactsPage.vue'
-import MedicationsPage from './MedicationsPage.vue'
-import Notify from 'src/utils/notify'
 import { scrollToFirstError } from 'src/utils/focusError'
 import { useRouter } from 'vue-router'
-import { useQuasar } from 'quasar'
-import ProgramarIngresoDialog from 'src/pages/beneficiaries/ProgramarIngresoDialog.vue'
-import { formatDate } from 'src/utils/formatDate'
 
-const $q = useQuasar()
+import Notify from 'src/utils/notify'
+
+import ContactsPage from './ContactsPage.vue'
+import MedicationsPage from './MedicationsPage.vue'
 
 const router = useRouter()
 const props = defineProps({
@@ -23,16 +20,13 @@ const props = defineProps({
 })
 
 onMounted(async () => {
+  statusOptions.value = (await api.get('candidate_statuses')).data.data
   evaluators.value = (await api.get('evaluators')).data.data
   if (props.candidateId) {
     candidate.value = (await api.get(`candidates/${props.candidateId}`)).data.data
     medications.value = candidate.value.medications
-    evaluation_schedule.value = candidate.value.evaluation_schedule
-      ? candidate.value.evaluation_schedule
-      : evaluation_schedule.value
-    evaluation_schedules.value = candidate.value.evaluation_schedules
-      ? candidate.value.evaluation_schedules
-      : []
+    evaluation_schedule.value = candidate.value.evaluation_schedule ?? evaluation_schedule.value
+    evaluation_schedules.value = candidate.value.evaluation_schedules ?? []
   }
   let datetime = DateTime.fromFormat(evaluation_schedule.value.date, 'yyyy-MM-dd HH:mm:ss')
   evaluationDate.value = datetime.toFormat('dd/MM/yyyy')
@@ -46,14 +40,16 @@ function loadData() {
     'last_name',
     'birth_date',
     'info_channel',
-    'diagnosis',
-    'sheet'
+    'diagnosis'
   ]
 
   let formdata = new FormData()
 
+  formdata.append('candidate[sheet]', 1)
+
   if (candidate.value.id) {
     formdata.append('_method', 'PUT')
+    formdata.append('candidate[sheet]', candidate.value.id)
   }
 
   Object.keys(candidate.value).forEach((attr) => {
@@ -62,7 +58,7 @@ function loadData() {
     }
   })
 
-  evaluation_schedule.value.date = fulldatetime.value
+  evaluation_schedule.value.date = evaluationDateTime.value
   Object.keys(evaluation_schedule.value).forEach((attr) => {
     let value = evaluation_schedule.value[attr] === null ? '' : evaluation_schedule.value[attr]
     formdata.append(`evaluation_schedule[${attr}]`, value)
@@ -89,9 +85,9 @@ function loadData() {
 }
 
 async function storeCandidate() {
-  loading.value = true
-  errors.value = {}
   try {
+    loading.value = true
+    errors.value = {}
     let endpoint = candidate.value.id ? `candidates/${candidate.value.id}` : 'candidates'
     await api.post(endpoint, loadData())
     Notify.positive('Guardado con éxito')
@@ -100,21 +96,13 @@ async function storeCandidate() {
     errors.value = error.status == 422 ? error.formatted : {}
     Notify.negative('Por favor, valide la informacion')
     nextTick(() => scrollToFirstError())
+  } finally {
+    loading.value = false
   }
-  loading.value = false
 }
 
 const loading = ref(false)
 const errors = ref({})
-const evaluationDate = ref(null)
-const evaluationTime = ref(null)
-const fulldatetime = computed(() => {
-  let newDate = DateTime.fromFormat(
-    evaluationDate.value + ' ' + evaluationTime.value,
-    'dd/MM/yyyy HH:mm'
-  )
-  return newDate.toFormat('yyyy-MM-dd HH:mm:ss')
-})
 
 const infoChannels = ref([
   'Publicidad impresa',
@@ -124,6 +112,8 @@ const infoChannels = ref([
   'Recomendación de otra persona',
   'Otro'
 ])
+
+const evaluators = ref([])
 const evaluation_schedules = ref([])
 
 const candidate = ref({
@@ -136,18 +126,23 @@ const candidate = ref({
   chronological_age: null,
   diagnosis: '',
   info_channel: infoChannels.value[infoChannels.value.length - 1],
-  sheet: 1,
-  program_id: null,
-  program_name: ''
+  status: 'default'
 })
 
+//Relationships
 const contacts = ref([])
 const medications = ref([])
-const evaluators = ref([])
 const evaluation_schedule = ref({
   evaluator_id: null,
   date: DateTime.now().toFormat('yyyy-MM-dd HH:mm:ss'),
   type_id: 0
+})
+const evaluationDate = ref(null)
+const evaluationTime = ref(null)
+const evaluationDateTime = computed(() => {
+  let concat = evaluationDate.value + ' ' + evaluationTime.value
+  let newDate = DateTime.fromFormat(concat, 'dd/MM/yyyy HH:mm')
+  return newDate.toFormat('yyyy-MM-dd HH:mm:ss')
 })
 const picture = ref(null)
 const recepient = ref({ name: '', phone: '' })
@@ -175,88 +170,35 @@ const chronological_age = computed(() => {
   return `${Math.floor(diff.months)} meses`
 })
 
-/* ---------------- Métodos de estados ---------------- */
-
-const onReingresar = async () => {
-  const { comment } = await $q
-    .dialog({
-      title: 'Reingreso',
-      message: 'Ingrese comentario para el reingreso',
-      prompt: { model: '', type: 'text' },
-      cancel: true,
-      ok: { label: 'Reingresar', color: 'primary' }
-    })
-    .onOk((val) => ({ comment: val }))
-
-  await api.post(`beneficiaries/${props.candidateId}/reingreso`, { comment })
-  $q.notify({ type: 'positive', message: 'Beneficiario reingresado' })
-}
-
-const onListoIngresar = async () => {
-  const { comment } = await $q
-    .dialog({
-      title: 'Listo para ingresar',
-      message: 'Ingrese comentario para el cambio de estatus',
-      prompt: { model: '', type: 'text' },
-      cancel: true,
-      ok: { label: 'Guardar', color: 'primary' }
-    })
-    .onOk((val) => ({ comment: val }))
-
-  await api.post(`beneficiaries/${props.candidateId}/status`, {
-    status: 'listo_ingresar',
-    comment
-  })
-  $q.notify({ type: 'positive', message: 'Beneficiario marcado como listo para ingresar' })
-}
-
-const onProgramarIngreso = (param) => {
-  console.log(param)
-  $q.dialog({
-    component: ProgramarIngresoDialog,
-    componentProps: { candidate: param }
-  }).onOk(async (payload) => {
-    await api.post(`beneficiaries/${param.id}/status`, {
-      status: 'programar_ingreso',
-      comment: 'Programar ingreso',
-      program_id: payload.programId,
-      scheduled_entry_date: payload.entryDate,
-      observations: payload.observations.value
-    })
-
-    candidate.value.status = 'ingreso_programado'
-    candidate.value.scheduled_entry_date = formatDate(payload.entryDate)
-
-    $q.notify({ type: 'positive', message: 'Ingreso programado correctamente' })
-  })
-}
+const statusOptions = ref([])
 </script>
 
 <template>
   <q-page>
     <div
       class="row items-center justify-end q-mb-lg q-gutter-sm"
-      v-if="candidate.id"
+      v-if="['exenlac', 'fallecido', 'graduado'].includes(candidate.status)"
     >
       <q-btn
         color="primary"
         label="Reingresar"
-        @click="onReingresar"
-      />
-      <q-btn
-        color="primary"
-        label="Listo para ingresar"
-        @click="onListoIngresar"
-      />
-      <q-btn
-        color="primary"
-        label="Programar ingreso"
-        icon="event"
-        @click="onProgramarIngreso({ ...candidate })"
+        @click="onScheduleEntry(candidate)"
       />
     </div>
+    <div class="row items-center justify-between q-mb-md">
+      <div class="page-title">Datos del Candidato</div>
 
-    <div class="page-title">Datos del Candidato</div>
+      <div class="row items-center q-gutter-sm">
+        <div class="text-caption text-grey-7">Estado del beneficiario:</div>
+        <q-chip
+          :color="candidate.status.color"
+          text-color="white"
+          size="sm"
+          icon="flag"
+          :label="candidate.status.label"
+        />
+      </div>
+    </div>
     <div class="row q-col-gutter-lg q-mb-lg">
       <div class="col-12 col-md-6 q-gutter-y-lg">
         <q-input

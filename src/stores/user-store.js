@@ -13,6 +13,9 @@ export const useAuthStore = defineStore('auth', {
     }
   },
   getters: {
+    logoutRedirectTo() {
+      return this.can('rides.index') ? '/login2' : '/login'
+    },
     unreadNotificationsCount() {
       return this.notifications.length
     }
@@ -27,21 +30,25 @@ export const useAuthStore = defineStore('auth', {
     },
     async attemptLogout() {
       await api.post(`${this.baseUrl}/logout`)
-      this.router.push('login')
+      this.router.push(this.logoutRedirectTo)
     },
     async attemptLogin(data) {
       try {
+        this.errors = {}
         this.loading = true
         await api.post(`${this.baseUrl}/login`, data)
-        this.router.push('home')
+        await this.fetchUser()
+        this.router.push('/home')
       } catch (error) {
         if (error.status == 422) {
           this.errors = {
             email: 'Nombre de usuario o contrasenia incorrectos'
           }
         }
+        return Promise.reject(error)
+      } finally {
+        this.loading = false
       }
-      this.loading = false
     },
     async fetchUser() {
       this.data.user = (await api.get('user')).data.data

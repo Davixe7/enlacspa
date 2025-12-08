@@ -8,6 +8,11 @@ const auth = [
     component: () => import('src/pages/auth/LoginPage.vue')
   },
   {
+    path: '/login2',
+    meta: { label: 'Acceso de Empleados' },
+    component: () => import('src/pages/LoginTwo.vue')
+  },
+  {
     path: '/recuperar-contrasena',
     meta: { label: 'Recuperar contrasena' },
     component: () => import('src/pages/auth/ForgotPassword.vue')
@@ -117,14 +122,22 @@ const routes = [
 
     children: [
       {
-        path: '/horarios',
-        component: () => import('pages/HorariosPage.vue')
-      },
-      {
         path: '/home',
         name: 'index',
         meta: { label: '', hideBreadcrumb: true },
-        component: () => import('pages/IndexPage.vue')
+        component: () => import('pages/BaseHome.vue')
+      },
+      {
+        path: '/horarios',
+        component: () => import('pages/admin/EquinetherapySchedule.vue')
+      },
+      {
+        path: '/rides-rubio',
+        component: () => import('src/pages/RidesRubio.vue')
+      },
+      {
+        path: '/rides-equinetherapy',
+        component: () => import('src/pages/RidesEquinetherapy.vue')
       },
       {
         path: '/tesoreria',

@@ -158,7 +158,7 @@ onMounted(async () => {
     <q-table
       flat
       bordered
-      :pagination="{ rowsPerPage: 0 }"
+      :pagination="{ rowsPerPage: 100 }"
       :columns="columns"
       :rows="results"
       :filter="searchFilter.text"

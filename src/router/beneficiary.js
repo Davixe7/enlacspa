@@ -14,6 +14,12 @@ export default [
         meta: { label: 'Admisiones y Beneficiarios', hideBreadcrumbEl: true }
       },
       {
+        path: 'reportes',
+        meta: { label: 'Reportes de Beneficiarios' },
+        component: () => import('src/pages/beneficiaries/BeneficiariesReports.vue'),
+        name: 'beneficiaries.reports'
+      },
+      {
         path: ':candidateId',
         component: () => import('src/layouts/BeneficiaryLayout.vue'),
         meta: { hideBreadcrumbEl: true },

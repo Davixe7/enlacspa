@@ -40,7 +40,7 @@ const columns = ref([
     name: 'evaluator',
     label: 'Evaluador',
     align: 'left',
-    field: (row) => row.evaluation_schedule.evaluator.name,
+    field: (row) => row.evaluation_schedule.evaluator?.name,
     sortable: true
   },
   {

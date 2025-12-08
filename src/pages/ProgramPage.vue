@@ -27,13 +27,13 @@ onMounted(async () => {
 <template>
   <div class="flex items-center">
     <div class="page-title">Detalles del Programa</div>
-    <q-btn
+    <!--   <q-btn
       outline
       class="q-ml-auto"
       color="primary"
       label="Nuevo"
       icon="sym_o_add"
-    />
+    /> -->
   </div>
 
   <div

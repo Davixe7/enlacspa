@@ -102,7 +102,7 @@ const amountEnlac = computed(() =>
             </tr>
             <tr>
               <td>Total del Programa:</td>
-              <td>${{ candidate?.program_price }}</td>
+              <td colspan="2">${{ candidate?.program_price }}</td>
             </tr>
           </tbody>
         </q-markup-table>

@@ -5,18 +5,20 @@ import { api } from 'src/boot/axios'
 
 defineEmits([...useDialogPluginComponent.emits])
 
-const props = defineProps({
-  row: Object,
-  candidate: Object
-})
-
 const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } = useDialogPluginComponent()
 
+const props = defineProps({
+  entry: {
+    type: Object,
+    required: true
+  }
+})
+
+const loading = ref(false)
 const form = ref({
-  name: props.row
-    ? props.row.name
-    : `${props.candidate?.first_name ?? ''} ${props.candidate?.last_name ?? ''}`.trim(),
-  programId: props.row ? props.row.program.id : (props.candidate?.program.id ?? null),
+  id: props.entry.id,
+  name: props.entry.name,
+  programId: props.entry.programId,
   entryDate: new Date().toISOString().slice(0, 10),
   observations: ''
 })
@@ -29,7 +31,7 @@ async function fetchPrograms() {
     const programs = Array.isArray(data.data) ? data.data : data
     programOptions.value = programs.map((p) => ({
       label: p.name,
-      value: p.id
+      value: Number(p.id)
     }))
   } catch (e) {
     console.error('Error cargando programas', e)
@@ -37,18 +39,37 @@ async function fetchPrograms() {
 }
 
 onMounted(async () => {
-  console.log(props.candidate)
-  console.log(props.row.program.id)
+  await fetchPrograms()
 
-  fetchPrograms()
+  if (form.value.programId) {
+    const exists = programOptions.value.some((opt) => opt.value === form.value.programId)
+    if (!exists) {
+      console.log('Program does not exist')
+      form.value.programId = null
+    }
+  }
 })
 
-function onSave() {
-  onDialogOK({
-    programId: form.value.programId,
-    entryDate: form.value.entryDate,
-    observations: form.value.observations
-  })
+async function onSave() {
+  try {
+    loading.value = true
+    await api.post(`candidatestatuses/${form.value.id}`, {
+      program_id: form.value.programId,
+      entry_date: form.value.entryDate,
+      candidate_status_id: 5,
+      _method: 'PUT'
+    })
+    onDialogOK({
+      id: form.value.id,
+      programId: form.value.programId,
+      entryDate: form.value.entryDate,
+      observations: form.value.observations
+    })
+  } catch (error) {
+    console.log(error)
+  } finally {
+    loading.value = false
+  }
 }
 
 function onCancel() {

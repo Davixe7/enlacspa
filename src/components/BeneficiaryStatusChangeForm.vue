@@ -1,35 +1,41 @@
 <script setup>
 import { api } from 'src/boot/axios'
-import { ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import notify from 'src/utils/notify'
 
 const model = defineModel()
 const emits = defineEmits(['close'])
 const loading = ref(false)
 
-const entryStatuses = {
-  pendiente_ingresar: 'Pendiente de ingresar',
-  ingreso_programado: 'Ingreso programado',
-  listo_ingresar: 'Listo para ingresar',
-  activo: 'Activo',
-  permiso_temporal: 'Permiso temporal',
-  prueba_vida: 'Prueba de vida',
-  inactivo: 'Inactivo',
-  exenlac: 'Ex-ENLAC',
-  graduado: 'Graduado',
-  fallecido: 'Fallecido'
+const entryStatuses = ref([])
+async function fetchStatuses() {
+  try {
+    entryStatuses.value = (await api.get('candidate_statuses')).data.data
+  } catch (error) {
+    console.log(error)
+  }
 }
+const entryStatusesLabels = computed(() => {
+  let labels = {}
+  entryStatuses.value.map((status) => (labels[status.id] = status.label))
+  return labels
+})
 
 async function update() {
   try {
     loading.value = true
+
     let data = {
-      status: model.value.newStatus,
-      comment: model.value.comment
+      candidate_status_id: model.value.newStatus,
+      comment: model.value.comment,
+      _method: 'PUT'
     }
-    await api.post(`beneficiaries/${model.value.id}/status`, data)
+
+    await api.post(`candidatestatuses/${model.value.id}`, data)
+
     notify.positive('Estado actualizado exitosamente.')
-    model.value.status = model.value.newStatus
+    model.value.candidate_status_id = model.value.newStatus
+    emits('status-updated', { id: model.value.id, status: model.value.newStatus })
     emits('close')
   } catch (error) {
     console.log(error)
@@ -38,6 +44,9 @@ async function update() {
     loading.value = false
   }
 }
+onMounted(() => {
+  fetchStatuses()
+})
 </script>
 
 <template>
@@ -60,18 +69,19 @@ async function update() {
       <div>
         <q-badge
           color="positive"
-          :label="entryStatuses[model.newStatus]"
+          :label="entryStatusesLabels[model.newStatus]"
         />
       </div>
     </q-card-section>
     <q-card-section>
       <q-input
-        class="q-mb-md"
+        class="q-mb-md custom-textarea"
         type="textarea"
         outlined
         stack-label
         label="Comentario"
         v-model="model.comment"
+        autogrow
       />
 
       <q-file
@@ -102,3 +112,8 @@ async function update() {
     </q-card-section>
   </q-card>
 </template>
+<style>
+.custom-textarea textarea {
+  line-height: 1 !important;
+}
+</style>

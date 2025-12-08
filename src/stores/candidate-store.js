@@ -16,11 +16,7 @@ export const useCandidateStore = defineStore('candidate', {
     diagnosis: '',
     info_channel: null,
     sheet: 1,
-    requires_transport: false,
-    transport_address: null,
-    transport_location_link: null,
-    curp: null,
-    onboard_at: null,
+    entry_date: null,
     loading: false,
     contacts: [],
     contact: null,
@@ -29,6 +25,15 @@ export const useCandidateStore = defineStore('candidate', {
     interviewee: {},
     program: null,
     medications: [],
+    requires_transport: 0,
+    location_detail: {
+      id: null,
+      transport_address: '',
+      transport_location_link: '',
+      curp: ''
+    },
+    enrollment: {},
+    enrollments: [],
     equinetherapy_permission_medical: 0,
     equinetherapy_permission_legal_guardian: 0,
     group_id: null,
@@ -42,8 +47,10 @@ export const useCandidateStore = defineStore('candidate', {
         this.loading = true
         let route = type == 'candidate' ? `candidates/${this.id}` : `beneficiaries/${this.id}`
         let data = (await api.get(route)).data.data
+        console.log('patching candidate')
+
         this.$patch(data)
-        this.loading = false
+        this.location_id = data.location_id
       } catch (error) {
         console.log(error)
       } finally {
@@ -51,8 +58,25 @@ export const useCandidateStore = defineStore('candidate', {
       }
     },
 
-    async updateTransport(payload) {
-      return api.put(`/transport/${this.id}`, payload)
+    async saveLocation(payload) {
+      try {
+        let route = payload.id ? `candidate_locations/${payload.id}` : `candidate_locations`
+        let data = payload.id ? { ...payload, _method: 'PUT' } : { ...payload }
+        this.location_detail = (await api.post(route, data)).data.data
+      } catch (error) {
+        console.log(error)
+      }
+    },
+
+    async deleteLocation() {
+      try {
+        if (!this.location_detail || !this.location_detail.id) return
+        this.location_detail = (
+          await api.delete(`candidate_locations/${this.location_detail.id}`)
+        ).data.data
+      } catch (error) {
+        console.log(error)
+      }
     },
 
     async updateEquineTherapyPermission(payload) {
@@ -63,19 +87,6 @@ export const useCandidateStore = defineStore('candidate', {
       } catch (error) {
         notify.negative('Error al actualizar permisos de equinoterapia.')
         throw Error(error)
-      } finally {
-        this.loading = false
-      }
-    },
-
-    async cancelTransport() {
-      try {
-        this.loading = true
-        await api.post(`transport/${this.id}`, { _method: 'DELETE' })
-        notify.positive('Datos de transporte actualizados.')
-      } catch (error) {
-        console.log(error)
-        notify.negative('Error al actualizar datos de transporte.')
       } finally {
         this.loading = false
       }

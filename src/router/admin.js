@@ -12,7 +12,7 @@ export default [
   {
     path: '/horarios-equinoterapia',
     meta: { label: 'Horarios de Equinoterapia' },
-    component: () => import('src/pages/HorariosPage.vue')
+    component: () => import('src/pages/admin/EquinetherapySchedule.vue')
   },
   {
     path: '/areas-de-trabajo',

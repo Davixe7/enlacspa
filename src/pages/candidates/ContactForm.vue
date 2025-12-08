@@ -87,6 +87,7 @@ async function save() {
         hide-bottom-space
         label="Apellido Paterno"
         v-model="contact.last_name"
+        class="q-field--required"
         :error="!!localErrors[`last_name`]"
         :error-message="localErrors[`last_name`]"
       ></q-input>

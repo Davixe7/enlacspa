@@ -1,15 +1,25 @@
 <script setup>
-import { computed, ref, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { api } from 'src/boot/axios'
-import { useRoute } from 'vue-router'
 
-const route = useRoute()
-
-const props = defineProps(['modelValue', 'disable'])
-const emits = defineEmits(['update:modelValue'])
-const fetchRoute = computed(() => {
-  return route.path == '/horarios-equinoterapia' ? `/beneficiaries/equinetherapy` : '/beneficiaries'
+const props = defineProps({
+  modelValue: {
+    required: true
+  },
+  disable: {
+    type: Boolean
+  },
+  fetchRoute: {
+    type: String,
+    default: '/beneficiaries'
+  },
+  params: {
+    type: Object,
+    default: () => ({})
+  }
 })
+
+const emits = defineEmits(['update:modelValue'])
 
 const selectedId = ref(null)
 const options = ref([])
@@ -27,7 +37,7 @@ onMounted(async () => {
 
 async function fetchBeneficiaries() {
   loading.value = true
-  options.value = (await api.get(fetchRoute.value)).data.data
+  options.value = (await api.get(props.fetchRoute, { params: props.params })).data.data
   loading.value = false
 }
 
@@ -37,8 +47,9 @@ const buscarOpciones = async (val, update, abort) => {
   if (loading.value) return
 
   try {
+    let params = { ...props.params, name: val }
     loading.value = true
-    const data = (await api.get(`${fetchRoute.value}/?name=${val}`)).data.data
+    const data = (await api.get(`${props.fetchRoute}`, { params })).data.data
     update(() => (options.value = data))
   } catch (error) {
     console.error('Error al buscar:', error)

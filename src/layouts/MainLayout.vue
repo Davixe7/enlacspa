@@ -95,7 +95,7 @@ const route = useRoute()
 
 onMounted(() => {
   route.matched.forEach((rt) => console.log(rt.name + ' ' + rt.path))
-  useAuthStore().fetchUser()
+  authStore.fetchUser()
   useNotificationStore().fetchNotifications()
   useMeta(() => ({ title: route.meta.label }))
 })

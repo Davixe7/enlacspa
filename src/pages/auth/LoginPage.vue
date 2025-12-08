@@ -1,14 +1,26 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import { useAuthStore } from '../../stores/user-store'
+import notify from 'src/utils/notify'
 
 onMounted(() => authStore.csrfCookie())
 
 const authStore = useAuthStore()
-const email = ref('ejemplo@mail.com')
+const email = ref('')
 const password = ref('')
 const remeberme = ref(false)
 const showPassword = ref(false)
+
+async function attemptLogin() {
+  try {
+    await authStore.attemptLogin({ email: email.value, password: password.value })
+  } catch (error) {
+    if (!error.formatted) {
+      console.log(error)
+      notify.negative('Error al intentar ingresar')
+    }
+  }
+}
 </script>
 
 <template>
@@ -26,7 +38,7 @@ const showPassword = ref(false)
         <div>
           <q-form
             class="q-gutter-y-lg"
-            @submit.prevent="authStore.attemptLogin({ email, password })"
+            @submit.prevent="attemptLogin()"
           >
             <q-input
               outlined
@@ -84,6 +96,11 @@ const showPassword = ref(false)
               >Iniciar sesión</q-btn
             >
           </q-form>
+
+          <!-- Login 2 Captura diaria -->
+          <div class="flex q-pa-md">
+            <router-link to="/login2">Acceder a captura Diaria</router-link>
+          </div>
         </div>
       </div>
     </div>
