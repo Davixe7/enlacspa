@@ -1,18 +1,30 @@
 <script setup>
+import { useCategoryStore } from 'src/stores/category-store'
 import { useAuthStore } from 'src/stores/user-store'
-import { computed } from 'vue'
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 
+const categoryStore = useCategoryStore()
 const auth = useAuthStore()
-const options = ref([
-  { role: '', path: '', label: 'ÁREA FÍSICA' },
-  { role: '', path: '', label: 'NATACIÓN' },
-  { role: '', path: '', label: 'ÁREA ACADÉMICA' },
-  { role: '', path: '', label: 'EQUINOTERAPIA' },
+
+const areaPermissions = ref({
+  8: [1, 4, 5, 6]
+})
+
+const driverOptions = [
   { role: 'driver', path: 'rides-rubio', label: 'TRASLADO CUAUHTÉMOC-RUBIO' },
   { role: 'driver', path: 'rides-equinetherapy', label: 'TRASLADO EQUINOTERPIA' }
-])
-const user = computed(() => auth.data?.user)
+]
+
+const categoryOptions = computed(() => {
+  if (categoryStore.categories.length == 0) return []
+  return categoryStore.categories
+    .map((item) => ({ ...item, path: `area/${item.name}/calificar` }))
+    .concat(driverOptions)
+})
+
+onMounted(async () => {
+  await categoryStore.fetchCategories({ base_only: 1 })
+})
 </script>
 
 <template>
@@ -20,11 +32,13 @@ const user = computed(() => auth.data?.user)
     <h1 class="page-title">Seleccione el área:</h1>
     <div class="row q-col-gutter-md">
       <template
-        v-for="option in options"
+        v-for="option in categoryOptions"
         :key="option.id"
       >
         <div
-          v-if="user?.role?.name == option.role"
+          v-if="
+            areaPermissions[auth.data.user.work_area_id].some((allowed) => allowed == option.id)
+          "
           class="col-12 col-sm-6"
         >
           <router-link

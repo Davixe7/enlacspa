@@ -2,10 +2,14 @@
 import { useAuthStore } from 'src/stores/user-store'
 import HomePage from './HomePage.vue'
 import EmployeeHome from './EmployeeHome.vue'
-const store = useAuthStore()
+import { ref, computed } from 'vue'
+const auth = useAuthStore()
+const user = computed(() => auth.data?.user)
+
+const employeeRoles = ref(['driver', 'coordinacion_fisica'])
 </script>
 
 <template>
-  <HomePage v-if="!store.can('rides.index')" />
+  <HomePage v-if="!employeeRoles.includes(user?.role?.name)" />
   <EmployeeHome v-else />
 </template>

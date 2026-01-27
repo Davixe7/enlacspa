@@ -222,6 +222,25 @@ const routes = [
             component: () => import('pages/ProgramForm.vue')
           }
         ]
+      },
+      {
+        path: 'area/:categoryName/calificar',
+        name: 'qualifying.index',
+        props: true,
+        meta: { label: 'Buscar beneficiario(s)' },
+        component: () => import('pages/ScoreFormPage.vue')
+      },
+      {
+        path: 'incidencias',
+        name: 'incidencias.index',
+        meta: { label: 'Reporte de incidencias' },
+        component: () => import('pages/IssuesPage.vue')
+      },
+      {
+        path: 'asistencias',
+        name: 'attendance.index',
+        meta: { label: 'Control de asistencias' },
+        component: () => import('pages/AttendancePage.vue')
       }
     ]
   },

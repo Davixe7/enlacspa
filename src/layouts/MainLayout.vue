@@ -13,22 +13,14 @@
           <q-toolbar-title> ENLAC </q-toolbar-title>
           <div class="q-toolbar__subtitle">Portal web para la administración y gestión</div>
         </div>
-        <q-select
-          dark
-          dense
-          outlined
-          :options="[{ label: 'semanal' }]"
-          class="text-grey-3"
-          color="grey-3"
-          v-model="span"
-        >
-          <template v-slot:prepend>
-            <q-icon
-              name="event"
-              color="white"
-            />
-          </template>
-        </q-select>
+
+        <q-btn
+          flat
+          round
+          icon="sym_o_siren"
+          class="q-ml-md"
+          @click="issuesDialog = true"
+        />
 
         <q-btn
           flat
@@ -61,6 +53,27 @@
     </q-header>
 
     <q-page-container>
+      <q-dialog v-model="issuesDialog">
+        <q-card style="width: 480px">
+          <q-card-section class="flex items-center">
+            <q-icon
+              name="sym_o_siren"
+              class="q-mr-sm"
+              size="1.25rem"
+            />
+            <h1 class="page-subtitle q-my-none">Registrar Incidencia</h1>
+            <q-btn
+              @click="issuesDialog = false"
+              icon="close"
+              flat
+              round
+              dense
+              class="q-ml-auto"
+            />
+          </q-card-section>
+          <IssuesForm @close="issuesDialog = false" />
+        </q-card>
+      </q-dialog>
       <div
         style="padding: 32px"
         v-if="!route.meta.hideBreadcrumb"
@@ -87,11 +100,14 @@
 import AdminMenu from './AdminMenu.vue'
 import { useAuthStore } from 'src/stores/user-store'
 import { useNotificationStore } from 'src/stores/notification-store'
+import IssuesForm from 'src/components/IssuesForm.vue'
 
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useMeta } from 'quasar'
+
 const route = useRoute()
+const issuesDialog = ref(false)
 
 onMounted(() => {
   route.matched.forEach((rt) => console.log(rt.name + ' ' + rt.path))
@@ -103,7 +119,6 @@ onMounted(() => {
 const authStore = useAuthStore()
 const notificationStore = useNotificationStore()
 
-const span = ref({ label: 'semanal', value: '1' })
 const matchedRoutes = computed(() =>
   route.matched.filter((rt) => Boolean(!rt.meta.hideBreadcrumbEl))
 )

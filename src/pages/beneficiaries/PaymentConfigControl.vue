@@ -149,7 +149,7 @@ onMounted(async () => {
             v-for="payment in configs[config]"
             :key="payment.month"
             :class="[`bg-${payment.status}-2`]"
-            @click="useAuthStore().can('payments.update') ? setPayment(config) : ''"
+            @click="true ? setPayment(config) : ''"
           >
             <div>${{ payment.abono }}</div>
           </td>
