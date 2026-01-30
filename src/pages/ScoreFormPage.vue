@@ -23,6 +23,7 @@ const activityId = ref(null)
 const activity = ref(null)
 const candidates = ref(null)
 const candidateId = ref(null)
+const dayClosed = computed(() => mapScores.value.some(score => score.closed == 1))
 
 const candidateActivities = ref([])
 const activityCandidates = ref([])
@@ -158,7 +159,8 @@ async function activitiesToScores() {
       activity: iActivity,
       activity_id: iActivity.id,
       candidate_id: candidateId.value,
-      score: ''
+      score: '',
+      closed: 0
     }
   })
 }
@@ -176,27 +178,41 @@ async function candidatesToScores() {
 
     return {
       activity: activity.value,
-      candidate: iCandidate,
       activity_id: activity.value.id,
+      candidate: iCandidate,
       candidate_id: iCandidate.id,
-      score: currentScore ? currentScore.score : ''
+      score: currentScore ? currentScore.score : '',
+      closed: currentScore ? currentScore.closed : 0,
+      id: currentScore ? currentScore.id : null
     }
   })
 }
 
-async function storeScores(close = false) {
-  let data = { scores: mapScores.value, close }
+async function storeScores(closed = false) {
+  let data = { scores: mapScores.value, closed }
 
   try {
     savingScores.value = true
     await api.post('activity_daily_scores', data)
     notify.positive('Calificaciones guardas con exito')
+
+    await fetchScores()
+
+    mapScores.value = [...currentScores.value]
+    if( closed == 1 ){
+      closeActivities()
+    }
+
   } catch (error) {
     notify.negative('Error al guardar calificaciones')
     console.log(error)
   } finally {
     savingScores.value = false
   }
+}
+
+function closeActivities(){
+  mapScores.value = mapScores.value.map(score => ({...score, closed: 1}))
 }
 
 async function fetchScores() {
@@ -354,50 +370,60 @@ onMounted(async () => {
       </div>
 
       <div
-        v-if="mapScores && mapScores.length"
+        v-if="mapScores && mapScores.length && !dayClosed"
         class="flex justify-end q-gutter-x-md"
       >
         <q-btn
           v-if="isClosable"
+          :disable="deferredDate || dayClosed"
           color="secondary"
           label="Cerrar dia"
-          @click="storeScores(true)"
+          @click="storeScores(1)"
           :loading="savingScores"
         />
         <q-btn
-          :disable="deferredDate"
+          :disable="deferredDate || dayClosed"
           color="primary"
           label="Guardar calificaciones"
-          @click="storeScores"
+          @click="storeScores(0)"
           :loading="savingScores"
         />
+      </div>
+      <div v-else-if="dayClosed">
+        <q-card>
+          <q-card-section class="bg-positive">
+            <q-icon name="sym_o_done_all" size="1.5rem" color="green-1" class="q-mr-md"/>
+            <span class="text-green-1">Dia cerrado, no se admiten actualizaciones.</span>
+          </q-card-section>
+        </q-card>
       </div>
 
       <ScoresTable
         v-if="(searchType == 'user' && candidateId) || (searchType == 'activity' && activityId)"
+        v-model:rows="mapScores"
         :readonly="deferredDate"
         :mode="searchType"
-        :rows="mapScores"
         :loading="loading"
         :disable="savingScores"
       />
 
       <div
-        v-if="mapScores && mapScores.length"
+        v-if="mapScores && mapScores.length && !dayClosed"
         class="flex justify-end q-gutter-x-md"
       >
         <q-btn
           v-if="isClosable"
+          :disable="deferredDate || dayClosed"
           color="secondary"
           label="Cerrar dia"
-          @click="storeScores(true)"
+          @click="storeScores(1)"
           :loading="savingScores"
         />
         <q-btn
-          :disable="deferredDate"
+          :disable="deferredDate || dayClosed"
           color="primary"
           label="Guardar calificaciones"
-          @click="storeScores"
+          @click="storeScores(0)"
           :loading="savingScores"
         />
       </div>

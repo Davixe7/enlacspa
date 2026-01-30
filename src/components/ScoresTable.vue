@@ -4,9 +4,10 @@ import { computed } from 'vue'
 const props = defineProps({
   readonly: { type: Boolean, default: false },
   loading: { type: Boolean, default: false },
-  mode: { type: String, default: 'user' },
-  rows: { type: Array, default: () => [] }
+  mode: { type: String, default: 'user' }
 })
+
+const rows = defineModel('rows', { type: Array, default: () => [] })
 
 const columns = computed(() => {
   return props.mode == 'user'
@@ -56,7 +57,7 @@ const columns = computed(() => {
       <q-td>
         <q-input
           v-if="props.row.activity.goal_type != 'Dominio'"
-          :disable="readonly"
+          :disable="readonly || props.row.closed == 1"
           type="number"
           borderless
           filled
@@ -70,7 +71,7 @@ const columns = computed(() => {
         </q-input>
         <q-select
           v-else
-          :disable="readonly"
+          :disable="readonly || props.row.closed == 1"
           filled
           dense
           borderless
