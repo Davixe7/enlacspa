@@ -2,11 +2,13 @@
 import { DateTime } from 'luxon'
 import { api } from 'src/boot/axios'
 import { onMounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
 import notify from 'src/utils/notify'
+import { useCategoryStore } from 'src/stores/category-store'
+import { useRoute } from 'vue-router'
 
 const route = useRoute()
-const work_area_id = route.query.categoryId
+const category = ref(null)
+
 const subjects = ref([
   {
     id: 1,
@@ -84,7 +86,7 @@ async function storeIssue() {
     loading.value = false
     let data = new FormData()
 
-    data.append('work_area_id', route.query.categoryId)
+    data.append('work_area_id', category.value.id)
     data.append('user_id', userId.value)
     data.append('type', type.value)
     data.append('date', DateTime.fromFormat(date.value, 'dd/MM/yyyy').toISODate())
@@ -108,9 +110,9 @@ async function storeIssue() {
 }
 
 const files = ref([])
-const filePicker = ref(null)
 
-onMounted(() => {
+onMounted(async () => {
+  category.value = (await useCategoryStore().getCategoryByName(route.params.categoryName))
   fetchUsers()
 })
 </script>
@@ -130,11 +132,12 @@ onMounted(() => {
             <td>Área</td>
             <td class="q-pa-sm">
               <q-input
-                readonly
+                v-if="category"
                 stack-label
                 hide-bottom-space
                 outlined
-                :value="work_area_id"
+                readonly
+                v-model="category.label"
               />
             </td>
           </tr>

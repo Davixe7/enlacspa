@@ -20,6 +20,7 @@
           icon="sym_o_siren"
           class="q-ml-md"
           @click="issuesDialog = true"
+          v-if="route.name == 'scores.create'"
         />
 
         <q-btn

@@ -1,13 +1,14 @@
 <script setup>
 import { api } from 'src/boot/axios'
-import notify from 'src/utils/notify'
-import { watch } from 'vue'
-import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { watch, ref, onMounted } from 'vue'
 import EnlacDate from 'src/components/EnlacDate.vue'
+import notify from 'src/utils/notify'
+import { useCategoryStore } from 'src/stores/category-store'
 
-const route = useRoute()
-const workAreaId = ref(route.query.categoryId)
+const props = defineProps(['categoryName'])
+
+const workAreaId = ref(null)
+const categoryStore = useCategoryStore()
 const candidates = ref([])
 const currentAttendances = ref([])
 const loading = ref(false)
@@ -52,6 +53,7 @@ async function fetchCandidates() {
 }
 
 onMounted(async () => {
+  workAreaId.value = (await categoryStore.getCategoryByName(props.categoryName)).id
   await fetchCandidates()
   await fetchAttendances()
   mapAttendances()

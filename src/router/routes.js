@@ -225,7 +225,7 @@ const routes = [
       },
       {
         path: 'area/:categoryName/calificar',
-        name: 'qualifying.index',
+        name: 'scores.create',
         props: true,
         meta: { label: 'Buscar beneficiario(s)' },
         component: () => import('pages/ScoreFormPage.vue')
@@ -237,9 +237,10 @@ const routes = [
         component: () => import('pages/IssuesPage.vue')
       },
       {
-        path: 'asistencias',
+        path: 'area/:categoryName/asistencias',
         name: 'attendance.index',
         meta: { label: 'Control de asistencias' },
+        props: true,
         component: () => import('pages/AttendancePage.vue')
       }
     ]
