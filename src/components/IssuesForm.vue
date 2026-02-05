@@ -86,7 +86,7 @@ async function storeIssue() {
     loading.value = false
     let data = new FormData()
 
-    data.append('work_area_id', category.value.id)
+    data.append('plan_category_id', category.value.id)
     data.append('user_id', userId.value)
     data.append('type', type.value)
     data.append('date', DateTime.fromFormat(date.value, 'dd/MM/yyyy').toISODate())

@@ -6,7 +6,7 @@ import { ref, computed } from 'vue'
 const auth = useAuthStore()
 const user = computed(() => auth.data?.user)
 
-const employeeRoles = ref(['driver', 'coordinacion_fisica'])
+const employeeRoles = ref(['driver', 'coordinacion_fisica', 'titular_de_expresion_artistica', 'coordinacion_academica'])
 </script>
 
 <template>

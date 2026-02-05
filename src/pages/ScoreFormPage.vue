@@ -16,33 +16,24 @@ const category = ref(false)
 const loading = ref(false)
 const savingScores = ref(false)
 
-const searchType = ref('activity')
+const searchType = ref('user')
 const searchQuery = ref('')
-const activities = ref([])
-const activityId = ref(null)
-const activity = ref(null)
-const candidates = ref(null)
-const candidateId = ref(null)
-const dayClosed = computed(() => mapScores.value.some(score => score.closed == 1))
+const optionId = ref(null)
 
-const candidateActivities = ref([])
-const activityCandidates = ref([])
-
-const mapScores = ref([])
-const currentScores = ref([])
 const dateISO = ref(DateTime.now().toISODate().split('T')[0])
+const dayClosed = computed(() => scores.value.some(score => score.closed == 1))
 
 function clearForm() {
-  candidates.value = null
-  currentScores.value = []
-  mapScores.value = []
-  activityId.value = null
-  activity.value = null
-  candidateId.value = null
+  loading.value = true
+  rows.value = []
+  searchQuery.value = ''
+  optionId.value = null
+  scores.value = []
 }
 
 watch(searchType, function () {
   clearForm()
+  fetchScores()
 })
 
 watch(dateISO, function () {
@@ -54,183 +45,12 @@ const emptySearch = computed(() => {
     return false
   }
 
-  if (searchType.value == 'user' && candidates.value && candidates.value.length == 0) {
+  if (results.value.length == 0){
     return true
   }
 
-  if (searchType.value == 'activity' && activity.value && activityCandidates.value.length == 0) {
-    return true
-  }
   return false
 })
-
-async function fetchActivities() {
-  try {
-    loading.value = true
-    activities.value = (await api.get(`activities/?category_id=${category.value.id}`)).data.data
-    activities.value.unshift({ name: 'Seleccione actividad', id: null })
-    activityId.value = activities.value[0].id
-  } catch (error) {
-    console.log(error)
-  } finally {
-    loading.value = false
-  }
-}
-
-async function fetchActivityCandidates() {
-  try {
-    loading.value = true
-    activityCandidates.value = (
-      await api.get(`beneficiaries/?activity_id=${activityId.value}`)
-    ).data.data
-    activity.value = activities.value.find((act) => act.id == activityId.value)
-
-    await fetchScores()
-    candidatesToScores()
-  } catch (error) {
-    console.log(error)
-  } finally {
-    loading.value = false
-  }
-}
-
-async function fetchCandidates() {
-  try {
-    candidateActivities.value = []
-    candidateId.value = null
-    candidates.value = null
-    mapScores.value = []
-
-    let params = {
-      name: searchQuery.value == null ? '' : searchQuery.value,
-      category_id: category.value.id
-    }
-
-    loading.value = true
-    candidates.value = (await api.get('beneficiaries', { params })).data.data
-  } catch (error) {
-    console.log(error)
-  } finally {
-    loading.value = false
-  }
-}
-
-async function fetchCandidateActivities(id) {
-  if (candidateId.value == id) {
-    candidateId.value = null
-    return
-  }
-
-  try {
-    loading.value = true
-    candidateId.value = id
-    mapScores.value = []
-    candidateActivities.value = (
-      await api.get(`activities/?candidate_id=${id}&category_id=${category.value.id}`)
-    ).data.data
-
-    await fetchScores()
-    await activitiesToScores()
-  } catch (error) {
-    console.log(error)
-  } finally {
-    loading.value = false
-  }
-}
-
-async function activitiesToScores() {
-  console.log('Mapping scores for: ', candidateId.value)
-  mapScores.value = candidateActivities.value.map(function (iActivity) {
-    let currentScore = currentScores.value.find(function (iCurrentScore) {
-      return (
-        iCurrentScore.activity_id == iActivity.id && iCurrentScore.candidate_id == candidateId.value
-      )
-    })
-
-    if (currentScore) {
-      return {
-        activity: iActivity,
-        activity_id: iActivity.id,
-        ...currentScore
-      }
-    }
-
-    return {
-      activity: iActivity,
-      activity_id: iActivity.id,
-      candidate_id: candidateId.value,
-      score: '',
-      closed: 0
-    }
-  })
-}
-
-async function candidatesToScores() {
-  console.log('Mapping scores for: ', activityId.value)
-
-  mapScores.value = activityCandidates.value.map(function (iCandidate) {
-    let currentScore = currentScores.value.find(function (iCurrentScore) {
-      return (
-        iCurrentScore.activity_id == activity.value.id &&
-        iCurrentScore.candidate_id == iCandidate.id
-      )
-    })
-
-    return {
-      activity: activity.value,
-      activity_id: activity.value.id,
-      candidate: iCandidate,
-      candidate_id: iCandidate.id,
-      score: currentScore ? currentScore.score : '',
-      closed: currentScore ? currentScore.closed : 0,
-      id: currentScore ? currentScore.id : null
-    }
-  })
-}
-
-async function storeScores(closed = false) {
-  let data = { scores: mapScores.value, closed }
-
-  try {
-    savingScores.value = true
-    await api.post('activity_daily_scores', data)
-    notify.positive('Calificaciones guardas con exito')
-
-    await fetchScores()
-
-    mapScores.value = [...currentScores.value]
-    if( closed == 1 ){
-      closeActivities()
-    }
-
-  } catch (error) {
-    notify.negative('Error al guardar calificaciones')
-    console.log(error)
-  } finally {
-    savingScores.value = false
-  }
-}
-
-function closeActivities(){
-  mapScores.value = mapScores.value.map(score => ({...score, closed: 1}))
-}
-
-async function fetchScores() {
-  try {
-    loading.value = true
-    const params = {
-      ...(candidateId.value !== null && { candidate_id: candidateId.value }),
-      ...(activityId.value !== null && { activity_id: activityId.value }),
-      ...{ date: dateISO.value }
-    }
-    currentScores.value = (await api.get('activity_daily_scores', { params })).data.data
-  } catch (error) {
-    console.log(error)
-    notify.negative('Error al cargar calificaciones de la fecha')
-  } finally {
-    loading.value = false
-  }
-}
 
 const deferredDate = computed(() => {
   if (!dateISO.value) return false
@@ -243,14 +63,74 @@ const deferredDate = computed(() => {
 })
 
 const isClosable = computed(() => {
-  return mapScores.value.some((score) => score.id)
+  return scores.value.some((score) => score.id)
 })
 
 const categoryStore = useCategoryStore()
 
+const rows    = ref([])
+const scores  = ref([])
+
+async function fetchScores(){
+  loading.value = true
+  rows.value = ((await api.get(`scores/?category_id=${category.value.id}&mode=${searchType.value}`)).data.data)
+  loading.value = false
+}
+
+const results = computed(()=>{
+  if(!searchQuery.value) {
+    return rows.value
+  }
+  return rows.value.filter(row => row.name.toLowerCase().includes(searchQuery.value.toLocaleLowerCase()))
+})
+
+async function closeScores(){
+  scores.value = scores.value.map(score => ({...score, closed: 1}))
+}
+
+async function storeScores(closed = false) {
+  let data = { scores: scores.value, closed }
+
+  try {
+    errors.value = {}
+    savingScores.value = true
+    await api.post('activity_daily_scores', data)
+    notify.positive('Calificaciones guardas con exito')
+
+    await fetchScores()
+    scores.value = [...rows.value.find(row => row.id == optionId.value).scores]
+
+    if( closed == 1 ){
+      closeScores()
+    }
+
+  } catch (error) {
+    console.log(error);
+    
+    notify.negative('Error al guardar calificaciones')
+    if( error.formatted ){
+      errors.value = error.formatted
+    }
+  } finally {
+    savingScores.value = false
+  }
+}
+
+function selectOption(option){
+  if( option.id == optionId.value ){
+    optionId.value = null
+    scores.value = []
+    return
+  }
+  optionId.value = option.id
+  scores.value = option.scores
+}
+
+const errors = ref({})
+
 onMounted(async () => {
   category.value = await categoryStore.getCategoryByName(props.categoryName)
-  await fetchActivities()
+  await fetchScores()
 })
 </script>
 
@@ -280,10 +160,7 @@ onMounted(async () => {
         />
       </div>
 
-      <div
-        class="q-gutter-y-md"
-        v-if="searchType == 'user'"
-      >
+      <div class="q-gutter-y-md">
         <div class="flex q-gutter-x-md">
           <q-input
             type="search"
@@ -293,52 +170,38 @@ onMounted(async () => {
             v-model="searchQuery"
             clearable
             style="flex: 1 1 auto"
+            debounce="500"
           >
             <template v-slot:prepend>
               <q-icon name="sym_o_search" />
             </template>
           </q-input>
-
-          <q-btn
-            color="primary"
-            label="Buscar"
-            :loading="loading"
-            @click="fetchCandidates"
-          />
         </div>
 
         <q-list
           bordered
-          v-if="candidates && candidates.length"
+          v-if="results"
         >
           <template
-            v-for="candidate in candidates"
-            :key="candidate.id"
+            v-for="result in results"
+            :key="result.id"
           >
             <q-item
-              v-if="!candidateId || candidate.id == candidateId"
+              v-if="!optionId || result.id == optionId"
               clickable
-              @click="fetchCandidateActivities(candidate.id)"
+              @click="selectOption(result)"
             >
               <q-item-section avatar>
                 <q-icon name="sym_o_account_circle" />
               </q-item-section>
-              <q-item-section class="two-line-ellipsis">
-                {{ candidate.name }}
-                <q-tooltip
-                  anchor="top middle"
-                  self="bottom middle"
-                  max-width="300px"
-                  class="bg-dark text-white shadow-4"
-                >
-                  {{ candidate.name }}
-                </q-tooltip>
+              <q-item-section class="two-line-ellipsis" style="font-family: monospace;">
+                {{ result.name }}
               </q-item-section>
               <q-item-section side>
                 <q-checkbox
-                  v-model="candidateId"
-                  :val="candidate.id"
-                  :true-value="candidate.id"
+                  v-model="optionId"
+                  :val="result.id"
+                  :true-value="result.id"
                   :false-value="null"
                   style="pointer-events: none"
                 />
@@ -349,28 +212,7 @@ onMounted(async () => {
       </div>
 
       <div
-        v-else
-        class="q-gutter-y-md"
-      >
-        <q-select
-          v-if="activities && activities.length"
-          stack-label
-          outlined
-          dense
-          hide-bottom-space
-          :options="activities"
-          :option-value="'id'"
-          :option-label="'name'"
-          :emit-value="true"
-          map-options
-          v-model="activityId"
-          style="width: 100%"
-          @update:model-value="fetchActivityCandidates"
-        />
-      </div>
-
-      <div
-        v-if="mapScores && mapScores.length && !dayClosed"
+        v-if="scores && scores.length && !dayClosed"
         class="flex justify-end q-gutter-x-md"
       >
         <q-btn
@@ -389,6 +231,7 @@ onMounted(async () => {
           :loading="savingScores"
         />
       </div>
+
       <div v-else-if="dayClosed">
         <q-card>
           <q-card-section class="bg-positive">
@@ -399,16 +242,17 @@ onMounted(async () => {
       </div>
 
       <ScoresTable
-        v-if="(searchType == 'user' && candidateId) || (searchType == 'activity' && activityId)"
-        v-model:rows="mapScores"
+        v-if="optionId"
+        v-model:rows="scores"
         :readonly="deferredDate"
         :mode="searchType"
         :loading="loading"
         :disable="savingScores"
+        :errors="errors"
       />
 
       <div
-        v-if="mapScores && mapScores.length && !dayClosed"
+        v-if="scores && scores.length && !dayClosed"
         class="flex justify-end q-gutter-x-md"
       >
         <q-btn
@@ -436,7 +280,7 @@ onMounted(async () => {
         No hay resultados coincidentes con la busqueda
       </div>
 
-      <template v-if="!candidateId && !activityId">
+      <template v-if="!optionId">
         <div class="text-center">
           <q-img
             src="/public/actividades.png"

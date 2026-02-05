@@ -9,7 +9,7 @@ const loading = ref(false)
 const rows = ref([])
 
 const columns = ref([
-  { name: 'work_area_id', label: 'Area', field: 'work_area_id', align: 'left' },
+  { name: 'category', label: 'Area', field: row => row.plan_category.label, align: 'left' },
   {
     name: 'type',
     label: 'Asunto',
@@ -74,7 +74,6 @@ const subjects = ref([
 ])
 
 async function fetchIssues() {
-  // Lógica para obtener los issues desde la API
   try {
     loading.value = true
     rows.value = (await api.get(`issues/?date=${dateISO.value}`)).data.data

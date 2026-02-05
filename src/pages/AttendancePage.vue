@@ -73,7 +73,7 @@ const columns = ref([
     label: 'Actividades Realizadas',
     field: 'done_activities'
   },
-  { align: 'left', name: 'actions', label: 'Acciones' }
+  { align: 'left', name: 'actions', label: 'Asistencia' }
 ])
 
 async function storeAttendances() {
@@ -124,6 +124,7 @@ async function storeAttendances() {
           v-model="props.row.status"
           :false-value="'absent'"
           :true-value="'present'"
+          :style="{'pointer-events': props.row.done_activities ? 'none' : 'all'}"
         />
       </q-td>
     </template>

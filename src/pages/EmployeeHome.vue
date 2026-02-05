@@ -7,7 +7,9 @@ const categoryStore = useCategoryStore()
 const auth = useAuthStore()
 
 const areaPermissions = ref({
-  8: [1, 4, 5, 6]
+  8: [1, 4, 5, 6],
+  4: [3],
+  7: [2],
 })
 
 const driverOptions = [

@@ -37,7 +37,7 @@ const adminLinks = ref([
           <q-item-section>Notificaciones</q-item-section>
         </q-item>
         <q-expansion-item
-          v-if="!['driver', 'chofer'].includes(authStore.data.user.role.name)"
+          v-if="authStore.data.user.is_admin"
           dense
           expand-separator
           icon="settings"

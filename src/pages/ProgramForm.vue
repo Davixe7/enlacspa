@@ -107,7 +107,7 @@ function removeActivity(activity) {
 
 function formatActivities() {
   return program.value.activities.reduce((acc, actividad) => {
-    acc[actividad.id] = { daily_goal: actividad.daily_goal }
+    acc[actividad.id] = { daily_goal: actividad.daily_goal, final_goal: actividad.final_goal }
     return acc
   }, {})
 }

@@ -26,6 +26,15 @@
         <q-btn
           flat
           round
+          icon="sym_o_rule"
+          class="q-ml-md"
+          :to="{name: 'attendance.index'}"
+          v-if="route.name == 'scores.create'"
+        />
+
+        <q-btn
+          flat
+          round
           icon="sym_o_notifications"
           class="q-mx-md"
           to="/notificaciones"
