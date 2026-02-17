@@ -7,6 +7,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import ScoresTable from '../components/ScoresTable.vue'
 import EnlacDate from '../components/EnlacDate.vue'
 import { useCategoryStore } from 'src/stores/category-store'
+import IssuesForm from 'src/components/IssuesForm.vue'
 
 const props = defineProps({
   categoryName: { type: String, required: true }
@@ -45,7 +46,7 @@ const emptySearch = computed(() => {
     return false
   }
 
-  if (results.value.length == 0){
+  if (results.value.length == 0) {
     return true
   }
 
@@ -68,30 +69,29 @@ const isClosable = computed(() => {
 
 const categoryStore = useCategoryStore()
 
-const rows    = ref([])
-const scores  = ref([])
+const rows = ref([])
+const scores = ref([])
 
-async function fetchScores(){
+async function fetchScores() {
   loading.value = true
-  rows.value = ((await api.get(`scores/?category_id=${category.value.id}&mode=${searchType.value}`)).data.data)
+  rows.value = ((await api.get(`activity_daily_scores/?category_id=${category.value.id}&mode=${searchType.value}`)).data.data)
   loading.value = false
 }
 
-const results = computed(()=>{
-  if(!searchQuery.value) {
+const results = computed(() => {
+  if (!searchQuery.value) {
     return rows.value
   }
   return rows.value.filter(row => row.name.toLowerCase().includes(searchQuery.value.toLocaleLowerCase()))
 })
 
-async function closeScores(){
-  scores.value = scores.value.map(score => ({...score, closed: 1}))
+async function closeScores() {
+  scores.value = scores.value.map(score => ({ ...score, closed: 1 }))
 }
 
 async function storeScores(closed = false) {
-  let data = { scores: scores.value, closed }
-
   try {
+    let data = { scores: scores.value, closed }
     errors.value = {}
     savingScores.value = true
     await api.post('activity_daily_scores', data)
@@ -100,15 +100,15 @@ async function storeScores(closed = false) {
     await fetchScores()
     scores.value = [...rows.value.find(row => row.id == optionId.value).scores]
 
-    if( closed == 1 ){
+    if (closed == 1) {
       closeScores()
     }
 
   } catch (error) {
     console.log(error);
-    
+
     notify.negative('Error al guardar calificaciones')
-    if( error.formatted ){
+    if (error.formatted) {
       errors.value = error.formatted
     }
   } finally {
@@ -116,8 +116,8 @@ async function storeScores(closed = false) {
   }
 }
 
-function selectOption(option){
-  if( option.id == optionId.value ){
+function selectOption(option) {
+  if (option.id == optionId.value) {
     optionId.value = null
     scores.value = []
     return
@@ -127,70 +127,54 @@ function selectOption(option){
 }
 
 const errors = ref({})
+const issuesDialog = ref(false)
 
 onMounted(async () => {
   category.value = await categoryStore.getCategoryByName(props.categoryName)
   await fetchScores()
 })
+
 </script>
 
 <template>
+  <q-dialog v-model="issuesDialog">
+    <q-card style="width: 480px">
+      <q-card-section class="flex items-center">
+        <q-icon name="sym_o_siren" class="q-mr-sm" size="1.25rem" />
+        <h1 class="page-subtitle q-my-none">Registrar Incidencia</h1>
+        <q-btn @click="issuesDialog = false" icon="close" flat round dense class="q-ml-auto" />
+      </q-card-section>
+      <IssuesForm :candidate-id="optionId" @close="issuesDialog = false" />
+    </q-card>
+  </q-dialog>
+
   <div class="row">
     <div class="col-md-8 q-mx-auto q-gutter-y-md">
       <div class="flex">
         <div class="page-title q-mb-none">
           Calificar actividades {{ category ? `- ${category.label}` : '' }}
         </div>
-        <enlac-date
-          v-model="dateISO"
-          class="q-ml-auto"
-        />
+        <enlac-date v-model="dateISO" class="q-ml-auto" />
       </div>
 
       <div class="flex q-gutter-x-md">
-        <q-radio
-          v-model="searchType"
-          val="user"
-          label="Nombre de beneficiario"
-        />
-        <q-radio
-          v-model="searchType"
-          val="activity"
-          label="Seleccionar actividad"
-        />
+        <q-radio v-model="searchType" val="user" label="Nombre de beneficiario" />
+        <q-radio v-model="searchType" val="activity" label="Seleccionar actividad" />
       </div>
 
       <div class="q-gutter-y-md">
         <div class="flex q-gutter-x-md">
-          <q-input
-            type="search"
-            outlined
-            stack-label
-            hide-bottom-space
-            v-model="searchQuery"
-            clearable
-            style="flex: 1 1 auto"
-            debounce="500"
-          >
+          <q-input type="search" outlined stack-label hide-bottom-space v-model="searchQuery" clearable
+            style="flex: 1 1 auto" debounce="500">
             <template v-slot:prepend>
               <q-icon name="sym_o_search" />
             </template>
           </q-input>
         </div>
 
-        <q-list
-          bordered
-          v-if="results"
-        >
-          <template
-            v-for="result in results"
-            :key="result.id"
-          >
-            <q-item
-              v-if="!optionId || result.id == optionId"
-              clickable
-              @click="selectOption(result)"
-            >
+        <q-list bordered v-if="results">
+          <template v-for="result in results" :key="result.id">
+            <q-item v-if="!optionId || result.id == optionId" clickable @click="selectOption(result)">
               <q-item-section avatar>
                 <q-icon name="sym_o_account_circle" />
               </q-item-section>
@@ -198,94 +182,51 @@ onMounted(async () => {
                 {{ result.name }}
               </q-item-section>
               <q-item-section side>
-                <q-checkbox
-                  v-model="optionId"
-                  :val="result.id"
-                  :true-value="result.id"
-                  :false-value="null"
-                  style="pointer-events: none"
-                />
+                <div class="flex">
+                  <q-btn flat round icon="sym_o_siren" class="q-mr-md" @click="issuesDialog = true" />
+                  <q-checkbox v-model="optionId" :val="result.id" :true-value="result.id" :false-value="null"
+                    style="pointer-events: none" />
+                </div>
               </q-item-section>
             </q-item>
           </template>
         </q-list>
       </div>
 
-      <div
-        v-if="scores && scores.length && !dayClosed"
-        class="flex justify-end q-gutter-x-md"
-      >
-        <q-btn
-          v-if="isClosable"
-          :disable="deferredDate || dayClosed"
-          color="secondary"
-          label="Cerrar dia"
-          @click="storeScores(1)"
-          :loading="savingScores"
-        />
-        <q-btn
-          :disable="deferredDate || dayClosed"
-          color="primary"
-          label="Guardar calificaciones"
-          @click="storeScores(0)"
-          :loading="savingScores"
-        />
+      <div v-if="scores && scores.length && !dayClosed" class="flex justify-end q-gutter-x-md">
+        <q-btn v-if="isClosable" :disable="deferredDate || dayClosed" color="secondary" label="Cerrar dia"
+          @click="storeScores(1)" :loading="savingScores" />
+        <q-btn :disable="deferredDate || dayClosed" color="primary" label="Guardar calificaciones"
+          @click="storeScores(0)" :loading="savingScores" />
       </div>
 
       <div v-else-if="dayClosed">
         <q-card>
           <q-card-section class="bg-positive">
-            <q-icon name="sym_o_done_all" size="1.5rem" color="green-1" class="q-mr-md"/>
+            <q-icon name="sym_o_done_all" size="1.5rem" color="green-1" class="q-mr-md" />
             <span class="text-green-1">Dia cerrado, no se admiten actualizaciones.</span>
           </q-card-section>
         </q-card>
       </div>
 
-      <ScoresTable
-        v-if="optionId"
-        v-model:rows="scores"
-        :readonly="deferredDate"
-        :mode="searchType"
-        :loading="loading"
-        :disable="savingScores"
-        :errors="errors"
-      />
+      <ScoresTable v-if="optionId" v-model:rows="scores" :readonly="deferredDate" :mode="searchType" :loading="loading"
+        :disable="savingScores" :errors="errors" />
 
-      <div
-        v-if="scores && scores.length && !dayClosed"
-        class="flex justify-end q-gutter-x-md"
-      >
-        <q-btn
-          v-if="isClosable"
-          :disable="deferredDate || dayClosed"
-          color="secondary"
-          label="Cerrar dia"
-          @click="storeScores(1)"
-          :loading="savingScores"
-        />
-        <q-btn
-          :disable="deferredDate || dayClosed"
-          color="primary"
-          label="Guardar calificaciones"
-          @click="storeScores(0)"
-          :loading="savingScores"
-        />
+      <div v-if="scores && scores.length && !dayClosed" class="flex justify-end q-gutter-x-md">
+        <q-btn v-if="isClosable" :disable="deferredDate || dayClosed" color="secondary" label="Cerrar dia"
+          @click="storeScores(1)" :loading="savingScores" />
+        <q-btn :disable="deferredDate || dayClosed" color="primary" label="Guardar calificaciones"
+          @click="storeScores(0)" :loading="savingScores" />
       </div>
 
-      <div
-        v-if="emptySearch"
-        class="text-negative"
-      >
+      <div v-if="emptySearch" class="text-negative">
         <q-icon name="sym_o_info" />
         No hay resultados coincidentes con la busqueda
       </div>
 
       <template v-if="!optionId">
         <div class="text-center">
-          <q-img
-            src="/public/actividades.png"
-            width="200px"
-          />
+          <q-img src="/public/actividades.png" width="200px" />
           <h6 class="q-my-sm">Selecciona un beneficiario o actividad</h6>
           <p>para empezar a evaluar</p>
         </div>
@@ -293,32 +234,14 @@ onMounted(async () => {
     </div>
   </div>
 
-  <q-page-sticky
-    expand
-    position="top"
-    :offset="[0, 0]"
-    class="z-top"
-  >
-    <q-card
-      v-if="deferredDate"
-      square
-      class="full-width shadow-2 q-pa-sm bg-warning"
-    >
+  <q-page-sticky expand position="top" :offset="[0, 0]" class="z-top">
+    <q-card v-if="deferredDate" square class="full-width shadow-2 q-pa-sm bg-warning">
       <div class="flex justify-center items-center">
-        <q-icon
-          name="sym_o_warning"
-          class="q-mr-md"
-        />
+        <q-icon name="sym_o_warning" class="q-mr-md" />
         <div>
           Estás visualizando una fecha pasada, no se admiten modificaciones.
-          <q-btn
-            unelevated
-            dense
-            label="Ir a hoy"
-            @click="dateISO = new Date().toISOString().split('T')[0]"
-            class="q-ml-sm q-pa-sm bg-dark text-white"
-            icon="sym_o_event_upcoming"
-          />
+          <q-btn unelevated dense label="Ir a hoy" @click="dateISO = new Date().toISOString().split('T')[0]"
+            class="q-ml-sm q-pa-sm bg-dark text-white" icon="sym_o_event_upcoming" />
         </div>
       </div>
     </q-card>
@@ -328,13 +251,16 @@ onMounted(async () => {
 <style lang="scss">
 .multi-line-ellipsis {
   display: -webkit-box;
-  -webkit-line-clamp: 2; /* Número de líneas */
+  -webkit-line-clamp: 2;
+  /* Número de líneas */
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-  word-break: break-word; /* Evita que palabras largas rompan el layout */
+  word-break: break-word;
+  /* Evita que palabras largas rompan el layout */
   max-width: 240px;
 }
+
 @mixin multi-line-ellipsis($lines: 2) {
   display: -webkit-box;
   -webkit-line-clamp: $lines;

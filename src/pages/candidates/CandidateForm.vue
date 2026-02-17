@@ -126,7 +126,7 @@ const candidate = ref({
   chronological_age: null,
   diagnosis: '',
   info_channel: infoChannels.value[infoChannels.value.length - 1],
-  status: 'default'
+  status: 'pendiente'
 })
 
 //Relationships
@@ -175,119 +175,52 @@ const statusOptions = ref([])
 
 <template>
   <q-page>
-    <div
-      class="row items-center justify-end q-mb-lg q-gutter-sm"
-      v-if="['exenlac', 'fallecido', 'graduado'].includes(candidate.status)"
-    >
-      <q-btn
-        color="primary"
-        label="Reingresar"
-        @click="onScheduleEntry(candidate)"
-      />
+    <div class="row items-center justify-end q-mb-lg q-gutter-sm"
+      v-if="['exenlac', 'fallecido', 'graduado'].includes(candidate.status)">
+      <q-btn color="primary" label="Reingresar" @click="onScheduleEntry(candidate)" />
     </div>
     <div class="row items-center justify-between q-mb-md">
       <div class="page-title">Datos del Candidato</div>
 
       <div class="row items-center q-gutter-sm">
         <div class="text-caption text-grey-7">Estado del beneficiario:</div>
-        <q-chip
-          :color="candidate.status.color"
-          text-color="white"
-          size="sm"
-          icon="flag"
-          :label="candidate.status.label"
-        />
+        <q-chip :color="candidate.status.color" text-color="white" size="sm" icon="flag"
+          :label="candidate.status.label" />
       </div>
     </div>
     <div class="row q-col-gutter-lg q-mb-lg">
       <div class="col-12 col-md-6 q-gutter-y-lg">
-        <q-input
-          outlined
-          stack-label
-          hide-bottom-space
-          label="Nombre (s)"
-          v-model="candidate.first_name"
-          class="q-field--required"
-          :error="!!errors['candidate.first_name']"
-          :error-message="errors['candidate.first_name']"
-        ></q-input>
-        <q-input
-          outlined
-          stack-label
-          hide-bottom-space
-          label="Apellido Paterno"
-          v-model="candidate.last_name"
-          class="q-field--required"
-          :error="!!errors['candidate.last_name']"
-          :error-message="errors['candidate.last_name']"
-        ></q-input>
-        <q-input
-          outlined
-          stack-label
-          hide-bottom-space
-          label="Apellido Materno"
-          v-model="candidate.middle_name"
-          class="q-field--required"
-          :error="!!errors['candidate.middle_name']"
-          :error-message="errors['candidate.middle_name']"
-        ></q-input>
+        <q-input outlined stack-label hide-bottom-space label="Nombre (s)" v-model="candidate.first_name"
+          class="q-field--required" :error="!!errors['candidate.first_name']"
+          :error-message="errors['candidate.first_name']"></q-input>
+        <q-input outlined stack-label hide-bottom-space label="Apellido Paterno" v-model="candidate.last_name"
+          class="q-field--required" :error="!!errors['candidate.last_name']"
+          :error-message="errors['candidate.last_name']"></q-input>
+        <q-input outlined stack-label hide-bottom-space label="Apellido Materno" v-model="candidate.middle_name"
+          class="q-field--required" :error="!!errors['candidate.middle_name']"
+          :error-message="errors['candidate.middle_name']"></q-input>
       </div>
       <div class="col-12 col-md-6 q-gutter-y-lg">
-        <q-input
-          outlined
-          stack-label
-          hide-bottom-space
-          label="Fecha de Nacimiento"
-          v-model="candidate.birth_date"
-          class="q-field--required"
-          :error="!!errors['candidate.birth_date']"
-          :error-message="errors['candidate.birth_date']"
-          type="date"
-        ></q-input>
-        <q-input
-          readonly
-          outlined
-          stack-label
-          hide-bottom-space
-          label="Edad"
-          v-model.number="age"
-        ></q-input>
-        <q-input
-          readonly
-          outlined
-          stack-label
-          hide-bottom-space
-          label="Edad Cronológica*"
-          v-model="chronological_age"
-        ></q-input>
+        <q-input outlined stack-label hide-bottom-space label="Fecha de Nacimiento" v-model="candidate.birth_date"
+          class="q-field--required" :error="!!errors['candidate.birth_date']"
+          :error-message="errors['candidate.birth_date']" type="date"></q-input>
+        <q-input readonly outlined stack-label hide-bottom-space label="Edad" v-model.number="age"></q-input>
+        <q-input readonly outlined stack-label hide-bottom-space label="Edad Cronológica*"
+          v-model="chronological_age"></q-input>
       </div>
-      <q-btn
-        v-if="candidate?.can_reingresar"
-        color="primary"
-        label="Reingresar"
-        @click="onReingresar"
-      />
+      <q-btn v-if="candidate?.can_reingresar" color="primary" label="Reingresar" @click="onReingresar" />
     </div>
 
-    <ContactsPage
-      :readonly="props.readonly"
-      :candidateId="candidateId"
-      @update:modelValue="(newContacts) => (contacts = [...newContacts])"
-      :errors="errors"
-    ></ContactsPage>
+    <ContactsPage :readonly="props.readonly" :candidateId="candidateId"
+      @update:modelValue="(newContacts) => (contacts = [...newContacts])" :errors="errors"></ContactsPage>
 
     <div class="form-section">
       <div class="page-title">¿Dónde obtuvo la información del Instituto?</div>
       <div class="row">
         <div class="col-12 col-md-7">
           <div class="flex">
-            <q-radio
-              v-for="channel in infoChannels"
-              :key="channel"
-              :label="channel"
-              :val="channel"
-              v-model="candidate.info_channel"
-            ></q-radio>
+            <q-radio v-for="channel in infoChannels" :key="channel" :label="channel" :val="channel"
+              v-model="candidate.info_channel"></q-radio>
           </div>
         </div>
       </div>
@@ -295,76 +228,32 @@ const statusOptions = ref([])
 
     <div class="form-section">
       <div class="page-title">Información Médica del Candidato</div>
-      <q-input
-        type="textarea"
-        outlined
-        stack-label
-        hide-bottom-space
-        label="Diagnostico Médico / Síntomas *"
-        v-model="candidate.diagnosis"
-        :error="!!errors['candidate.diagnosis']"
-        :error-message="errors['candidate.diagnosis']"
-      ></q-input>
+      <q-input type="textarea" outlined stack-label hide-bottom-space label="Diagnostico Médico / Síntomas *"
+        v-model="candidate.diagnosis" :error="!!errors['candidate.diagnosis']"
+        :error-message="errors['candidate.diagnosis']"></q-input>
     </div>
 
-    <MedicationsPage
-      :readonly="props.readonly"
-      v-model="medications"
-      :candidateId="candidate.id"
-      :errors="errors"
-    ></MedicationsPage>
+    <MedicationsPage :readonly="props.readonly" v-model="medications" :candidateId="candidate.id" :errors="errors">
+    </MedicationsPage>
 
     <div class="form-section">
       <div class="page-title">Programar Evaluación</div>
 
-      <div
-        v-if="evaluations"
-        class="row q-col-gutter-lg q-mb-md"
-      >
+      <div v-if="evaluations" class="row q-col-gutter-lg q-mb-md">
         <div class="col-12 col-md-4">
-          <q-select
-            outlined
-            stack-label
-            label="Seleccione Evaluador"
-            :options="evaluators"
-            v-model="evaluation_schedule.evaluator_id"
-            emit-value
-            option-label="full_name"
-            option-value="id"
-            map-options
+          <q-select outlined stack-label label="Seleccione Evaluador" :options="evaluators"
+            v-model="evaluation_schedule.evaluator_id" emit-value option-label="full_name" option-value="id" map-options
             :error="!!errors['evaluation_schedule.evaluator_id']"
-            :error-message="errors['evaluation_schedule.evaluator_id']"
-          ></q-select>
+            :error-message="errors['evaluation_schedule.evaluator_id']"></q-select>
         </div>
         <div class="col-12 col-md-2">
-          <q-input
-            outlined
-            stack-label
-            v-model="evaluationDate"
-            class="q-field--required"
-            label="Seleccione fecha"
-          >
+          <q-input outlined stack-label v-model="evaluationDate" class="q-field--required" label="Seleccione fecha">
             <template v-slot:append>
-              <q-icon
-                name="event"
-                class="cursor-pointer"
-              >
-                <q-popup-proxy
-                  cover
-                  transition-show="scale"
-                  transition-hide="scale"
-                >
-                  <q-date
-                    v-model="evaluationDate"
-                    mask="DD/MM/YYYY"
-                  >
+              <q-icon name="event" class="cursor-pointer">
+                <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                  <q-date v-model="evaluationDate" mask="DD/MM/YYYY">
                     <div class="row items-center justify-end">
-                      <q-btn
-                        v-close-popup
-                        label="Cerrar"
-                        color="primary"
-                        flat
-                      />
+                      <q-btn v-close-popup label="Cerrar" color="primary" flat />
                     </div>
                   </q-date>
                 </q-popup-proxy>
@@ -373,31 +262,13 @@ const statusOptions = ref([])
           </q-input>
         </div>
         <div class="col-12 col-md-2">
-          <q-input
-            outlined
-            stack-label
-            v-model="evaluationTime"
-            class="q-field--required"
-            label="Horario"
-          >
+          <q-input outlined stack-label v-model="evaluationTime" class="q-field--required" label="Horario">
             <template v-slot:append>
-              <q-icon
-                name="access_time"
-                class="cursor-pointer"
-              >
-                <q-popup-proxy
-                  cover
-                  transition-show="scale"
-                  transition-hide="scale"
-                >
+              <q-icon name="access_time" class="cursor-pointer">
+                <q-popup-proxy cover transition-show="scale" transition-hide="scale">
                   <q-time v-model="evaluationTime">
                     <div class="row items-center justify-end">
-                      <q-btn
-                        v-close-popup
-                        label="Cerrar"
-                        color="primary"
-                        flat
-                      />
+                      <q-btn v-close-popup label="Cerrar" color="primary" flat />
                     </div>
                   </q-time>
                 </q-popup-proxy>
@@ -409,90 +280,38 @@ const statusOptions = ref([])
 
       <div class="subtitle">Historial de Evaluaciones Re-programadas</div>
       <ul class="q-pl-md q-mt-none">
-        <li
-          class="q-py-md"
-          v-for="schedule in evaluation_schedules"
-          :key="schedule.id"
-        >
+        <li class="q-py-md" v-for="schedule in evaluation_schedules" :key="schedule.id">
           <span style="font-family: monospace; margin-right: 1rem">{{ schedule.date }}</span>
           <span style="font-family: monospace">{{ schedule.evaluator.name }}</span>
         </li>
       </ul>
     </div>
 
-    <div
-      v-if="notifications"
-      class="form-section"
-    >
+    <div v-if="notifications" class="form-section">
       <div class="page-title">Herramientas Adicionales</div>
       <div class="subtitle q-my-md">Envío de Formato Inicial por WhatsApp</div>
       <div class="flex q-gutter-x-md q-mb-lg">
-        <q-input
-          outlined
-          stack-label
-          label="Nombre de la persona"
-          type="text"
-          v-model="recepient.name"
-        ></q-input>
-        <q-input
-          outlined
-          stack-label
-          label="Celular"
-          type="tel"
-          mask="##########"
-          v-model="recepient.phone"
-        ></q-input>
-        <q-btn
-          style="width: 100px; height: 48px; align-self: flex-end"
-          color="primary"
-          >Enviar</q-btn
-        >
+        <q-input outlined stack-label label="Nombre de la persona" type="text" v-model="recepient.name"></q-input>
+        <q-input outlined stack-label label="Celular" type="tel" mask="##########" v-model="recepient.phone"></q-input>
+        <q-btn style="width: 100px; height: 48px; align-self: flex-end" color="primary">Enviar</q-btn>
       </div>
 
       <div class="subtitle q-my-md">Envío de Encuesta de Satisfacción</div>
       <div class="flex q-gutter-x-md">
-        <q-input
-          outlined
-          stack-label
-          label="Nombre de la persona"
-          type="text"
-          v-model="recepient.name"
-        ></q-input>
-        <q-input
-          outlined
-          stack-label
-          label="Celular"
-          type="tel"
-          mask="##########"
-          v-model="recepient.phone"
-        ></q-input>
-        <q-btn
-          style="width: 100px; height: 48px; align-self: flex-end"
-          color="primary"
-          >Enviar</q-btn
-        >
+        <q-input outlined stack-label label="Nombre de la persona" type="text" v-model="recepient.name"></q-input>
+        <q-input outlined stack-label label="Celular" type="tel" mask="##########" v-model="recepient.phone"></q-input>
+        <q-btn style="width: 100px; height: 48px; align-self: flex-end" color="primary">Enviar</q-btn>
       </div>
     </div>
 
     <div class="form-section">
       <div class="subtitle q-mb-md">Foto del candidato</div>
       <div class="row">
-        <q-avatar
-          v-if="candidate.picture"
-          size="64px"
-          rounded
-          class="q-mr-sm"
-        >
+        <q-avatar v-if="candidate.picture" size="64px" rounded class="q-mr-sm">
           <q-img :src="candidate.picture"></q-img>
         </q-avatar>
         <div class="col-12 col-md-4">
-          <q-file
-            outlined
-            stack-label
-            label="Adjuntar archivo"
-            icon="attach"
-            v-model="picture"
-          >
+          <q-file outlined stack-label label="Adjuntar archivo" icon="attach" v-model="picture">
             <template v-slot:append>
               <q-icon name="attachment"></q-icon>
             </template>
@@ -502,12 +321,7 @@ const statusOptions = ref([])
     </div>
 
     <div class="flex justify-end">
-      <q-btn
-        :disable="props.readonly"
-        :loading="loading"
-        color="primary"
-        @click="storeCandidate"
-      >
+      <q-btn :disable="props.readonly" :loading="loading" color="primary" @click="storeCandidate">
         Guardar
       </q-btn>
     </div>

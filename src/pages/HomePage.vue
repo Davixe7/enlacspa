@@ -1,47 +1,19 @@
 <template>
   <q-page>
-    <q-carousel
-      autoplay
-      infinite
-      v-model="slide"
-      transition-prev="fade"
-      transition-next="fade"
-      control-color="white"
-      swipeable
-      animated
-      navigation
-      arrows
-      height="366px"
-      class="bg-grey-13 text-white rounded-borders q-mb-lg"
-    >
-      <q-carousel-slide
-        v-for="slide in slides"
-        :key="slide.id"
-        :name="slide.id"
-        class="column no-wrap flex-center"
-        :img-src="slide.picture"
-      >
+    <q-carousel autoplay infinite v-model="slide" transition-prev="fade" transition-next="fade" control-color="white"
+      swipeable animated navigation arrows height="366px" class="bg-grey-13 text-white rounded-borders q-mb-lg">
+      <q-carousel-slide v-for="slide in slides" :key="slide.id" :name="slide.id" class="column no-wrap flex-center"
+        :img-src="slide.picture">
       </q-carousel-slide>
     </q-carousel>
 
     <div>
       <div class="row q-col-gutter-lg">
-        <div
-          class="col col-12 col-md-3"
-          v-for="module in modules"
-          :key="module.name"
-        >
-          <q-card
-            class="module-card"
-            :style="{ background: module.color }"
-          >
+        <div class="col col-12 col-md-3" v-for="module in modules" :key="module.name">
+          <q-card class="module-card" :style="{ background: module.color }">
             <router-link :to="module.path">
               <q-card-section style="padding: 36px">
-                <q-img
-                  :src="`/${module.icon}.png`"
-                  width="74px"
-                  fit="contain"
-                ></q-img>
+                <q-img :src="`/${module.icon}.png`" width="74px" fit="contain"></q-img>
                 <div>
                   {{ module.label }}
                 </div>
@@ -89,10 +61,10 @@ const modules = ref([
     path: '/padrinos'
   },
   {
-    label: 'Administración de Programas',
+    label: 'Reportes de Programas',
     color: '#98007780',
     icon: 'administracion',
-    path: '/'
+    path: '/reportes'
   },
   {
     label: 'Capacitaciones',
@@ -121,7 +93,7 @@ const modules = ref([
   margin-top: -36px;
 }
 
-.q-col-gutter-xl > * {
+.q-col-gutter-xl>* {
   padding-left: 36px;
   padding-top: 36px;
 }

@@ -108,21 +108,21 @@ export default [
                 name: 'programs.create',
                 meta: { label: 'Elaborar Programa' },
                 props: true,
-                component: () => import('src/pages/ProgramForm.vue')
+                component: () => import('src/pages/PlanForm.vue')
               },
               {
                 path: ':planId',
                 name: 'programs.show',
                 meta: { label: 'Detalles del Programa Individual' },
                 props: true,
-                component: () => import('pages/ProgramPage.vue')
+                component: () => import('pages/PlanPage.vue')
               },
               {
                 path: ':planId/editar',
                 name: 'programs.edit',
                 meta: { label: 'Actualizar el Programa Individual' },
                 props: true,
-                component: () => import('pages/ProgramForm.vue')
+                component: () => import('pages/PlanForm.vue')
               }
             ]
           }

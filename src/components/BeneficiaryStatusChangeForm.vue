@@ -1,6 +1,6 @@
 <script setup>
 import { api } from 'src/boot/axios'
-import { computed, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import notify from 'src/utils/notify'
 
 const model = defineModel()
@@ -8,6 +8,7 @@ const emits = defineEmits(['close'])
 const loading = ref(false)
 
 const entryStatuses = ref([])
+
 async function fetchStatuses() {
   try {
     entryStatuses.value = (await api.get('candidate_statuses')).data.data
@@ -15,26 +16,20 @@ async function fetchStatuses() {
     console.log(error)
   }
 }
-const entryStatusesLabels = computed(() => {
-  let labels = {}
-  entryStatuses.value.map((status) => (labels[status.id] = status.label))
-  return labels
-})
 
 async function update() {
   try {
     loading.value = true
 
     let data = {
-      candidate_status_id: model.value.newStatus,
+      status: model.value.newStatus,
       comment: model.value.comment,
       _method: 'PUT'
     }
 
     await api.post(`candidatestatuses/${model.value.id}`, data)
-
     notify.positive('Estado actualizado exitosamente.')
-    model.value.candidate_status_id = model.value.newStatus
+    model.value.status = model.value.newStatus
     emits('status-updated', { id: model.value.id, status: model.value.newStatus })
     emits('close')
   } catch (error) {
@@ -54,61 +49,30 @@ onMounted(() => {
     <q-card-section>
       <div class="flex items-center">
         <div class="page-subtitle">Actualizar estado</div>
-        <q-btn
-          flat
-          round
-          dense
-          icon="close"
-          class="q-ml-auto"
-          @click="emits('close')"
-        />
+        <q-btn flat round dense icon="close" class="q-ml-auto" @click="emits('close')" />
       </div>
       <div>
         {{ model.name }}
       </div>
       <div>
-        <q-badge
-          color="positive"
-          :label="entryStatusesLabels[model.newStatus]"
-        />
+        <q-badge v-if="entryStatuses && entryStatuses.length" color="positive"
+          :label="entryStatuses.find(row => row.value == model.newStatus).label" />
       </div>
     </q-card-section>
     <q-card-section>
-      <q-input
-        class="q-mb-md custom-textarea"
-        type="textarea"
-        outlined
-        stack-label
-        label="Comentario"
-        v-model="model.comment"
-        autogrow
-      />
+      <q-input class="q-mb-md custom-textarea" type="textarea" outlined stack-label label="Comentario"
+        v-model="model.comment" autogrow />
 
-      <q-file
-        outlined
-        stack-label
-        label="Archivo adjunto"
-        v-if="model.newStatus == 'inactivo'"
-        v-model="model.statusChangeFile"
-      >
+      <q-file outlined stack-label label="Archivo adjunto" v-if="model.newStatus == 'inactivo'"
+        v-model="model.statusChangeFile">
         <template v-slot:append>
           <q-icon name="sym_o_attach_file" />
         </template>
       </q-file>
     </q-card-section>
     <q-card-section class="flex justify-end">
-      <q-btn
-        flat
-        label="Cancelar"
-        @click="emits('close')"
-        class="q-mr-md"
-      />
-      <q-btn
-        color="primary"
-        label="Guardar"
-        :loading="loading"
-        @click="update"
-      />
+      <q-btn flat label="Cancelar" @click="emits('close')" class="q-mr-md" />
+      <q-btn color="primary" label="Guardar" :loading="loading" @click="update" />
     </q-card-section>
   </q-card>
 </template>

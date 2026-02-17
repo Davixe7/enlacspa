@@ -30,7 +30,7 @@ function mapAttendances() {
       name: iCandidate.name,
       done_activities: iCandidate.done_activities,
       total_activities: iCandidate.total_activities,
-      work_area_id: workAreaId.value,
+      plan_category_id: workAreaId.value,
       status: matchAttendance ? matchAttendance.status : 'absent'
     }
   })
@@ -38,7 +38,7 @@ function mapAttendances() {
 
 async function fetchAttendances() {
   let params = {
-    work_area_id: workAreaId.value,
+    plan_category_id: workAreaId.value,
     date: dateISO.value
   }
   currentAttendances.value = (await api.get('attendances', { params })).data.data
@@ -46,7 +46,7 @@ async function fetchAttendances() {
 
 async function fetchCandidates() {
   let params = {
-    work_area_id: workAreaId.value,
+    plan_category_id: workAreaId.value,
     date: dateISO.value
   }
   candidates.value = (await api.get(`attendances/candidates`, { params })).data.data

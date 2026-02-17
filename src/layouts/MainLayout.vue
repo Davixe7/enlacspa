@@ -17,15 +17,6 @@
         <q-btn
           flat
           round
-          icon="sym_o_siren"
-          class="q-ml-md"
-          @click="issuesDialog = true"
-          v-if="route.name == 'scores.create'"
-        />
-
-        <q-btn
-          flat
-          round
           icon="sym_o_rule"
           class="q-ml-md"
           :to="{name: 'attendance.index'}"
@@ -63,28 +54,7 @@
     </q-header>
 
     <q-page-container>
-      <q-dialog v-model="issuesDialog">
-        <q-card style="width: 480px">
-          <q-card-section class="flex items-center">
-            <q-icon
-              name="sym_o_siren"
-              class="q-mr-sm"
-              size="1.25rem"
-            />
-            <h1 class="page-subtitle q-my-none">Registrar Incidencia</h1>
-            <q-btn
-              @click="issuesDialog = false"
-              icon="close"
-              flat
-              round
-              dense
-              class="q-ml-auto"
-            />
-          </q-card-section>
-          <IssuesForm @close="issuesDialog = false" />
-        </q-card>
-      </q-dialog>
-      <div
+            <div
         style="padding: 32px"
         v-if="!route.meta.hideBreadcrumb"
       >
@@ -110,14 +80,12 @@
 import AdminMenu from './AdminMenu.vue'
 import { useAuthStore } from 'src/stores/user-store'
 import { useNotificationStore } from 'src/stores/notification-store'
-import IssuesForm from 'src/components/IssuesForm.vue'
 
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useMeta } from 'quasar'
 
 const route = useRoute()
-const issuesDialog = ref(false)
 
 onMounted(() => {
   route.matched.forEach((rt) => console.log(rt.name + ' ' + rt.path))

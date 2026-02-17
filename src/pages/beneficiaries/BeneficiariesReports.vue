@@ -52,13 +52,13 @@ const onScheduleEntry = (row) => {
     component: ProgramarIngresoDialog,
     componentProps: { entry: normalized }
   }).onOk(async (payload) => {
-    row.enrollment_status_id = 5
+    row.status = 'programado'
     row.entry_date = payload.entryDate
     row.program.id = payload.programId
 
     // restar 1 al contador del estado anterior si aplica
-    if (counts.value[row.candidate_status_id]) {
-      counts.value[row.candidate_status_id] = Math.max(0, counts.value[row.candidate_status_id] - 1)
+    if (counts.value[row.status]) {
+      counts.value[row.status] = Math.max(0, counts.value[row.status] - 1)
     }
 
     // eliminar el beneficiario de la tabla
@@ -75,25 +75,14 @@ const onScheduleEntry = (row) => {
         <h1 class="page-title">Reporte de Beneficiarios Dados de Baja</h1>
       </div>
       <div class="col-auto row items-center q-gutter-sm">
-        <q-input
-          outlined
-          stack-label
-          label="Nombre"
-          v-model="query.name"
-          :error="!!errors.name"
-          :error-message="errors.name"
-        >
+        <q-input outlined stack-label label="Nombre" v-model="query.name" :error="!!errors.name"
+          :error-message="errors.name">
           <template v-slot:prepend>
             <q-icon name="search" />
           </template>
         </q-input>
 
-        <q-btn
-          class="q-mt-md"
-          :loading="loading"
-          color="primary"
-          @click="fetchBeneficiaries"
-        >
+        <q-btn class="q-mt-md" :loading="loading" color="primary" @click="fetchBeneficiaries">
           Buscar
         </q-btn>
       </div>
@@ -101,14 +90,7 @@ const onScheduleEntry = (row) => {
 
     <div class="page-title q-mb-lg">Información general</div>
 
-    <q-table
-      flat
-      bordered
-      class="q-mb-xl q-table-custom"
-      :rows="rows"
-      :columns="columns"
-      hide-bottom
-    >
+    <q-table flat bordered class="q-mb-xl q-table-custom" :rows="rows" :columns="columns" hide-bottom>
       <template v-slot:body="">
         <q-tr>
           <q-td class="number">{{ counts[7] ?? 0 }}</q-td>
@@ -120,44 +102,20 @@ const onScheduleEntry = (row) => {
 
     <div class="page-title q-my-lg">Información en detalle</div>
 
-    <q-table
-      class="q-table-custom-left"
-      flat
-      bordered
-      wrap-cells
-      :columns="beneficiaryColumns"
-      :rows="beneficiaries"
-      row-key="id"
-    >
+    <q-table class="q-table-custom-left" flat bordered wrap-cells :columns="beneficiaryColumns" :rows="beneficiaries"
+      row-key="id">
       <template v-slot:body-cell-reingresar="props">
         <q-td class="text-left q-py-xs">
-          <q-btn
-            v-if="props.row.status.name !== 'fallecido'"
-            unelevated
-            label="Reingresar"
-            color="primary"
-            dense
-            @click="onScheduleEntry(props.row)"
-          />
+          <q-btn v-if="props.row.status.name !== 'fallecido'" unelevated label="Reingresar" color="primary" dense
+            @click="onScheduleEntry(props.row)" />
         </q-td>
       </template>
       <template v-slot:body-cell-actions="props">
         <q-td class="text-right q-py-xs">
           <div q-table__actions>
-            <q-btn
-              v-for="action in actions"
-              :key="action.icon"
-              :disable="action.disable"
-              round
-              unelevated
-              dense
-              :icon="action.icon"
-              :to="`${props.row.id}/${action.route}`"
-              ><q-tooltip
-                :offset="[0, 0]"
-                anchor="top middle"
-                self="bottom middle"
-              >
+            <q-btn v-for="action in actions" :key="action.icon" :disable="action.disable" round unelevated dense
+              :icon="action.icon" :to="`${props.row.id}/${action.route}`"><q-tooltip :offset="[0, 0]"
+                anchor="top middle" self="bottom middle">
                 {{ action.label }}
               </q-tooltip>
             </q-btn>
@@ -193,6 +151,7 @@ const onScheduleEntry = (row) => {
 .q-table-custom-left th:last-child {
   text-align: left;
 }
+
 .q-table tr td,
 .q-table tr th {
   text-align: left !important;
@@ -212,7 +171,7 @@ const onScheduleEntry = (row) => {
   margin-bottom: 24px;
 }
 
-.q-field__prepend + .q-field__control-container .q-field__label {
+.q-field__prepend+.q-field__control-container .q-field__label {
   margin-left: -2.25rem;
 }
 

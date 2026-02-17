@@ -47,7 +47,6 @@ export const useCandidateStore = defineStore('candidate', {
         this.loading = true
         let route = type == 'candidate' ? `candidates/${this.id}` : `beneficiaries/${this.id}`
         let data = (await api.get(route)).data.data
-        console.log('patching candidate')
 
         this.$patch(data)
         this.location_id = data.location_id

@@ -97,25 +97,13 @@ function onStatusUpdated({ id, status }) {
 
     <div class="row items-center q-my-sm">
       <div class="col-auto">
-        <q-btn
-          :loading="loading"
-          color="primary"
-          icon="description"
-          outline
-          to="/beneficiarios/reportes"
-        >
+        <q-btn :loading="loading" color="primary" icon="description" outline to="/beneficiarios/reportes">
           Reporte de Bajas
         </q-btn>
       </div>
 
       <div class="col-auto q-ml-auto">
-        <q-input
-          outlined
-          v-model="searchQuery"
-          debounce="500"
-          clearable
-          style="width: 250px"
-        >
+        <q-input outlined v-model="searchQuery" debounce="500" clearable style="width: 250px">
           <template v-slot:prepend>
             <q-icon name="search" />
           </template>
@@ -123,75 +111,35 @@ function onStatusUpdated({ id, status }) {
       </div>
     </div>
   </div>
-  <q-table
-    row-key="id"
-    bordered
-    flat
-    hide-bottom
-    :rows="rows"
-    :columns="columns"
-    :pagination="{ rowsPerPage: 0 }"
-    :loading="loading"
-    :filter="searchQuery"
-  >
+  <q-table row-key="id" bordered flat hide-bottom :rows="rows" :columns="columns" :pagination="{ rowsPerPage: 0 }"
+    :loading="loading" :filter="searchQuery">
     <template v-slot:loading>
       <div class="flex q-my-lg justify-center">
         <div>
-          <q-spinner
-            size="30px"
-            color="primary"
-            class="q-mr-md"
-          ></q-spinner>
+          <q-spinner size="30px" color="primary" class="q-mr-md"></q-spinner>
           Cargando...
         </div>
       </div>
     </template>
     <template v-slot:body-cell-status="props">
       <q-td>
-        <q-select
-          dense
-          outlined
-          hide-bottom-space
-          emit-value
-          map-options
-          option-value="id"
-          option-label="label"
-          :options="entryStatuses"
-          :model-value="props.row.candidate_status_id"
-          @update:model-value="(val) => openStatusDialog(props.row, val)"
-        />
+        <q-select dense outlined hide-bottom-space emit-value map-options option-value="value" option-label="label"
+          :options="entryStatuses" :model-value="props.row.status"
+          @update:model-value="(val) => openStatusDialog(props.row, val)" />
       </q-td>
     </template>
 
     <template v-slot:body-cell-actions="props">
       <q-td class="text-right q-py-xs">
         <div q-table__actions>
-          <!-- Botón programar ingreso -->
-          <q-btn
-            :disable="props.row.candidate_status_id !== 4"
-            round
-            unelevated
-            dense
-            icon="sym_o_event"
-            @click="onScheduleEntry(props.row)"
-          >
+          <q-btn :disable="props.row.status !== 'listo'" round unelevated dense icon="sym_o_event"
+            @click="onScheduleEntry(props.row)">
             <q-tooltip>Programar ingreso</q-tooltip>
           </q-btn>
 
-          <q-btn
-            v-for="action in actions"
-            :key="action.icon"
-            :disable="action.disable"
-            round
-            unelevated
-            dense
-            :icon="`sym_o_${action.icon}`"
-            :to="`beneficiarios/${props.row.id}/${action.route}`"
-            ><q-tooltip
-              :offset="[0, 0]"
-              anchor="top middle"
-              self="bottom middle"
-            >
+          <q-btn v-for="action in actions" :key="action.icon" :disable="action.disable" round unelevated dense
+            :icon="`sym_o_${action.icon}`" :to="`beneficiarios/${props.row.id}/${action.route}`"><q-tooltip
+              :offset="[0, 0]" anchor="top middle" self="bottom middle">
               {{ action.label }}
             </q-tooltip>
           </q-btn>
@@ -201,10 +149,7 @@ function onStatusUpdated({ id, status }) {
   </q-table>
 
   <q-dialog v-model="statusDialog">
-    <BeneficiaryStatusChangeForm
-      v-model="selectedRow"
-      @status-updated="onStatusUpdated"
-      @close="statusDialog = false"
-    />
+    <BeneficiaryStatusChangeForm v-model="selectedRow" @status-updated="onStatusUpdated"
+      @close="statusDialog = false" />
   </q-dialog>
 </template>

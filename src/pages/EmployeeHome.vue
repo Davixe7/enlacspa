@@ -24,6 +24,12 @@ const categoryOptions = computed(() => {
     .concat(driverOptions)
 })
 
+function isAllowed(option){
+  let allowedByArea = areaPermissions.value[auth.data.user.work_area_id] && areaPermissions.value[auth.data.user.work_area_id].some((allowed) => allowed == option.id)
+  let allowedByRoleName = auth.data.user.role.name == option.role
+  return allowedByArea || allowedByRoleName
+}
+
 onMounted(async () => {
   await categoryStore.fetchCategories({ base_only: 1 })
 })
@@ -38,9 +44,7 @@ onMounted(async () => {
         :key="option.id"
       >
         <div
-          v-if="
-            areaPermissions[auth.data.user.work_area_id].some((allowed) => allowed == option.id)
-          "
+          v-if="isAllowed(option)"
           class="col-12 col-sm-6"
         >
           <router-link

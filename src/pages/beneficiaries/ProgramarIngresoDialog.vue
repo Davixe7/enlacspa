@@ -56,7 +56,7 @@ async function onSave() {
     await api.post(`candidatestatuses/${form.value.id}`, {
       program_id: form.value.programId,
       entry_date: form.value.entryDate,
-      candidate_status_id: 5,
+      status: 'programado',
       _method: 'PUT'
     })
     onDialogOK({
@@ -78,60 +78,22 @@ function onCancel() {
 </script>
 
 <template>
-  <q-dialog
-    ref="dialogRef"
-    @hide="onDialogHide"
-  >
+  <q-dialog ref="dialogRef" @hide="onDialogHide">
     <q-card style="min-width: 450px">
       <q-card-section class="q-pa-md">
         <div class="text-h6">Programar ingreso</div>
       </q-card-section>
 
       <q-card-section class="q-pa-md q-gutter-md">
-        <q-input
-          outlined
-          v-model="form.name"
-          label="Nombre"
-          readonly
-        />
-        <q-select
-          outlined
-          v-model="form.programId"
-          :options="programOptions"
-          label="Programa"
-          emit-value
-          map-options
-        />
-        <q-input
-          outlined
-          v-model="form.entryDate"
-          type="date"
-          label="Fecha de ingreso"
-        />
-        <q-input
-          outlined
-          v-model="form.observations"
-          type="textarea"
-          label="Observaciones"
-        />
+        <q-input outlined v-model="form.name" label="Nombre" readonly />
+        <q-select outlined v-model="form.programId" :options="programOptions" label="Programa" emit-value map-options />
+        <q-input outlined v-model="form.entryDate" type="date" label="Fecha de ingreso" />
+        <q-input outlined v-model="form.observations" type="textarea" label="Observaciones" />
       </q-card-section>
 
-      <q-card-actions
-        align="right"
-        class="q-pa-md"
-      >
-        <q-btn
-          flat
-          label="Cancelar"
-          color="primary"
-          @click="onCancel"
-        />
-        <q-btn
-          unelevated
-          label="Guardar"
-          color="primary"
-          @click="onSave"
-        />
+      <q-card-actions align="right" class="q-pa-md">
+        <q-btn flat label="Cancelar" color="primary" @click="onCancel" />
+        <q-btn unelevated label="Guardar" color="primary" @click="onSave" />
       </q-card-actions>
     </q-card>
   </q-dialog>

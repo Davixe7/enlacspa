@@ -1,10 +1,19 @@
 <script setup>
 import { DateTime } from 'luxon'
 import { api } from 'src/boot/axios'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import notify from 'src/utils/notify'
 import { useCategoryStore } from 'src/stores/category-store'
 import { useRoute } from 'vue-router'
+import { useCandidateStore } from 'src/stores/candidate-store'
+
+const candidateStore = useCandidateStore()
+const props = defineProps(['candidateId'])
+
+watch(()=>props.candidateId, ()=>{
+  candidateStore.$state.id = props.candidateId
+  candidateStore.fetchCandidate()
+})
 
 const route = useRoute()
 const category = ref(null)
@@ -59,12 +68,13 @@ const subjects = ref([
     label: 'Otro'
   }
 ])
-const date = ref(DateTime.now().toFormat('dd/MM/yyyy'))
+const date     = ref(DateTime.now().toFormat('dd/MM/yyyy'))
 const comments = ref('')
-const type = ref(null)
-const userId = ref(null)
-const users = ref([])
-const loading = ref(false)
+const type     = ref(null)
+const userId   = ref(null)
+const users    = ref([])
+const loading  = ref(false)
+const files    = ref([])
 
 const emit = defineEmits(['close'])
 
@@ -84,8 +94,10 @@ const errors = ref([])
 async function storeIssue() {
   try {
     loading.value = false
+    errors.value = {}
     let data = new FormData()
 
+    data.append('candidate_id', props.candidateId)
     data.append('plan_category_id', category.value.id)
     data.append('user_id', userId.value)
     data.append('type', type.value)
@@ -108,8 +120,6 @@ async function storeIssue() {
     loading.value = false
   }
 }
-
-const files = ref([])
 
 onMounted(async () => {
   category.value = (await useCategoryStore().getCategoryByName(route.params.categoryName))
@@ -139,6 +149,15 @@ onMounted(async () => {
                 readonly
                 v-model="category.label"
               />
+            </td>
+          </tr>
+
+          <tr>
+            <td>Beneficiario</td>
+            <td class="q-py-lg">
+              <div class="q-pa-sm">
+                {{candidateStore ? candidateStore.full_name : 'Cargando...'}}
+              </div>
             </td>
           </tr>
 

@@ -128,6 +128,50 @@ const routes = [
         component: () => import('pages/BaseHome.vue')
       },
       {
+        path: '/reportes',
+        component: () => import('pages/reports/ReportsIndex.vue'),
+      },
+      {
+        path: '/reportes/traslados/rubio',
+        component: () => import('pages/reports/RidesReport.vue'),
+        props: true
+      },
+      {
+        path: '/reportes/individual',
+        component: () => import('pages/reports/IndividualReport.vue'),
+        props: true
+      },
+      {
+        path: '/reportes/incidencias',
+        component: () => import('pages/reports/IssuesReport.vue'),
+        props: true
+      },
+      {
+        path: '/reportes/ejecutivo',
+        component: () => import('pages/reports/ExcecutiveReport.vue'),
+        props: true
+      },
+      {
+        path: '/reportes/operativo',
+        component: () => import('pages/reports/GeneralReport.vue'),
+        props: true
+      },
+      {
+        path: '/reportes/asistencias',
+        component: () => import('pages/reports/AttendanceReport.vue'),
+        props: true
+      },
+      {
+        path: '/reportes/:candidateId/mensual',
+        component: () => import('pages/reports/MonthlyScores.vue'),
+        props: true
+      },
+      {
+        path: '/reportes/:candidateId/diario',
+        component: () => import('pages/reports/DailyReport.vue'),
+        props: true
+      },
+      {
         path: '/horarios',
         component: () => import('pages/admin/EquinetherapySchedule.vue')
       },
@@ -207,19 +251,19 @@ const routes = [
             path: ':groupId/planes/crear',
             meta: { label: 'Agregar plan al grupo' },
             props: true,
-            component: () => import('pages/ProgramForm.vue')
+            component: () => import('pages/PlanForm.vue')
           },
           {
             path: ':groupId/planes/:planId',
             meta: { label: 'Detalles del plan grupal' },
             props: true,
-            component: () => import('pages/ProgramPage.vue')
+            component: () => import('pages/PlanPage.vue')
           },
           {
             path: ':groupId/planes/:planId/editar',
             meta: { label: 'Actualizar plan grupal' },
             props: true,
-            component: () => import('pages/ProgramForm.vue')
+            component: () => import('pages/PlanForm.vue')
           }
         ]
       },
@@ -229,12 +273,6 @@ const routes = [
         props: true,
         meta: { label: 'Buscar beneficiario(s)' },
         component: () => import('pages/ScoreFormPage.vue')
-      },
-      {
-        path: 'incidencias',
-        name: 'incidencias.index',
-        meta: { label: 'Reporte de incidencias' },
-        component: () => import('pages/IssuesPage.vue')
       },
       {
         path: 'area/:categoryName/asistencias',

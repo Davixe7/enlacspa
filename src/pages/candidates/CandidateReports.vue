@@ -26,7 +26,7 @@ async function fetchCandidates() {
     return
   }
 
-  let response = (await api.get('candidates', { params })).data
+  let response = (await api.get('candidates/dashboard', { params })).data
   candidates.value = response.data
   counts.value = response.counts
   loading.value = false
@@ -57,7 +57,7 @@ const candidateColumns = ref([
     name: 'status',
     label: 'Estatus',
     align: 'left',
-    field: 'candidate_status_id',
+    field: 'status',
     sortable: true
   },
   {
@@ -105,79 +105,37 @@ const columns = ref([
     <div class="row q-col-gutter-lg items-end q-mb-xl">
       <div class="col-12 col-md-auto">
         <div class="label-alt-2">Fecha a consultar</div>
-        <q-input
-          outlined
-          stack-label
-          label="Desde"
-          type="date"
-          v-model="query.date_from"
-          :error="!!errors.date_from"
-          :error-message="errors.date_from"
-        >
-          <template v-slot:prepend> <q-icon name="calendar_today"></q-icon> </template
-        ></q-input>
+        <q-input outlined stack-label label="Desde" type="date" v-model="query.date_from" :error="!!errors.date_from"
+          :error-message="errors.date_from">
+          <template v-slot:prepend> <q-icon name="calendar_today"></q-icon> </template></q-input>
       </div>
       <div class="col-12 col-md-auto">
-        <q-input
-          outlined
-          stack-label
-          label="Hasta"
-          type="date"
-          v-model="query.date_to"
-          :error="!!errors.date_to"
-          :error-message="errors.date_to"
-        >
+        <q-input outlined stack-label label="Hasta" type="date" v-model="query.date_to" :error="!!errors.date_to"
+          :error-message="errors.date_to">
         </q-input>
       </div>
       <div class="col-12 col-md-auto">
         <div class="label-alt-2">Buscar por</div>
-        <q-input
-          outlined
-          stack-label
-          label="Nombre"
-          v-model="query.name"
-          :error="!!errors.name"
-          :error-message="errors.name"
-        >
-          <template v-slot:prepend> <q-icon name="search"></q-icon> </template
-        ></q-input>
+        <q-input outlined stack-label label="Nombre" v-model="query.name" :error="!!errors.name"
+          :error-message="errors.name">
+          <template v-slot:prepend> <q-icon name="search"></q-icon> </template></q-input>
       </div>
       <div class="col-12 col-md-auto">
-        <q-input
-          outlined
-          stack-label
-          label="Fecha de nacimiento"
-          v-model="query.birth_date"
-          type="date"
-          :error="!!errors.birth_date"
-          :error-message="errors.birth_date"
-        >
+        <q-input outlined stack-label label="Fecha de nacimiento" v-model="query.birth_date" type="date"
+          :error="!!errors.birth_date" :error-message="errors.birth_date">
           <template v-slot:prepend>
             <q-icon name="calendar_today"></q-icon>
           </template>
         </q-input>
       </div>
       <div class="col-12 col-md-auto">
-        <q-btn
-          :loading="loading"
-          color="primary"
-          style="margin-bottom: 20px"
-          @click="fetchCandidates"
-          >Buscar</q-btn
-        >
+        <q-btn :loading="loading" color="primary" style="margin-bottom: 20px" @click="fetchCandidates">Buscar</q-btn>
       </div>
     </div>
 
     <div class="page-title q-mb-lg">Información general</div>
 
-    <q-table
-      flat
-      bordered
-      class="q-mb-xl"
-      :rows="rows"
-      :columns="columns"
-      hide-bottom
-    >
+    <q-table flat bordered class="q-mb-xl" :rows="rows" :columns="columns" hide-bottom>
       <template v-slot:body="">
         <q-tr>
           <q-td class="number">{{ counts.en_proceso }}</q-td>
@@ -191,13 +149,7 @@ const columns = ref([
 
     <div class="page-title q-my-lg">Información en detalle</div>
 
-    <q-table
-      flat
-      bordered
-      wrap-cells
-      :columns="candidateColumns"
-      :rows="candidates"
-    >
+    <q-table flat bordered wrap-cells :columns="candidateColumns" :rows="candidates">
     </q-table>
   </q-page>
 </template>
@@ -234,7 +186,7 @@ const columns = ref([
   margin-bottom: 24px;
 }
 
-.q-field__prepend + .q-field__control-container .q-field__label {
+.q-field__prepend+.q-field__control-container .q-field__label {
   margin-left: -2.25rem;
 }
 </style>

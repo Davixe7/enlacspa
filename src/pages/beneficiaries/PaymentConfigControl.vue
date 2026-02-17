@@ -57,14 +57,14 @@ async function fetchConfigs() {
 const selectedConfig = ref(null)
 
 function setPayment(config) {
-  if (configs.value[config].every((i) => i.status == 'green')) {
+  /* if (configs.value && configs.value.length && configs.value[config].every((i) => i.status == 'green')) {
     alert('No hay pagos pendientes con este padrino.')
     return
-  }
+  } */
 
   selectedConfig.value = configs.value[config]
-  let firstDue = configs.value[config].find((i) => i.status == 'red')
-  firstDue = firstDue ? firstDue : configs.value[config].find((i) => i.status == 'yellow')
+  let firstDue = Object.values(configs.value[config]).flat().find((i) => i.status == 'red')
+  firstDue = firstDue ? firstDue : Object.values(configs.value[config]).flat().find((i) => i.status == 'yellow')
 
   let sponsorId = config ? config : null
   payment.value.maxAmount = rows.value.find((r) => r.sponsor_id == sponsorId).monthly_amount
@@ -135,24 +135,30 @@ onMounted(async () => {
       </thead>
       <tbody v-if="rows && rows.length">
         <tr
-          v-for="config in Object.keys(configs).reverse()"
-          :key="config"
+          v-for="sponsorId in Object.keys(configs).reverse()"
+          :key="sponsorId"
         >
           <td>
             {{
-              config != ''
-                ? rows.find((r) => r.sponsor?.id == config).sponsor.full_name
+              sponsorId != ''
+                ? rows.find((r) => r.sponsor?.id == sponsorId).sponsor.full_name
                 : 'Cuota de padres'
             }}
           </td>
-          <td
-            v-for="payment in configs[config]"
-            :key="payment.month"
-            :class="[`bg-${payment.status}-2`]"
-            @click="true ? setPayment(config) : ''"
-          >
-            <div>${{ payment.abono }}</div>
-          </td>
+          <template v-if="configs[sponsorId]">
+            <td
+              v-for="month in Object.keys(configs[sponsorId])"
+              :key="month"
+              :class="[`bg-${payment.status}-2`]"
+              @click="true ? setPayment(sponsorId) : ''"
+            >
+            <div style="display: flex;">
+              <div v-for="payment in configs[sponsorId][month]" :key="payment.id" style="flex: 1 1 auto" :class="[`bg-${payment.status}-2`]">
+                {{ payment.abono }}
+              </div>
+            </div>
+            </td>
+          </template>
         </tr>
         <tr>
           <td>Beca ENLAC</td>

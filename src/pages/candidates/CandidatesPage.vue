@@ -9,7 +9,7 @@ import { formatDate } from 'src/utils/formatDate'
 onMounted(() => fetchCandidates())
 
 async function fetchCandidates() {
-  rows.value = (await api.get('candidates/dashboard')).data.data
+  rows.value = (await api.get('candidates')).data.data
 }
 
 const appointmentDialog = ref(false)
@@ -70,96 +70,40 @@ function editReview(row) {
 <template>
   <q-page>
     <q-dialog v-model="reviewDialog">
-      <CandidateReviewForm
-        :candidate="candidate"
-        @saved="
-          (r) => {
-            candidate.review = r
-            reviewDialog = false
-          }
-        "
-        @close="reviewDialog = false"
-      />
+      <CandidateReviewForm :candidate="candidate" @saved="
+        (r) => {
+          candidate.review = r
+          reviewDialog = false
+        }
+      " @close="reviewDialog = false" />
     </q-dialog>
     <h1 class="page-title">Candidatos y Evaluaciones</h1>
     <div class="flex q-mb-lg">
-      <q-btn
-        color="primary"
-        icon="description"
-        outline=""
-        class="q-mr-md"
-        to="/candidatos/reportes"
-        >Reporte de candidatos
+      <q-btn color="primary" icon="description" outline="" class="q-mr-md" to="/candidatos/reportes">Reporte de
+        candidatos
       </q-btn>
-      <q-btn
-        color="primary"
-        icon="calendar_today"
-        outline=""
-        @click="appointmentDialog = true"
-        >Programar cita
+      <q-btn color="primary" icon="calendar_today" outline="" @click="appointmentDialog = true">Programar cita
       </q-btn>
-      <q-btn
-        color="primary"
-        icon="add"
-        class="q-ml-auto"
-        unelevated=""
-        to="/candidatos/registrar"
-      >
+      <q-btn color="primary" icon="add" class="q-ml-auto" unelevated="" to="/candidatos/registrar">
         Nuevo Candidato
       </q-btn>
     </div>
 
-    <q-table
-      bordered
-      flat
-      wrap-cells
-      hide-bottom
-      :columns="columns"
-      :rows="rows"
-      :pagination="{ rowsPerPage: 0 }"
-    >
+    <q-table bordered flat wrap-cells hide-bottom :columns="columns" :rows="rows" :pagination="{ rowsPerPage: 0 }">
       <template v-slot:body-cell-actions="props">
         <q-td>
           <div class="q-table__actions">
-            <q-btn
-              dense
-              flat
-              round
-              icon="sym_o_edit"
-              :to="`candidatos/${props.row.id}/editar`"
-            />
-            <q-btn
-              dense
-              flat
-              round
-              icon="sym_o_chat"
-              :to="`candidatos/${props.row.id}/entrevistar`"
-              class="q-mx-xs"
-            />
-            <q-btn
-              dense
-              flat
-              round
-              icon="sym_o_content_paste"
-              :to="`candidatos/${props.row.id}/evaluar`"
-            />
-            <q-btn
-              dense
-              flat
-              round
-              icon="sym_o_note_alt"
-              @click="editReview(props.row)"
-            />
+            <q-btn dense flat round icon="sym_o_edit" :to="`candidatos/${props.row.id}/editar`" />
+            <q-btn dense flat round icon="sym_o_chat" :to="`candidatos/${props.row.id}/entrevistar`" class="q-mx-xs" />
+            <q-btn dense flat round icon="sym_o_content_paste" :to="`candidatos/${props.row.id}/evaluar`" />
+            <q-btn dense flat round icon="sym_o_note_alt" @click="editReview(props.row)" />
           </div>
         </q-td>
       </template>
     </q-table>
 
     <q-dialog v-model="appointmentDialog">
-      <AppointmentForm
-        :candidates="rows"
-        @close="appointmentDialog = false"
-      ></AppointmentForm>
+      <AppointmentForm :candidates="rows" @close="appointmentDialog = false"></AppointmentForm>
     </q-dialog>
   </q-page>
 </template>

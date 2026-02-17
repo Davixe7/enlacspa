@@ -156,93 +156,37 @@ onMounted(async () => {
 
       <div class="row q-col-gutter-x-md q-mb-lg">
         <div class="col-md-2">
-          <q-select
-            class="q-field--required"
-            outlined
-            stack-label
-            hide-bottom-space
-            label="Plan"
-            :options="categories"
-            map-options
-            emit-value
-            option-value="id"
-            v-model="program.category_id"
-            @update:model-value="fetchActivities()"
-            :error="!!(errors && errors.category_id)"
-            :error-message="errors.category_id"
-          />
+          <q-select class="q-field--required" outlined stack-label hide-bottom-space label="Plan" :options="categories"
+            map-options emit-value option-value="id" v-model="program.category_id"
+            @update:model-value="fetchActivities()" :error="!!(errors && errors.category_id)"
+            :error-message="errors.category_id" />
         </div>
 
         <div class="col-md-4">
-          <q-select
-            class="q-field--required"
-            outlined
-            stack-label
-            hide-bottom-space
-            label="Tipo de plan"
-            :options="subcategories"
-            map-options
-            emit-value
-            option-value="id"
-            option-label="name"
-            v-model="program.subcategory_id"
-            :error="!!(errors && errors.subcategory_id)"
-            :error-message="errors.subcategory_id"
-          />
+          <q-select class="q-field--required" outlined stack-label hide-bottom-space label="Tipo de plan"
+            :options="subcategories" map-options emit-value option-value="id" option-label="name"
+            v-model="program.subcategory_id" :error="!!(errors && errors.subcategory_id)"
+            :error-message="errors.subcategory_id" />
         </div>
 
         <div class="col-md-4">
-          <q-input
-            class="q-field--required"
-            label="Nombre del plan"
-            outlined
-            stack-label
-            hide-bottom-space
-            v-model="program.name"
-            :error="!!(errors && errors.name)"
-            :error-message="errors.name"
-          />
+          <q-input class="q-field--required" label="Nombre del plan" outlined stack-label hide-bottom-space
+            v-model="program.name" :error="!!(errors && errors.name)" :error-message="errors.name" />
         </div>
         <div class="col-md-2 flex">
-          <q-toggle
-            style="align-self: flex-end"
-            :label="program.status ? 'Activo' : 'Inactivo'"
-            outlined
-            stack-label
-            hide-bottom-space
-            v-model="program.status"
-            :true-value="1"
-            :false-value="0"
-          />
+          <q-toggle style="align-self: flex-end" :label="program.status ? 'Activo' : 'Inactivo'" outlined stack-label
+            hide-bottom-space v-model="program.status" :true-value="1" :false-value="0" />
         </div>
       </div>
 
       <div class="row q-col-gutter-x-md q-mb-lg">
         <div class="col-md-2">
-          <q-input
-            outlined
-            stack-label
-            v-model="program.start_date"
-            class="q-field--required"
-            label="Fecha de inicio"
-            mask="##/##/####"
-            :error="!!(errors && errors.start_date)"
-            :error-message="errors.start_date"
-          >
+          <q-input outlined stack-label v-model="program.start_date" class="q-field--required" label="Fecha de inicio"
+            mask="##/##/####" :error="!!(errors && errors.start_date)" :error-message="errors.start_date">
             <template v-slot:append>
-              <q-icon
-                name="event"
-                class="cursor-pointer"
-              >
-                <q-popup-proxy
-                  cover
-                  transition-show="scale"
-                  transition-hide="scale"
-                >
-                  <q-date
-                    v-model="program.start_date"
-                    mask="DD/MM/YYYY"
-                  />
+              <q-icon name="event" class="cursor-pointer">
+                <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                  <q-date v-model="program.start_date" mask="DD/MM/YYYY" />
                 </q-popup-proxy>
               </q-icon>
             </template>
@@ -250,30 +194,12 @@ onMounted(async () => {
         </div>
 
         <div class="col-md-2">
-          <q-input
-            outlined
-            stack-label
-            v-model="program.end_date"
-            class="q-field--required"
-            label="Fecha de cierre"
-            mask="##/##/####"
-            :error="!!(errors && errors.end_date)"
-            :error-message="errors.end_date"
-          >
+          <q-input outlined stack-label v-model="program.end_date" class="q-field--required" label="Fecha de cierre"
+            mask="##/##/####" :error="!!(errors && errors.end_date)" :error-message="errors.end_date">
             <template v-slot:append>
-              <q-icon
-                name="event"
-                class="cursor-pointer"
-              >
-                <q-popup-proxy
-                  cover
-                  transition-show="scale"
-                  transition-hide="scale"
-                >
-                  <q-date
-                    v-model="program.end_date"
-                    mask="DD/MM/YYYY"
-                  />
+              <q-icon name="event" class="cursor-pointer">
+                <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                  <q-date v-model="program.end_date" mask="DD/MM/YYYY" />
                 </q-popup-proxy>
               </q-icon>
             </template>
@@ -285,48 +211,26 @@ onMounted(async () => {
 
       <div class="row q-col-gutter-x-md">
         <div class="col-md-4">
-          <q-input
-            outlined
-            stack-label
-            hide-bottom-space
-            v-model="activitiesSearch"
-            class="q-mb-md"
-            clearable
-          >
+          <q-input outlined stack-label hide-bottom-space v-model="activitiesSearch" class="q-mb-md" clearable>
             <template v-slot:prepend>
               <q-icon name="sym_o_search" />
             </template>
           </q-input>
 
-          <q-list
-            separator
-            bordered
-          >
-            <q-item
-              draggable="true"
-              @dragstart="onDragStart(item)"
-              v-for="item in activities"
-              :key="item.id"
-            >
+          <q-list separator bordered>
+            <q-item draggable="true" @dragstart="onDragStart(item)" v-for="item in activities" :key="item.id">
               <q-item-section>{{ item.name }}</q-item-section>
             </q-item>
           </q-list>
         </div>
 
-        <div
-          class="col-md-8"
-          @drop="onDrop"
-          @dragover.prevent=""
-        >
-          <q-markup-table
-            flat
-            bordered
-          >
+        <div class="col-md-8" @drop="onDrop" @dragover.prevent="">
+          <q-markup-table flat bordered class="plan-form-table">
             <thead>
               <tr>
-                <th style="text-align: left">Nombre</th>
-                <th>Unidad</th>
+                <th>Nombre</th>
                 <th style="white-space: nowrap">Tipo de Meta</th>
+                <th>Unidad</th>
                 <th>Meta diaria</th>
                 <th>Meta final</th>
                 <th></th>
@@ -334,63 +238,30 @@ onMounted(async () => {
             </thead>
             <template v-if="program.activities.length">
               <tbody>
-                <tr
-                  v-for="activity in program.activities"
-                  :key="activity.id"
-                >
+                <tr v-for="activity in program.activities" :key="activity.id">
                   <td class="td--name">{{ activity.name }}</td>
+                  <td>{{ activity.goal_type }}</td>
                   <td class="td--measurement-unit">
                     {{ activity.measurement_unit }}
                   </td>
-                  <td>{{ activity.goal_type }}</td>
                   <td>
-                    <q-input
-                      dense
-                      outlined
-                      stack-label
-                      hide-bottom-space
-                      v-model="activity.daily_goal"
-                      v-if="['Normal', 'Incremental', 'Acumulada'].includes(activity.goal_type)"
-                    />
-
-                    <q-select
-                      dense
-                      outlined
-                      stack-label
-                      hide-bottom-space
-                      :options="['Dominada', 'Presentada', 'En proceso']"
-                      v-model="activity.daily_goal"
-                      v-else
-                    />
+                    <q-input dense outlined stack-label hide-bottom-space v-model="activity.daily_goal"
+                      v-if="activity.goal_type == 'Normal'" />
+                    <template v-else>N/A</template>
                   </td>
                   <td>
-                    <q-input
-                      v-if="['Incremental', 'Acumulada'].includes(activity.goal_type)"
-                      dense
-                      outlined
-                      stack-label
-                      hide-bottom-space
-                      v-model="activity.final_goal"
-                    />
+                    <q-input dense outlined stack-label hide-bottom-space
+                      v-if="['Incremental', 'Acumulada'].includes(activity.goal_type)" v-model="activity.final_goal" />
                   </td>
                   <td>
-                    <q-btn
-                      flat
-                      round
-                      dense
-                      icon="sym_o_delete"
-                      @click="removeActivity(activity)"
-                    />
+                    <q-btn flat round dense icon="sym_o_delete" @click="removeActivity(activity)" />
                   </td>
                 </tr>
               </tbody>
             </template>
             <template v-else>
               <tr>
-                <td
-                  colspan="6"
-                  class="program-activities--empty"
-                >
+                <td colspan="6" class="program-activities--empty">
                   Arrastra actividades aqui para armar el plan
                 </td>
               </tr>
@@ -398,12 +269,7 @@ onMounted(async () => {
           </q-markup-table>
 
           <div class="flex justify-end q-py-lg">
-            <q-btn
-              color="primary"
-              label="Guardar programa"
-              :loading="loading"
-              @click="saveProgram"
-            />
+            <q-btn color="primary" label="Guardar programa" :loading="loading" @click="saveProgram" />
           </div>
         </div>
       </div>
@@ -416,14 +282,24 @@ onMounted(async () => {
   max-width: 560px;
   white-space: pre-wrap !important;
 }
+
 .td--measurement-unit {
   max-width: 100px;
   white-space: wrap;
   overflow: hidden;
 }
+
 .program-activities--empty {
   border: 2px $primary dashed !important;
   text-align: center !important;
   padding: 13px 16px !important;
+}
+
+.plan-form-table {
+
+  th,
+  td {
+    text-align: left;
+  }
 }
 </style>
