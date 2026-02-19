@@ -129,37 +129,57 @@ const routes = [
       },
       {
         path: '/reportes',
-        component: () => import('pages/reports/ReportsIndex.vue'),
-      },
-      {
-        path: '/reportes/traslados/rubio',
-        component: () => import('pages/reports/RidesReport.vue'),
-        props: true
-      },
-      {
-        path: '/reportes/individual',
-        component: () => import('pages/reports/IndividualReport.vue'),
-        props: true
-      },
-      {
-        path: '/reportes/incidencias',
-        component: () => import('pages/reports/IssuesReport.vue'),
-        props: true
-      },
-      {
-        path: '/reportes/ejecutivo',
-        component: () => import('pages/reports/ExcecutiveReport.vue'),
-        props: true
-      },
-      {
-        path: '/reportes/operativo',
-        component: () => import('pages/reports/GeneralReport.vue'),
-        props: true
-      },
-      {
-        path: '/reportes/asistencias',
-        component: () => import('pages/reports/AttendanceReport.vue'),
-        props: true
+        meta: { label: 'Reportes', name: 'reports.index' },
+        name: 'reports',
+        redirect: { name: 'reports.index' },
+        children: [
+          {
+            path: '',
+            name: 'reports.index',
+            meta: { label: 'Menu', name: 'reports.index' },
+            component: () => import('pages/reports/ReportsIndex.vue'),
+            props: true
+          },
+          {
+            path: 'traslados/rubio',
+            meta: { label: 'Traslados Cuauhtemoc - Rubio', name: 'reports.rides.rubio' },
+            component: () => import('pages/reports/RidesReport.vue'),
+            props: true
+          },
+          {
+            path: 'individual',
+            meta: { label: 'Bitácora Individual del Beneficiario', name: 'reports.individual' },
+            component: () => import('pages/reports/IndividualReport.vue'),
+            props: true
+          },
+          {
+            path: 'incidencias',
+            meta: { label: 'Reporte de Incidencias', name: 'reports.issues' },
+            component: () => import('pages/reports/IssuesReport.vue'),
+            props: true
+          },
+          {
+            path: 'ejecutivo',
+            meta: { label: 'Reporte Ejecutivo', name: 'reports.executive' },
+            component: () => import('pages/reports/ExcecutiveReport.vue'),
+            props: true
+          },
+          {
+            path: 'operativo',
+            meta: { label: 'Tablero de indicadores operativos', name: 'reports.operative' },
+            component: () => import('pages/reports/GeneralReport.vue'),
+            props: true
+          },
+          {
+            path: 'asistencias',
+            meta: {
+              label: 'Reporte de Asistencias & Faltas Diarias',
+              name: 'reports.attendances'
+            },
+            component: () => import('pages/reports/AttendanceReport.vue'),
+            props: true
+          }
+        ]
       },
       {
         path: '/reportes/:candidateId/mensual',

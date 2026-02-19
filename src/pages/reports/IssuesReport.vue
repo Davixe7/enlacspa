@@ -6,7 +6,7 @@ import notify from 'src/utils/notify'
 
 const startDate = ref(new Date().toISOString().split('T')[0])
 const endDate = ref(new Date().toISOString().split('T')[0])
-const candidateId = ref(55)
+const candidateId = ref()
 
 const loading = ref(false)
 const rows = ref([])
