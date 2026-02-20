@@ -1,7 +1,7 @@
 <script setup>
 import { api } from 'src/boot/axios';
 import EnlacDate from 'src/components/EnlacDate.vue'
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 const startDate = ref(new Date().toISOString().split('T')[0])
 const endDate = ref(new Date().toISOString().split('T')[0])
 
@@ -22,6 +22,8 @@ async function fetchData() {
 }
 
 onMounted(() => fetchData())
+watch(startDate, () => fetchData())
+watch(endDate, () => fetchData())
 </script>
 
 <template>
@@ -31,8 +33,6 @@ onMounted(() => fetchData())
             <div class="col-md-4 flex">
                 <enlac-date v-model="startDate" class="q-mr-md" />
                 <enlac-date v-model="endDate" class="q-mr-md" />
-                <q-btn color="primary" unelevated icon="sym_o_search" @click="fetchData" :loading="loading"
-                    label="Buscar" />
             </div>
         </div>
 

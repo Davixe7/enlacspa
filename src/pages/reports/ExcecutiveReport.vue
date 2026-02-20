@@ -1,10 +1,12 @@
 <script setup>
 import { api } from 'src/boot/axios';
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import EnlacDate from 'src/components/EnlacDate.vue'
+import BeneficiarySelect from 'src/components/BeneficiarySelect.vue'
 
 const startDate = ref(new Date().toISOString().split('T')[0])
 const endDate = ref(new Date().toISOString().split('T')[0])
+const candidateId = ref(null)
 
 const loading = ref(false)
 const rows = ref([])
@@ -13,6 +15,7 @@ async function fetchData() {
     try {
         loading.value = true
         let params = { start_date: startDate.value, end_date: endDate.value }
+        if (candidateId.value) params.candidate_id = candidateId.value
         rows.value = (await api.get('reports/excecutive', { params })).data.data
     } catch (error) {
         console.log(error);
@@ -47,17 +50,19 @@ const columns = computed(() => {
 })
 
 onMounted(() => fetchData())
+watch(candidateId, () => fetchData())
+watch(startDate, () => fetchData())
+watch(endDate, () => fetchData())
 </script>
 
 <template>
     <q-page>
         <h1 class="page-title">Reporte Ejecutivo</h1>
         <div class="row q-mb-md">
-            <div class="col-md-4 flex">
+            <div class="col-md-6 flex items-end">
+                <BeneficiarySelect v-model="candidateId" class="q-mr-md" />
                 <EnlacDate v-model="startDate" class="q-mr-md" />
                 <EnlacDate v-model="endDate" class="q-mr-md" />
-                <q-btn color="primary" unelevated icon="sym_o_search" @click="fetchData" :loading="loading"
-                    label="Buscar" />
             </div>
         </div>
 

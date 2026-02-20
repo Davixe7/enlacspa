@@ -1,11 +1,11 @@
 <script setup>
 import { api } from 'src/boot/axios'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import BeneficiarySelect from 'src/components/BeneficiarySelect.vue'
 
 const route = useRoute()
-const selectedCandidate = ref(null)
+const candidateId = ref(null)
 const candidateData = ref({})
 const month = ref(1)
 
@@ -52,10 +52,10 @@ async function fetchCandidateData() {
   try {
     loading.value = true
     let params = {
-      month: month.value
+      month: month.value,
     }
     let response = (
-      await api.get(`beneficiaries/${selectedCandidate.value}/individual`, { params })
+      await api.get(`beneficiaries/${candidateId.value}/individual`, { params })
     ).data.data
     candidateData.value = response.candidate
     issuesCount.value = response.issues
@@ -80,7 +80,7 @@ async function fetchScores() {
       month: month.value
     }
     scores.value = (
-      await api.get(`beneficiaries/${selectedCandidate.value}/scores`, { params })
+      await api.get(`beneficiaries/${candidateId.value}/scores`, { params })
     ).data.data
   } catch (error) {
     console.log(error)
@@ -109,59 +109,29 @@ function update() {
 
 onMounted(async () => {
   if (route.params.candidate_id) {
-    selectedCandidate.value = route.params.candidate_id
+    candidateId.value = route.params.candidate_id
     fetchCandidateData()
   }
   planCategories.value = (await api.get('plan_categories/?base_only=1')).data.data
   planCategories.value.push({ label: 'Totals', id: 'totals' })
 })
+
+watch(candidateId, () => candidateId.value ? update() : null)
+watch(month, () => candidateId.value ? update() : null)
 </script>
 
 <template>
   <q-page>
     <h1 class="page-title q-mb-lg">Bitácora Individual del Beneficiario</h1>
     <div class="flex items-end q-mb-md">
-      <BeneficiarySelect
-        v-model="selectedCandidate"
-        class="q-mr-md"
-        @update:model-value="update"
-      />
-      <q-select
-        outlined
-        :options="monthOptions"
-        v-model="month"
-        label="Primer mes a mostrar"
-        emit-value
-        map-options
-        class="q-mr-md"
-        style="min-width: 230px"
-        @update:model-value="update"
-      />
-      <q-btn
-        color="primary"
-        unelevated
-        icon="sym_o_search"
-        :loading="loading"
-        @click="
-          () => {
-            fetchCandidateData()
-            fetchScores()
-          }
-        "
-      />
+      <BeneficiarySelect v-model="candidateId" class="q-mr-md" />
+      <q-select outlined :options="monthOptions" v-model="month" label="Primer mes a mostrar" emit-value map-options
+        class="q-mr-md" style="min-width: 230px" />
     </div>
-    <q-markup-table
-      class="q-mb-lg"
-      separator="vertical"
-      flat
-      bordered
-    >
+    <q-markup-table class="q-mb-lg" separator="vertical" flat bordered>
       <thead>
         <tr>
-          <th
-            colspan="8"
-            class="text-center"
-          >
+          <th colspan="8" class="text-center">
             Datos Base
           </th>
         </tr>
@@ -203,10 +173,7 @@ onMounted(async () => {
     <q-markup-table class="q-mb-lg">
       <thead>
         <tr>
-          <th
-            colspan="8"
-            class="text-center"
-          >
+          <th colspan="8" class="text-center">
             Resumen de Traslados
           </th>
         </tr>
@@ -214,28 +181,19 @@ onMounted(async () => {
       <thead>
         <tr>
           <th>Tipo</th>
-          <th
-            v-for="m in Object.values(mapMonthLabels)"
-            :key="m"
-          >
+          <th v-for="m in Object.values(mapMonthLabels)" :key="m">
             {{ m }}
           </th>
           <th>Total</th>
         </tr>
       </thead>
       <tbody>
-        <tr
-          v-for="type in Object.keys(ridesTypeLabels)"
-          :key="type"
-        >
+        <tr v-for="type in Object.keys(ridesTypeLabels)" :key="type">
           <td>
             {{ ridesTypeLabels[type] }}
           </td>
           <template v-if="rides[type]">
-            <td
-              v-for="n in 6"
-              :key="n"
-            >
+            <td v-for="n in 6" :key="n">
               {{ rides[type][`m${n}`] }}
             </td>
             <td>
@@ -243,10 +201,7 @@ onMounted(async () => {
             </td>
           </template>
           <template v-else>
-            <td
-              v-for="n in 6"
-              :key="n"
-            >
+            <td v-for="n in 6" :key="n">
               N/A
             </td>
           </template>
@@ -257,10 +212,7 @@ onMounted(async () => {
     <q-markup-table class="q-mb-lg">
       <thead>
         <tr>
-          <th
-            colspan="8"
-            class="text-center"
-          >
+          <th colspan="8" class="text-center">
             Sesiones, Claes o Consultas Recibidas
           </th>
         </tr>
@@ -268,28 +220,19 @@ onMounted(async () => {
       <thead>
         <tr>
           <th>Tipo</th>
-          <th
-            v-for="m in Object.values(mapMonthLabels)"
-            :key="m"
-          >
+          <th v-for="m in Object.values(mapMonthLabels)" :key="m">
             {{ m }}
           </th>
           <th>Total</th>
         </tr>
       </thead>
       <tbody>
-        <tr
-          v-for="category in planCategories"
-          :key="category.id"
-        >
+        <tr v-for="category in planCategories" :key="category.id">
           <td>
             {{ category.label }}
           </td>
           <template v-if="areaAttendances[category.id]">
-            <td
-              v-for="n in 6"
-              :key="n"
-            >
+            <td v-for="n in 6" :key="n">
               {{ areaAttendances[category.id][`m${n}`] }}
             </td>
             <td>
@@ -297,27 +240,18 @@ onMounted(async () => {
             </td>
           </template>
           <template v-else>
-            <td
-              v-for="n in 7"
-              :key="n"
-            >
+            <td v-for="n in 7" :key="n">
               N/A
             </td>
           </template>
         </tr>
 
-        <tr
-          v-for="appointmentType in appointmentTypes"
-          :key="appointmentType.id"
-        >
+        <tr v-for="appointmentType in appointmentTypes" :key="appointmentType.id">
           <td>
             {{ appointmentType.label }}
           </td>
           <template v-if="appointments[appointmentType.id]">
-            <td
-              v-for="n in 6"
-              :key="n"
-            >
+            <td v-for="n in 6" :key="n">
               {{ appointments[appointmentType.id][`m${n}`] }}
             </td>
             <td>
@@ -325,10 +259,7 @@ onMounted(async () => {
             </td>
           </template>
           <template v-else>
-            <td
-              v-for="n in 7"
-              :key="n"
-            >
+            <td v-for="n in 7" :key="n">
               N/A
             </td>
           </template>
@@ -336,10 +267,7 @@ onMounted(async () => {
 
         <tr>
           <th class="text-right">Total</th>
-          <td
-            v-for="value in Object.values(totalsRow)"
-            :key="value"
-          >
+          <td v-for="value in Object.values(totalsRow)" :key="value">
             {{ value }}
           </td>
           <td></td>
@@ -350,35 +278,23 @@ onMounted(async () => {
     <q-markup-table v-if="scores">
       <thead>
         <tr>
-          <th
-            colspan="8"
-            class="text-center"
-          >
+          <th colspan="8" class="text-center">
             Resultados
           </th>
         </tr>
         <tr>
           <th>Area</th>
-          <th
-            v-for="m in Object.values(mapMonthLabels)"
-            :key="m"
-          >
+          <th v-for="m in Object.values(mapMonthLabels)" :key="m">
             {{ m }}
           </th>
           <th>Total</th>
         </tr>
       </thead>
       <tbody>
-        <tr
-          v-for="category in planCategories"
-          :key="category.id"
-        >
+        <tr v-for="category in planCategories" :key="category.id">
           <td>{{ category.label }}</td>
           <template v-if="scores.hasOwnProperty(category.id)">
-            <td
-              v-for="n in 6"
-              :key="n"
-            >
+            <td v-for="n in 6" :key="n">
               <q-badge color="positive">{{ scores[category.id][n].positive }}</q-badge>
               <q-badge color="warning">{{ scores[category.id][n].warning }}</q-badge>
               <q-badge color="negative">{{ scores[category.id][n].negative }}</q-badge>
@@ -390,10 +306,7 @@ onMounted(async () => {
             </td>
           </template>
           <template v-else>
-            <td
-              v-for="n in 7"
-              :key="n"
-            >
+            <td v-for="n in 7" :key="n">
               <!-- <q-badge color="positive">0</q-badge>
                             <q-badge color="warning">0</q-badge>
                             <q-badge color="negative">0</q-badge> -->

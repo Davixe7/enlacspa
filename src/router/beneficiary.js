@@ -26,6 +26,12 @@ export default [
         props: true,
         children: [
           {
+            path: 'reportes',
+            meta: { label: 'Reportes de programas del beneficiario', name: 'beneficiary.reports' },
+            component: () => import('src/pages/reports/BeneficiaryReports.vue'),
+            props: true
+          },
+          {
             path: 'perfil',
             meta: { label: 'Perfil' },
             name: 'beneficiaries.profile',

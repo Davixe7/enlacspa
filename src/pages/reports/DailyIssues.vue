@@ -2,15 +2,19 @@
 import { onMounted, ref, watch } from 'vue'
 import { api } from 'src/boot/axios'
 
+const props = defineProps(['candidateId', 'date'])
 const loading = ref(false)
 const rows = ref([])
-const props = defineProps(['candidateId', 'date'])
 
 async function fetchIssues() {
   try {
     console.log('Consultando incidencias del dia para ' + props.candidateId + ' ' + props.date);
     loading.value = true
-    rows.value = (await api.get(`issues/?candidate_id=${props.candidateId}&date=${props.date}`)).data.data
+    let params = {
+      candidate_id: props.candidateId,
+      date: props.date
+    }
+    rows.value = (await api.get('issues', { params })).data.data
   } catch (error) {
     console.error(error)
   } finally {

@@ -1,15 +1,18 @@
 <script setup>
 import { api } from 'src/boot/axios'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import EnlacDate from 'src/components/EnlacDate.vue'
+import BeneficiarySelect from 'src/components/BeneficiarySelect.vue'
 import notify from 'src/utils/notify'
 
 const startDate = ref(new Date().toISOString().split('T')[0])
 const endDate = ref(new Date().toISOString().split('T')[0])
-const candidateId = ref()
+const candidateId = ref(null)
 
 const loading = ref(false)
 const rows = ref([])
+
+const subjectsMap = computed(() => new Map(subjects.value.map(s => [s.id, s.label])))
 
 const columns = ref([
   { name: 'candidate.full_name', label: 'Nombre del beneficiario', field: row => row.candidate.full_name, align: 'left' },
@@ -19,7 +22,7 @@ const columns = ref([
   {
     name: 'type',
     label: 'Tipo',
-    field: (row) => subjects.value[row.type - 1]?.label || 'Desconocido',
+    field: (row) => subjectsMap.value.get(row.type) || 'Desconocido',
     align: 'left'
   },
   { name: 'comments', label: 'Comentarios', field: 'comments', align: 'left' },
@@ -79,10 +82,18 @@ const subjects = ref([
 async function fetchIssues() {
   try {
     loading.value = true
-    rows.value = (await api.get(`issues/?start_date=${startDate.value}&end_date=${endDate.value}&candidate_id=${candidateId.value}`)).data.data
-    notify.positive('Incidencias cargadas con exito')
+    const params = {
+      start_date: startDate.value,
+      end_date: endDate.value
+    }
+    if (candidateId.value) {
+      params.candidate_id = candidateId.value
+    }
+    const response = await api.get('issues/', { params })
+    rows.value = response.data.data
+    notify.positive('Incidencias cargadas con éxito')
   } catch (error) {
-    console.log(error)
+    console.error('Error fetching issues:', error)
     notify.negative('No se pudieron cargar las incidencias')
   } finally {
     loading.value = false
@@ -92,14 +103,19 @@ async function fetchIssues() {
 onMounted(() => {
   fetchIssues()
 })
+
+watch(candidateId, () => fetchIssues())
 </script>
 
 <template>
   <q-page class="q-pa-md">
-    <div class="flex q-mb-md">
-      <h1 class="page-title q-mb-none">Incidencias</h1>
-      <enlac-date v-model="startDate" class="q-ml-auto q-mr-md" @update:model-value="fetchIssues" />
-      <enlac-date v-model="endDate" @update:model-value="fetchIssues" />
+    <h1 class="page-title">Incidencias</h1>
+    <div class="row q-mb-md">
+      <div class="col-12 col-md-6 flex items-end">
+        <BeneficiarySelect v-model="candidateId" class="q-mr-md" />
+        <enlac-date v-model="startDate" class="q-mr-md" @update:model-value="fetchIssues" />
+        <enlac-date v-model="endDate" @update:model-value="fetchIssues" />
+      </div>
     </div>
     <q-table flat bordered :rows="rows" :columns="columns" :loading="loading" :pagination="{ rowsPerPage: 0 }"
       row-key="id" />

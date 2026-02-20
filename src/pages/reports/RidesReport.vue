@@ -1,11 +1,13 @@
 <script setup>
 import { api } from 'src/boot/axios';
-import { computed, ref } from 'vue';
+import { computed, ref, watch, onMounted } from 'vue';
 import EnlacDate from 'src/components/EnlacDate.vue';
+import BeneficiarySelect from 'src/components/BeneficiarySelect.vue';
 
 const loading = ref(false)
 const startDate = ref(new Date().toISOString().split('T')[0])
 const endDate = ref(new Date().toISOString().split('T')[0])
+const candidateId = ref(null)
 
 const rawRows = ref([])
 const rows = computed(() => {
@@ -74,6 +76,7 @@ async function fetchRides() {
             start_date: startDate.value,
             end_date: endDate.value
         }
+        if (candidateId.value) params.candidate_id = candidateId.value
         rawRows.value = (await api.get('rides', { params })).data.data
     } catch (error) {
         console.log(error);
@@ -81,6 +84,11 @@ async function fetchRides() {
         loading.value = false
     }
 }
+
+onMounted(() => fetchRides())
+watch(candidateId, () => fetchRides())
+watch(startDate, () => fetchRides())
+watch(endDate, () => fetchRides())
 </script>
 
 <template>
@@ -89,10 +97,12 @@ async function fetchRides() {
             Bitácora de Servicios de Traslados
         </h1>
 
-        <div class="q-ml-auto flex q-mb-md">
-            <EnlacDate v-model="startDate" class="q-mr-md" />
-            <EnlacDate v-model="endDate" class="q-mr-md" />
-            <q-btn icon="sym_o_search" color="primary" unelevated @click="fetchRides" :loading="loading" />
+        <div class="row q-mb-md">
+            <div class="col-md-6 flex items-end">
+                <BeneficiarySelect v-model="candidateId" class="q-mr-md" />
+                <EnlacDate v-model="startDate" class="q-mr-md" />
+                <EnlacDate v-model="endDate" />
+            </div>
         </div>
 
         <q-table :rows="rows" :columns="columns"></q-table>
