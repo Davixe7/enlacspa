@@ -122,9 +122,14 @@ const routes = [
 
     children: [
       {
+        path: 'logs',
+        name: 'logs',
+        component: () => import('pages/StatusHistory.vue')
+      },
+      {
         path: '/home',
         name: 'index',
-        meta: { label: '', hideBreadcrumb: true },
+        meta: { label: '' },
         component: () => import('pages/BaseHome.vue')
       },
       {
@@ -182,25 +187,19 @@ const routes = [
         ]
       },
       {
-        path: '/reportes/:candidateId/mensual',
-        component: () => import('pages/reports/MonthlyScores.vue'),
-        props: true
-      },
-      {
-        path: '/reportes/:candidateId/diario',
-        component: () => import('pages/reports/DailyReport.vue'),
-        props: true
-      },
-      {
         path: '/horarios',
         component: () => import('pages/admin/EquinetherapySchedule.vue')
       },
       {
-        path: '/rides-rubio',
+        path: '/traslados/rubio',
+        name: 'rides.rubio',
+        meta: { label: 'Traslados Cuauhtémoc - Rubio', name: 'rides.rubio' },
         component: () => import('src/pages/RidesRubio.vue')
       },
       {
-        path: '/rides-equinetherapy',
+        path: '/traslados/equinoterapia',
+        name: 'rides.equine',
+        meta: { label: 'Traslados Equinoterapia', name: 'rides.equine' },
         component: () => import('src/pages/RidesEquinetherapy.vue')
       },
       {

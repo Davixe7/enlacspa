@@ -2,18 +2,26 @@
 import { DateTime } from 'luxon'
 import { api } from 'src/boot/axios'
 import { onMounted, ref, watch } from 'vue'
-import notify from 'src/utils/notify'
-import { useCategoryStore } from 'src/stores/category-store'
 import { useRoute } from 'vue-router'
+import { useCategoryStore } from 'src/stores/category-store'
 import { useCandidateStore } from 'src/stores/candidate-store'
+import notify from 'src/utils/notify'
 
 const candidateStore = useCandidateStore()
 const props = defineProps(['candidateId'])
 
-watch(()=>props.candidateId, ()=>{
-  candidateStore.$state.id = props.candidateId
-  candidateStore.fetchCandidate()
+const categoryStore = useCategoryStore()
+const categories = ref(categoryStore.categories)
+
+watch(() => props.candidateId, () => {
+  fetchCandidate()
 })
+
+async function fetchCandidate() {
+  if (!props.candidateId) return
+  candidateStore.$state.id = props.candidateId
+  await candidateStore.fetchCandidate()
+}
 
 const route = useRoute()
 const category = ref(null)
@@ -68,13 +76,13 @@ const subjects = ref([
     label: 'Otro'
   }
 ])
-const date     = ref(DateTime.now().toFormat('dd/MM/yyyy'))
+const date = ref(DateTime.now().toFormat('dd/MM/yyyy'))
 const comments = ref('')
-const type     = ref(null)
-const userId   = ref(null)
-const users    = ref([])
-const loading  = ref(false)
-const files    = ref([])
+const type = ref(null)
+const userId = ref(null)
+const users = ref([])
+const loading = ref(false)
+const files = ref([])
 
 const emit = defineEmits(['close'])
 
@@ -122,33 +130,26 @@ async function storeIssue() {
 }
 
 onMounted(async () => {
-  category.value = (await useCategoryStore().getCategoryByName(route.params.categoryName))
+  await fetchCandidate()
+  await useCategoryStore().fetchCategories({ base_only: true })
+  let categoryName = route.params.categoryName
+  if (categoryName) {
+    category.value = (await categoryStore.getCategoryByName(categoryName))
+  }
   fetchUsers()
 })
 </script>
 
 <template>
   <q-form>
-    <q-markup-table
-      flat
-      bordered
-      square
-      separator="cell"
-      dense
-    >
+    <q-markup-table flat bordered square separator="cell" dense>
       <table class="full-width custom-table">
         <tbody>
           <tr>
             <td>Área</td>
             <td class="q-pa-sm">
-              <q-input
-                v-if="category"
-                stack-label
-                hide-bottom-space
-                outlined
-                readonly
-                v-model="category.label"
-              />
+              <q-select dense stack-label hide-bottom-space outlined v-model="category"
+                :readonly="!!route.params.categoryName" :options="categories" />
             </td>
           </tr>
 
@@ -156,7 +157,7 @@ onMounted(async () => {
             <td>Beneficiario</td>
             <td class="q-py-lg">
               <div class="q-pa-sm">
-                {{candidateStore ? candidateStore.full_name : 'Cargando...'}}
+                {{ candidateStore ? candidateStore.full_name : 'Cargando...' }}
               </div>
             </td>
           </tr>
@@ -164,34 +165,13 @@ onMounted(async () => {
           <tr>
             <td>Fecha</td>
             <td class="q-pa-sm">
-              <q-input
-                outlined
-                stack-label
-                v-model="date"
-                class="q-field--required"
-              >
+              <q-input outlined stack-label v-model="date" class="q-field--required">
                 <template v-slot:append>
-                  <q-icon
-                    name="event"
-                    class="cursor-pointer"
-                  >
-                    <q-popup-proxy
-                      cover
-                      transition-show="scale"
-                      transition-hide="scale"
-                    >
-                      <q-date
-                        v-model="date"
-                        mask="DD/MM/YYYY"
-                      >
+                  <q-icon name="event" class="cursor-pointer">
+                    <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                      <q-date v-model="date" mask="DD/MM/YYYY">
                         <div class="row items-center justify-end">
-                          <q-btn
-                            v-close-popup
-                            label="Cerrar"
-                            color="primary"
-                            flat
-                            @click="dialog = false"
-                          />
+                          <q-btn v-close-popup label="Cerrar" color="primary" flat @click="dialog = false" />
                         </div>
                       </q-date>
                     </q-popup-proxy>
@@ -204,70 +184,33 @@ onMounted(async () => {
           <tr>
             <td>Reportó</td>
             <td class="q-pa-sm">
-              <q-select
-                dense
-                stack-label
-                outlined
-                hide-bottom-space
-                v-model="userId"
-                :options="users"
-                option-label="name"
-                option-value="id"
-                emit-value
-                map-options
-                :error="!!errors['user_id']"
-                :error-message="errors['user_id']"
-              />
+              <q-select dense stack-label outlined hide-bottom-space v-model="userId" :options="users"
+                option-label="name" option-value="id" emit-value map-options :error="!!errors['user_id']"
+                :error-message="errors['user_id']" />
             </td>
           </tr>
 
           <tr>
             <td>Tipo</td>
             <td class="q-pa-sm">
-              <q-select
-                dense
-                stack-label
-                outlined
-                hide-bottom-space
-                v-model="type"
-                :options="subjects"
-                option-label="label"
-                option-value="id"
-                emit-value
-                map-options
-                :error="!!errors['type']"
-                :error-message="errors['type']"
-              />
+              <q-select dense stack-label outlined hide-bottom-space v-model="type" :options="subjects"
+                option-label="label" option-value="id" emit-value map-options :error="!!errors['type']"
+                :error-message="errors['type']" />
             </td>
           </tr>
 
           <tr>
             <td>Comentarios</td>
             <td class="q-pa-sm">
-              <q-input
-                type="textarea"
-                stack-label
-                outlined
-                hide-bottom-space
-                v-model="comments"
-                :error="!!errors['comments']"
-                :error-message="errors['comments']"
-              />
+              <q-input type="textarea" stack-label outlined hide-bottom-space v-model="comments"
+                :error="!!errors['comments']" :error-message="errors['comments']" />
             </td>
           </tr>
           <tr>
             <td>Adjuntos</td>
             <td>
               <div class="row">
-                <q-file
-                  ref="filePicker"
-                  v-model="files"
-                  append
-                  multiple
-                  use-chips
-                  outlined
-                  class="full-width"
-                />
+                <q-file ref="filePicker" v-model="files" append multiple use-chips outlined class="full-width" />
               </div>
             </td>
           </tr>
@@ -276,12 +219,7 @@ onMounted(async () => {
     </q-markup-table>
 
     <div class="q-pa-md flex justify-end">
-      <q-btn
-        color="primary"
-        label="Guardar"
-        :loading="loading"
-        @click="storeIssue"
-      />
+      <q-btn color="primary" label="Guardar" :loading="loading" @click="storeIssue" />
     </div>
   </q-form>
 </template>
@@ -291,7 +229,8 @@ th {
   text-align: left;
   font-weight: 400;
 }
+
 /* .q-field--outlined .q-field__control:before {
-  
+
 } */
 </style>

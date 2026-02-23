@@ -1,6 +1,6 @@
 <script setup>
 import { api } from 'src/boot/axios'
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import notify from 'src/utils/notify'
 
 const model = defineModel()
@@ -8,6 +8,9 @@ const emits = defineEmits(['close'])
 const loading = ref(false)
 
 const entryStatuses = ref([])
+const entryStatusesMap = computed(() => {
+  return new Map(entryStatuses.value.map(status => [status.value, status.label]))
+})
 
 async function fetchStatuses() {
   try {
@@ -39,8 +42,10 @@ async function update() {
     loading.value = false
   }
 }
+
 onMounted(() => {
   fetchStatuses()
+  model.value.newStatus = model.value.newStatus ?? model.value.status
 })
 </script>
 
@@ -55,11 +60,14 @@ onMounted(() => {
         {{ model.name }}
       </div>
       <div>
-        <q-badge v-if="entryStatuses && entryStatuses.length" color="positive"
-          :label="entryStatuses.find(row => row.value == model.newStatus).label" />
+        <q-badge color="positive" :label="entryStatusesMap.get(model.status)" />
       </div>
     </q-card-section>
     <q-card-section>
+      <div class="field-label">Seleccionar Status</div>
+      <q-select dense outlined hide-bottom-space emit-value map-options option-value="value" option-label="label"
+        :options="entryStatuses" v-model="model.newStatus" class="q-mb-md" />
+
       <q-input class="q-mb-md custom-textarea" type="textarea" outlined stack-label label="Comentario"
         v-model="model.comment" autogrow />
 
@@ -76,8 +84,14 @@ onMounted(() => {
     </q-card-section>
   </q-card>
 </template>
+
 <style>
 .custom-textarea textarea {
   line-height: 1 !important;
+}
+
+.field-label {
+  font-size: 14px;
+  margin-bottom: 14px;
 }
 </style>

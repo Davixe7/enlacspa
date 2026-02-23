@@ -1,7 +1,9 @@
 <script setup>
 import { api } from 'src/boot/axios'
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, ref, watch, defineAsyncComponent } from 'vue'
 import EnlacDate from 'src/components/EnlacDate.vue'
+
+const BeneficiaryProfile = defineAsyncComponent(() => import('src/components/BeneficiaryProfile.vue'))
 
 const props = defineProps(['candidateId'])
 const startDate = ref(new Date().toISOString().split('T')[0])
@@ -25,6 +27,52 @@ async function fetchScores() {
     }
 }
 
+async function exportXls() {
+    try {
+        loading.value = true
+        let downloadurl = `beneficiaries/${props.candidateId}/reports/exportMonthly`
+        let response = await api({
+            url: downloadurl,
+            method: 'GET',
+            responseType: 'blob',
+            params: {
+                start_date: startDate.value,
+                end_date: endDate.value
+            }
+        })
+
+        const contentDisposition = response.headers['content-disposition']
+        let filename = 'reporte_descargado.xlsx'
+
+        if (contentDisposition) {
+            // Ejemplo: attachment; filename="usuarios.xlsx"
+            const filenameMatch = contentDisposition.match(/filename="(.+?)"/)
+            if (filenameMatch && filenameMatch[1]) {
+                filename = filenameMatch[1]
+            }
+        }
+        const blob = new Blob([response.data], {
+            type: response.headers['content-type']
+        })
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+
+        link.href = url
+        link.setAttribute('download', filename)
+        document.body.appendChild(link)
+        link.click()
+
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+
+        console.log(`Descarga de ${filename} iniciada.`)
+    } catch (error) {
+        console.log(error)
+    } finally {
+        loading.value = false
+    }
+}
+
 onMounted(() => {
     fetchScores()
 })
@@ -34,11 +82,23 @@ watch(endDate, () => fetchScores())
 </script>
 
 <template>
+    <div class="row">
+        <div class="col-12 q-mb-lg">
+            <Suspense>
+                <template>
+                    <BeneficiaryProfile v-if="candidateId" :candidateId="candidateId" />
+                </template>
+            </Suspense>
+        </div>
+    </div>
     <div>
         <div class="row">
             <div class="col-12 col-md-4 flex q-mb-lg">
                 <enlac-date v-model="startDate" class="q-mr-md" />
                 <enlac-date v-model="endDate" />
+            </div>
+            <div class="q-ml-auto">
+                <q-btn outline color="primary" label="Exportar Excel" @click="exportXls" />
             </div>
         </div>
 
@@ -49,7 +109,7 @@ watch(endDate, () => fetchScores())
                     <tr>
                         <th>Fecha</th>
                         <th v-for="activity in plan.activities" :key="activity.id">
-                            {{ activity.name }}\{{ activity.goal_type }}
+                            {{ activity.name }}
                         </th>
                     </tr>
                 </thead>

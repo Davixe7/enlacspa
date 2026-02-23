@@ -116,14 +116,19 @@ async function storeScores(closed = false) {
   }
 }
 
-function selectOption(option) {
-  if (option.id == optionId.value) {
+function selectOption(option, toggleable = true) {
+  if ((option.id == optionId.value) && toggleable) {
     optionId.value = null
     scores.value = []
     return
   }
   optionId.value = option.id
   scores.value = option.scores
+}
+
+function openDialogFor(option) {
+  selectOption(option, false)
+  issuesDialog.value = true
 }
 
 const errors = ref({})
@@ -183,7 +188,7 @@ onMounted(async () => {
               </q-item-section>
               <q-item-section side>
                 <div class="flex">
-                  <q-btn flat round icon="sym_o_siren" class="q-mr-md" @click="issuesDialog = true" />
+                  <q-btn flat round icon="sym_o_siren" class="q-mr-md" @click.stop="() => openDialogFor(result)" />
                   <q-checkbox v-model="optionId" :val="result.id" :true-value="result.id" :false-value="null"
                     style="pointer-events: none" />
                 </div>

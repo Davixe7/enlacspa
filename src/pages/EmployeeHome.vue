@@ -13,8 +13,8 @@ const areaPermissions = ref({
 })
 
 const driverOptions = [
-  { role: 'driver', path: 'rides-rubio', label: 'TRASLADO CUAUHTÉMOC-RUBIO' },
-  { role: 'driver', path: 'rides-equinetherapy', label: 'TRASLADO EQUINOTERPIA' }
+  { role: 'driver', path: 'traslados/rubio', label: 'TRASLADO CUAUHTÉMOC-RUBIO' },
+  { role: 'driver', path: 'traslados/equinoterapia', label: 'TRASLADO EQUINOTERPIA' }
 ]
 
 const categoryOptions = computed(() => {
@@ -24,7 +24,7 @@ const categoryOptions = computed(() => {
     .concat(driverOptions)
 })
 
-function isAllowed(option){
+function isAllowed(option) {
   let allowedByArea = areaPermissions.value[auth.data.user.work_area_id] && areaPermissions.value[auth.data.user.work_area_id].some((allowed) => allowed == option.id)
   let allowedByRoleName = auth.data.user.role.name == option.role
   return allowedByArea || allowedByRoleName
@@ -38,24 +38,12 @@ onMounted(async () => {
 <template>
   <q-page>
     <h1 class="page-title">Seleccione el área:</h1>
-    <div class="row q-col-gutter-md">
-      <template
-        v-for="option in categoryOptions"
-        :key="option.id"
-      >
-        <div
-          v-if="isAllowed(option)"
-          class="col-12 col-sm-6"
-        >
-          <router-link
-            :to="option.path"
-            style="text-decoration: none !important"
-          >
-            <q-card
-              bordered
-              flat
-            >
-              <q-card-section>
+    <div class="row q-col-gutter-xl">
+      <template v-for="option in categoryOptions" :key="option.id">
+        <div v-if="isAllowed(option)" class="col-12 col-sm-6">
+          <router-link :to="option.path" style="text-decoration: none !important">
+            <q-card bordered flat class="home-menu-card">
+              <q-card-section class="q-pa-xl">
                 <div class="page-subtitle q-mb-0">
                   {{ option.label }}
                 </div>
@@ -67,3 +55,9 @@ onMounted(async () => {
     </div>
   </q-page>
 </template>
+
+<style lang="scss">
+.home-menu-card {
+  border: 3px solid var(--q-primary);
+}
+</style>

@@ -79,35 +79,17 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="flex">
+  <div class="flex q-mb-lg">
     <div class="page-title">Tesorería</div>
-    <q-input
-      outlined
-      v-model="search"
-      hide-bottom-space
-      clearable
-      class="q-ml-auto q-mr-md"
-    >
+    <q-input outlined v-model="search" hide-bottom-space clearable class="q-ml-auto q-mr-md">
       <template v-slot:prepend>
         <q-icon name="search" />
       </template>
     </q-input>
-    <q-select
-      dense
-      outlined
-      v-model="month"
-      @update:modelValue="fetchFinancial"
-      :options="mesesDisponibles"
-    />
+    <q-select dense outlined v-model="month" @update:modelValue="fetchFinancial" :options="mesesDisponibles" />
   </div>
-  <q-table
-    bordered
-    hide-bottom
-    :filter="search"
-    :rows="rows"
-    :columns="columns"
-    :pagination="{ rowsPerPage: -1 }"
-  >
+
+  <q-table bordered hide-bottom :filter="search" :rows="rows" :columns="columns" :pagination="{ rowsPerPage: -1 }">
     <template v-slot:body-cell-name="props">
       <q-td>
         <router-link :to="{ name: 'financial.control', params: { candidateId: props.row.id } }">

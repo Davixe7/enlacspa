@@ -37,5 +37,5 @@ onMounted(() => {
 
 <template>
   <q-select outlined v-model="model" use-input fill-input hide-selected :options="filterOptions" input-debounce="300"
-    :loading="loading" @filter="filterFn" label="Beneficiario" emit-value map-options />
+    :loading="loading" @filter="filterFn" label="Beneficiario" emit-value map-options clearable />
 </template>

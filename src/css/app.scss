@@ -37,14 +37,17 @@ body {
 .page-title {
   color: #111827;
   font-weight: 500;
-  font-size: 25px;
+  font-size: 2rem;
   line-height: 1.3em;
-  margin: 0 0 2rem;
-  &--no-margin {
-    margin: 0;
-  }
+  margin-top: 0;
 }
 .page-subtitle {
+  color: #111827;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 1.3em;
+}
+.subtitle {
   color: #111827;
   font-weight: 500;
   font-size: 20px;

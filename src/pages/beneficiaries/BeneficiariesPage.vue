@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { api } from 'src/boot/axios'
 import { useAuthStore } from 'src/stores/user-store'
 import { useQuasar } from 'quasar'
@@ -13,6 +13,7 @@ const authStore = useAuthStore()
 const searchQuery = ref('')
 const loading = ref(false)
 const entryStatuses = ref([])
+const entryStatusesMap = computed(() => new Map(entryStatuses.value.map(status => [status.value, status.label])))
 
 async function fetchStatuses() {
   try {
@@ -34,9 +35,8 @@ onMounted(async () => {
 const statusDialog = ref(false)
 const selectedRow = ref(null)
 
-function openStatusDialog(row, newStatus) {
+function openStatusDialog(row) {
   selectedRow.value = row
-  selectedRow.value.newStatus = newStatus
   statusDialog.value = true
 }
 
@@ -123,9 +123,17 @@ function onStatusUpdated({ id, status }) {
     </template>
     <template v-slot:body-cell-status="props">
       <q-td>
-        <q-select dense outlined hide-bottom-space emit-value map-options option-value="value" option-label="label"
-          :options="entryStatuses" :model-value="props.row.status"
-          @update:model-value="(val) => openStatusDialog(props.row, val)" />
+        <div @click="openStatusDialog(props.row)"
+          style="border: 1px solid rgba(0,0,0,.25); border-radius: 3px; padding: 8px 12px;">
+          {{ entryStatusesMap.get(props.row.status) }}
+        </div>
+      </q-td>
+    </template>
+
+    <template v-slot:body-cell-name="props">
+      <q-td>
+        <router-link :to="{ name: 'beneficiary.reports', params: { candidateId: props.row.id } }">{{ props.row.name
+        }}</router-link>
       </q-td>
     </template>
 

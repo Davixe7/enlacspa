@@ -4,12 +4,14 @@ import { api } from 'src/boot/axios'
 export const useAuthStore = defineStore('auth', {
   state: () => {
     let url = new URL(api.defaults.baseURL).origin
+    let authMode = window.localStorage.getItem('enlac.authMode')
     return {
       loading: false,
       errors: {},
       baseUrl: url,
       data: {},
-      notifications: []
+      notifications: [],
+      authMode
     }
   },
   getters: {
@@ -34,6 +36,9 @@ export const useAuthStore = defineStore('auth', {
     },
     async attemptLogin(data) {
       try {
+        this.authMode = data.employee_number ? 'employee' : 'admin'
+        window.localStorage.setItem('enlac.authMode', this.authMode)
+
         this.errors = {}
         this.loading = true
         await api.post(`${this.baseUrl}/login`, data)

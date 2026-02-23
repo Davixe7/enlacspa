@@ -28,6 +28,7 @@ export default [
           {
             path: 'reportes',
             meta: { label: 'Reportes de programas del beneficiario', name: 'beneficiary.reports' },
+            name: 'beneficiary.reports',
             component: () => import('src/pages/reports/BeneficiaryReports.vue'),
             props: true
           },

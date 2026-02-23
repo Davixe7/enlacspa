@@ -174,9 +174,4 @@ const onScheduleEntry = (row) => {
 .q-field__prepend+.q-field__control-container .q-field__label {
   margin-left: -2.25rem;
 }
-
-h1.page-title {
-  margin-bottom: 0.25rem;
-  font-size: 35px;
-}
 </style>

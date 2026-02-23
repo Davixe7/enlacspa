@@ -333,11 +333,6 @@ const statusOptions = ref([])
   margin-bottom: 3rem;
 }
 
-.page-title {
-  line-height: 1.3em;
-  margin-bottom: 2rem;
-}
-
 .subtitle {
   color: #000;
   font-weight: 500;

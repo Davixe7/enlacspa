@@ -22,10 +22,7 @@ async function attemptLogin() {
 <template>
   <div class="row login-row">
     <div class="col-12 col-md-6 login-brand-column">
-      <img
-        src="../assets/logo_white.png"
-        alt="Logo"
-      />
+      <img src="../assets/logo_white.png" alt="Logo" />
     </div>
 
     <div class="col-12 col-md-6 flex items-center q-pa-md login-form-column">
@@ -33,41 +30,16 @@ async function attemptLogin() {
         <h1 class="title">ENLAC</h1>
         <div class="subtitle q-pb-lg">Ingresa tu Número de Empleado:</div>
 
-        <q-form
-          @submit.prevent="attemptLogin"
-          class="q-gutter-y-lg"
-        >
-          <q-input
-            outlined
-            stack-label
-            label="Número"
-            v-model="employee_number"
-            hide-bottom-space
-            class="employee-number-input"
-            :error="!!authStore.errors.email"
-            :error-message="'Código de empleado inválido'"
-            clearable
-            type="number"
-          />
+        <q-form @submit.prevent="attemptLogin" class="q-gutter-y-lg">
+          <q-input outlined stack-label label="Número" v-model="employee_number" hide-bottom-space
+            class="employee-number-input" :error="!!authStore.errors.email"
+            :error-message="'Código de empleado inválido'" clearable type="number" />
 
-          <q-btn
-            unelevated
-            color="primary"
-            label="Ingresar"
-            type="submit"
-            :loading="authStore.loading"
-          />
+          <q-btn unelevated color="primary" label="Ingresar" type="submit" :loading="authStore.loading" />
         </q-form>
-        <div class="flex q-pa-md">
-          <router-link
-            to="/login"
-            class="back-link"
-          >
-            <q-icon
-              name="arrow_back"
-              size="sm"
-              class="q-mr-sm"
-            />
+        <div class="flex q-py-md">
+          <router-link to="/login" class="back-link">
+            <q-icon name="arrow_back" size="xs" class="q-mr-sm" />
             Regresar
           </router-link>
         </div>
@@ -77,7 +49,7 @@ async function attemptLogin() {
 </template>
 
 <style lang="scss">
-.login-form-column > div {
+.login-form-column>div {
   flex: 1 1 auto;
 }
 
@@ -136,7 +108,7 @@ a {
     order: 1;
     padding-left: 100px;
 
-    > div {
+    >div {
       max-width: 370px;
     }
   }

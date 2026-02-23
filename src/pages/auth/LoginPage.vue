@@ -8,7 +8,7 @@ onMounted(() => authStore.csrfCookie())
 const authStore = useAuthStore()
 const email = ref('')
 const password = ref('')
-const remeberme = ref(false)
+const rememberme = ref(false)
 const showPassword = ref(false)
 
 async function attemptLogin() {
@@ -26,79 +26,37 @@ async function attemptLogin() {
 <template>
   <div class="row login-row">
     <div class="col-12 col-md-6 login-brand-column">
-      <img
-        src="./../../assets/logo_white.png"
-        alt=""
-      />
+      <img src="./../../assets/logo_white.png" alt="" />
     </div>
     <div class="col-12 col-md-6 flex items-center q-pa-md login-form-column">
       <div>
         <h1 class="title">ENLAC</h1>
         <div class="subtitle q-pb-lg">Portal web para la administración y gestión</div>
         <div>
-          <q-form
-            class="q-gutter-y-lg"
-            @submit.prevent="attemptLogin()"
-          >
-            <q-input
-              outlined
-              stack-label
-              label="Correo electrónico"
-              type="email"
-              v-model="email"
-              hide-bottom-space
-              :error="!!authStore.errors.email"
-              :error-message="authStore.errors.email"
-            >
+          <q-form class="q-gutter-y-lg" @submit.prevent="attemptLogin()">
+            <q-input outlined stack-label label="Correo electrónico" type="email" v-model="email" hide-bottom-space
+              :error="!!authStore.errors.email" :error-message="authStore.errors.email">
               <template v-slot:append="">
-                <q-btn
-                  flat
-                  dense
-                  round
-                  icon="sym_o_alternate_email"
-                  @click="() => (email = email + '@')"
-                />
+                <q-btn flat dense round icon="sym_o_alternate_email" @click="() => (email = email + '@')" />
               </template>
             </q-input>
-            <q-input
-              outlined
-              stack-label
-              label="Contraseña"
-              :type="showPassword ? 'text' : 'password'"
-              v-model="password"
-              hide-bottom-space
-              :error="!!authStore.errors.email"
-              :error-message="authStore.errors.email"
-            >
+            <q-input outlined stack-label label="Contraseña" :type="showPassword ? 'text' : 'password'"
+              v-model="password" hide-bottom-space :error="!!authStore.errors.email"
+              :error-message="authStore.errors.email">
               <template v-slot:append="">
-                <q-btn
-                  @click="showPassword = !showPassword"
-                  flat
-                  round
-                  :icon="!showPassword ? 'visibility' : 'visibility_off'"
-                  dense
-                />
+                <q-btn @click="showPassword = !showPassword" flat round
+                  :icon="!showPassword ? 'visibility' : 'visibility_off'" dense />
               </template>
             </q-input>
             <div class="flex justify-between items-center q-py-sm">
-              <q-checkbox
-                label="Recuérdame"
-                v-model="remeberme"
-                style="margin-left: -10px"
-              ></q-checkbox>
+              <q-checkbox label="Recuérdame" v-model="rememberme" style="margin-left: -10px"></q-checkbox>
               <router-link to="/recuperar-contrasena">¿Olvidó su contraseña?</router-link>
             </div>
-            <q-btn
-              unelevated
-              :loading="authStore.loading"
-              color="primary"
-              type="submit"
-              >Iniciar sesión</q-btn
-            >
+            <q-btn unelevated :loading="authStore.loading" color="primary" type="submit">Iniciar sesión</q-btn>
           </q-form>
 
           <!-- Login 2 Captura diaria -->
-          <div class="flex q-pa-md">
+          <div class="flex q-py-md">
             <router-link to="/login2">Acceder a captura Diaria</router-link>
           </div>
         </div>
@@ -108,7 +66,7 @@ async function attemptLogin() {
 </template>
 
 <style lang="scss">
-.login-form-column > div {
+.login-form-column>div {
   flex: 1 1 auto;
 }
 
@@ -160,7 +118,7 @@ a {
     order: 1;
     padding-left: 100px;
 
-    > div {
+    >div {
       max-width: 370px;
     }
   }
