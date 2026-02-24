@@ -107,7 +107,7 @@ function removeActivity(activity) {
 
 function formatActivities() {
   return program.value.activities.reduce((acc, actividad) => {
-    acc[actividad.id] = { daily_goal: actividad.daily_goal, final_goal: actividad.final_goal }
+    acc[actividad.id] = { daily_goal: actividad.daily_goal, final_goal: actividad.final_goal ?? null }
     return acc
   }, {})
 }
@@ -129,7 +129,7 @@ async function saveProgram() {
     let route = props.planId ? `plans/${props.planId}` : 'plans'
     let result = (await api.post(route, data)).data.data
     notify.positive('Programa guardado exitosamente.')
-    router.push({ ...redirectTo, params: { recent: result.id } })
+    router.push({ ...redirectTo.value, params: { recent: result.id } })
   } catch (error) {
     errors.value = error.response.status == '422' ? error.formatted : errors.value
     notify.negative('No se pudo registrar el programa.')
