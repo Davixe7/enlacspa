@@ -118,15 +118,71 @@ onMounted(async () => {
 
 watch(candidateId, () => candidateId.value ? update() : null)
 watch(month, () => candidateId.value ? update() : null)
+
+async function exportXls() {
+  try {
+    loading.value = true
+    let downloadurl = `beneficiaries/${candidateId.value}/individual/export`
+    let response = await api({
+      url: downloadurl,
+      method: 'GET',
+      responseType: 'blob',
+      params: {
+        month: month.value,
+      }
+    })
+
+    const contentDisposition = response.headers['content-disposition']
+    let filename = 'reporte_ejecutivo_' + month.value + '_' + '.xlsx'
+
+    if (contentDisposition) {
+      // Ejemplo: attachment; filename="usuarios.xlsx"
+      const filenameMatch = contentDisposition.match(/filename="(.+?)"/)
+      if (filenameMatch && filenameMatch[1]) {
+        filename = filenameMatch[1]
+      }
+    }
+
+    // 3. Crear el Blob a partir de los datos de la respuesta
+    const blob = new Blob([response.data], {
+      type: response.headers['content-type'] // Usar el tipo MIME correcto
+    })
+
+    // 4. Iniciar la descarga usando el API del navegador
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+
+    link.href = url
+    link.setAttribute('download', filename) // 👈 Aplicar el nombre del archivo
+    document.body.appendChild(link)
+    link.click() // 👈 Forzar el click para iniciar la descarga
+
+    // 5. Limpieza
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url) // Liberar memoria del Blob
+
+    console.log(`Descarga de ${filename} iniciada.`)
+  } catch (error) {
+    console.log(error)
+  } finally {
+    loading.value = false
+  }
+}
 </script>
 
 <template>
   <q-page>
     <h1 class="page-title q-mb-lg">Bitácora Individual del Beneficiario</h1>
-    <div class="flex items-end q-mb-md">
-      <BeneficiarySelect v-model="candidateId" class="q-mr-md" />
-      <q-select outlined :options="monthOptions" v-model="month" label="Primer mes a mostrar" emit-value map-options
-        class="q-mr-md" style="min-width: 230px" />
+    <div class="row q-mb-md justify-between items-end">
+      <div class="flex items-end">
+        <BeneficiarySelect v-model="candidateId" class="q-mr-md" />
+        <q-select outlined :options="monthOptions" v-model="month" label="Primer mes a mostrar" emit-value map-options
+          class="q-mr-md" style="min-width: 230px" />
+      </div>
+
+      <div>
+        <q-btn outline color="primary" icon="file_download" label="Exportar Excel" @click="exportXls" />
+      </div>
     </div>
     <q-markup-table class="q-mb-lg" separator="vertical" flat bordered>
       <thead>

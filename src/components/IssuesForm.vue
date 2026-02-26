@@ -5,13 +5,14 @@ import { onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useCategoryStore } from 'src/stores/category-store'
 import { useCandidateStore } from 'src/stores/candidate-store'
+import { storeToRefs } from 'pinia'
 import notify from 'src/utils/notify'
 
 const candidateStore = useCandidateStore()
 const props = defineProps(['candidateId'])
 
 const categoryStore = useCategoryStore()
-const categories = ref(categoryStore.categories)
+const categories = storeToRefs(categoryStore).categories
 
 watch(() => props.candidateId, () => {
   fetchCandidate()
@@ -133,9 +134,9 @@ onMounted(async () => {
   await fetchCandidate()
   await useCategoryStore().fetchCategories({ base_only: true })
   let categoryName = route.params.categoryName
-  if (categoryName) {
-    category.value = (await categoryStore.getCategoryByName(categoryName))
-  }
+  category.value = categoryName
+    ? (await categoryStore.getCategoryByName(categoryName))
+    : categories.value[0]
   fetchUsers()
 })
 </script>
