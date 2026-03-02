@@ -81,7 +81,7 @@ async function storeAttendances() {
     loading.value = true
     let data = { attendances: currentAttendances.value }
     await api.post('attendances', data)
-    notify.positive('Lista de asistencia actualizada')
+    notify.positive('Lista de asistencia actualizada.')
   } catch (error) {
     console.log(error)
     notify.negative('No se pudo actualizar la lista de asistencia')
@@ -95,47 +95,22 @@ async function storeAttendances() {
   <div class="flex items-center q-mb-md">
     <h1 class="page-title q-mb-none">Control de Asistencias</h1>
 
-    <enlac-date
-      v-model="dateISO"
-      class="q-ml-auto q-mr-md"
-    />
+    <enlac-date v-model="dateISO" class="q-ml-auto q-mr-md" />
 
-    <q-btn
-      color="primary"
-      :loading="loading"
-      @click="storeAttendances"
-      label="Guardar lista"
-    />
+    <q-btn color="primary" :loading="loading" @click="storeAttendances" label="Guardar lista" />
   </div>
 
-  <q-table
-    v-if="candidates && candidates.length"
-    flat
-    bordered
-    dense
-    :loading="loading"
-    :columns="columns"
-    :rows="currentAttendances"
-    :pagination="{ rowsPerPage: 0 }"
-  >
+  <q-table v-if="candidates && candidates.length" flat bordered dense :loading="loading" :columns="columns"
+    :rows="currentAttendances" :pagination="{ rowsPerPage: 0 }">
     <template v-slot:body-cell-actions="props">
       <q-td>
-        <q-checkbox
-          v-model="props.row.status"
-          :false-value="'absent'"
-          :true-value="'present'"
-          :style="{'pointer-events': props.row.done_activities ? 'none' : 'all'}"
-        />
+        <q-checkbox v-model="props.row.status" :false-value="'absent'" :true-value="'present'"
+          :style="{ 'pointer-events': props.row.done_activities ? 'none' : 'all' }" />
       </q-td>
     </template>
   </q-table>
 
   <div class="flex justify-end q-mt-md">
-    <q-btn
-      color="primary"
-      :loading="loading"
-      @click="storeAttendances"
-      label="Guardar lista"
-    />
+    <q-btn color="primary" :loading="loading" @click="storeAttendances" label="Guardar lista" />
   </div>
 </template>

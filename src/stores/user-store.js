@@ -16,7 +16,7 @@ export const useAuthStore = defineStore('auth', {
   },
   getters: {
     logoutRedirectTo() {
-      return this.authMode == 'admin' ? 'login' : 'empleados/login'
+      return this.authMode == 'admin' ? '/login' : '/empleados/login'
     },
     unreadNotificationsCount() {
       return this.notifications.length
