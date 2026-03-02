@@ -33,5 +33,11 @@ export default [
     path: '/carrusel/anadir-diapositiva',
     meta: { label: 'Anadir diapositiva', hideBreadcrumb: true, noPadding: true },
     component: () => import('src/pages/admin/DashboardSlideForm.vue')
+  },
+  {
+    path: '/actividades',
+    name: 'actividades.index',
+    meta: { label: 'Actividades' },
+    component: () => import('src/pages/admin/ActivitiesPage.vue')
   }
 ]

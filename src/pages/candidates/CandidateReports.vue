@@ -1,6 +1,7 @@
 <script setup>
 import { api } from 'src/boot/axios'
 import { onMounted, ref } from 'vue'
+import EnlacDate from 'src/components/EnlacDate.vue'
 
 onMounted(() => fetchCandidates())
 
@@ -105,31 +106,22 @@ const columns = ref([
     <div class="row q-col-gutter-lg items-end q-mb-xl">
       <div class="col-12 col-md-auto">
         <div class="label-alt-2">Fecha a consultar</div>
-        <q-input outlined stack-label label="Desde" type="date" v-model="query.date_from" :error="!!errors.date_from"
-          :error-message="errors.date_from">
-          <template v-slot:prepend> <q-icon name="calendar_today"></q-icon> </template></q-input>
+        <enlac-date v-model="query.date_from" label="Desde" outlined />
       </div>
       <div class="col-12 col-md-auto">
-        <q-input outlined stack-label label="Hasta" type="date" v-model="query.date_to" :error="!!errors.date_to"
-          :error-message="errors.date_to">
-        </q-input>
+        <enlac-date v-model="query.date_to" label="Hasta" outlined />
       </div>
       <div class="col-12 col-md-auto">
         <div class="label-alt-2">Buscar por</div>
-        <q-input outlined stack-label label="Nombre" v-model="query.name" :error="!!errors.name"
+        <q-input outlined stack-label label="Nombre" hide-bottom-space v-model="query.name" :error="!!errors.name"
           :error-message="errors.name">
-          <template v-slot:prepend> <q-icon name="search"></q-icon> </template></q-input>
+          <template v-slot:prepend> <q-icon name="search" /></template></q-input>
       </div>
       <div class="col-12 col-md-auto">
-        <q-input outlined stack-label label="Fecha de nacimiento" v-model="query.birth_date" type="date"
-          :error="!!errors.birth_date" :error-message="errors.birth_date">
-          <template v-slot:prepend>
-            <q-icon name="calendar_today"></q-icon>
-          </template>
-        </q-input>
+        <enlac-date v-model="query.birth_date" label="Fecha de nacimiento" outlined />
       </div>
       <div class="col-12 col-md-auto">
-        <q-btn :loading="loading" color="primary" style="margin-bottom: 20px" @click="fetchCandidates">Buscar</q-btn>
+        <q-btn :loading="loading" color="primary" @click="fetchCandidates" label="Buscar" />
       </div>
     </div>
 

@@ -1,32 +1,11 @@
 <template>
-  <q-input
-    filled
-    v-model="dateDisplay"
-    mask="##/##/####"
-    v-bind="$attrs"
-  >
+  <q-input :filled="isFilled" :outlined="outlined" v-model="dateDisplay" mask="##/##/####" v-bind="$attrs">
     <template v-slot:append>
-      <q-icon
-        name="event"
-        class="cursor-pointer"
-      >
-        <q-popup-proxy
-          cover
-          transition-show="scale"
-          transition-hide="scale"
-        >
-          <q-date
-            v-model="proxyModel"
-            mask="YYYY-MM-DD"
-            :options="limitToPast"
-          >
+      <q-icon name="event" class="cursor-pointer">
+        <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+          <q-date v-model="proxyModel" mask="YYYY-MM-DD" :options="limitToPast">
             <div class="row items-center justify-end">
-              <q-btn
-                v-close-popup
-                label="Cerrar"
-                color="primary"
-                flat
-              />
+              <q-btn v-close-popup label="Cerrar" color="primary" flat />
             </div>
           </q-date>
         </q-popup-proxy>
@@ -38,6 +17,16 @@
 <script setup>
 import { computed } from 'vue'
 import { DateTime } from 'luxon'
+
+const props = defineProps({
+  outlined: Boolean,
+  filled: {
+    type: Boolean,
+    default: true
+  }
+})
+
+const isFilled = computed(() => (props.outlined ? false : props.filled))
 
 const limitToPast = (dateString) => {
   const dateToCheck = DateTime.fromFormat(dateString, 'yyyy/MM/dd')

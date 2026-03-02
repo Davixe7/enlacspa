@@ -4,7 +4,7 @@ import { api } from 'src/boot/axios'
 export const useAuthStore = defineStore('auth', {
   state: () => {
     let url = new URL(api.defaults.baseURL).origin
-    let authMode = window.localStorage.getItem('enlac.authMode')
+    let authMode = window.localStorage.getItem('enlac.authMode') ?? 'admin'
     return {
       loading: false,
       errors: {},
@@ -16,7 +16,7 @@ export const useAuthStore = defineStore('auth', {
   },
   getters: {
     logoutRedirectTo() {
-      return this.can('rides.index') ? '/login2' : '/login'
+      return this.authMode == 'admin' ? 'login' : 'empleados/login'
     },
     unreadNotificationsCount() {
       return this.notifications.length
@@ -25,7 +25,7 @@ export const useAuthStore = defineStore('auth', {
   actions: {
     can(permission) {
       if (!this.data.user) return false
-      return this.data.user.permissions.includes(permission)
+      return this.data?.user?.permissions?.includes(permission)
     },
     async csrfCookie() {
       await api.get(`${this.baseUrl}/sanctum/csrf-cookie`)

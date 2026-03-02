@@ -9,6 +9,13 @@ const props = defineProps(['groupId', 'candidateId', 'newCopy'])
 const loading = ref(false)
 const recentId = ref(route.query.recent ? route.query.recent : null)
 
+function planLinkByType(planId, action = '') {
+  if (props.candidateId) {
+    return `/beneficiarios/${props.candidateId}/planes/${planId}/${action}`;
+  }
+  return `/grupos/${props.groupId}/planes/${planId}/${action}`
+}
+
 watch(
   () => props.newCopy,
   (newVal) => {
@@ -49,38 +56,12 @@ onMounted(async () => {
 </script>
 
 <template>
-  <q-table
-    flat
-    bordered
-    :columns="columns"
-    :rows="rows"
-    :pagination="{ rowsPerPage: 0 }"
-  >
+  <q-table flat bordered :columns="columns" :rows="rows" :pagination="{ rowsPerPage: 0 }">
     <template v-slot:body-cell-actions="props">
       <q-td :class="{ highlight: props.row.id == recentId }">
         <div class="q-table__actions">
-          <q-btn
-            flat
-            round
-            dense
-            icon="sym_o_edit"
-            :to="
-              candidateId
-                ? `/beneficiarios/${candidateId}/planes/${props.row.id}/editar`
-                : `/grupos/${groupId}/planes/${props.row.id}/editar`
-            "
-          />
-          <q-btn
-            flat
-            round
-            dense
-            icon="sym_o_visibility"
-            :to="
-              candidateId
-                ? `/beneficiarios/${candidateId}/planes/${props.row.id}`
-                : `/grupos/${groupId}/planes/${props.row.id}`
-            "
-          />
+          <q-btn flat round dense icon="sym_o_visibility" :to="planLinkByType(props.row.id)" />
+          <q-btn flat round dense icon="sym_o_edit" :to="planLinkByType(props.row.id, 'editar')" />
         </div>
       </q-td>
     </template>
@@ -93,6 +74,8 @@ onMounted(async () => {
 </template>
 
 <style lang="scss">
+@use 'sass:color';
+
 th,
 td {
   text-align: left !important;
@@ -106,6 +89,6 @@ td:last-child {
 tr:has(.highlight) td {
   will-change: background-color;
   transition: all 0.4s;
-  background: lighten($positive, 50%);
+  background: color.adjust($positive, $lightness: 50%);
 }
 </style>

@@ -6,8 +6,8 @@ const loading = ref(false)
 const search = ref('')
 const rows = ref([])
 const columns = ref([
-  { name: 'name', label: 'Beneficiario', field: 'full_name', align: 'left', sortable: true },
   { name: 'id', label: 'Folio', field: 'id', align: 'left', sortable: true },
+  { name: 'name', label: 'Beneficiario', field: 'full_name', align: 'left', sortable: true },
   { name: 'program', label: 'Programa', field: (row) => row.program.name, align: 'left' },
   { name: 'parents', label: 'Cuota Padres (mes)', align: 'left' },
   { name: 'sponsors', label: 'Aportación de Padrinos (mes)', align: 'left' },
@@ -66,7 +66,7 @@ async function fetchFinancial() {
   } catch (error) {
     console.log(error)
   } finally {
-    loading.value = true
+    loading.value = false
   }
 }
 onMounted(async () => {
@@ -89,7 +89,8 @@ onMounted(async () => {
     <q-select dense outlined v-model="month" @update:modelValue="fetchFinancial" :options="mesesDisponibles" />
   </div>
 
-  <q-table bordered hide-bottom :filter="search" :rows="rows" :columns="columns" :pagination="{ rowsPerPage: -1 }">
+  <q-table :loading="loading" bordered hide-bottom :filter="search" :rows="rows" :columns="columns"
+    :pagination="{ rowsPerPage: -1 }">
     <template v-slot:body-cell-name="props">
       <q-td>
         <router-link :to="{ name: 'financial.control', params: { candidateId: props.row.id } }">
@@ -117,6 +118,15 @@ onMounted(async () => {
           </small>
         </div>
       </q-td>
+    </template>
+
+    <template v-slot:loading>
+      <div class="q-pa-md text-center text-weight-medium">
+        <q-spinner color="primary" class="q-mr-sm" />
+        <span style="font-size: 18px">
+          Cargando...
+        </span>
+      </div>
     </template>
   </q-table>
 </template>

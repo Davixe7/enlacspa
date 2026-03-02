@@ -57,7 +57,7 @@ async function attemptLogin() {
 
           <!-- Login 2 Captura diaria -->
           <div class="flex q-py-md">
-            <router-link to="/login2">Acceder a captura Diaria</router-link>
+            <router-link to="/empleados/login">Acceder a captura Diaria</router-link>
           </div>
         </div>
       </div>

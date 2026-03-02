@@ -32,7 +32,7 @@
       <div style="padding: 32px" v-if="!route.meta.hideBreadcrumb">
         <q-breadcrumbs>
           <q-breadcrumbs-el v-for="rt in matchedRoutes" :key="rt.path" :label="rt.meta.label" :icon="rt.meta.icon"
-            :to="rt.name ? { name: rt.name, props: rt.props } : null" />
+            :to="rt.meta.name ? { name: rt.meta.name, props: rt.props } : (rt.name ? { name: rt.name, props: rt.props } : null)" />
         </q-breadcrumbs>
       </div>
 

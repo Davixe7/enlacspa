@@ -96,9 +96,13 @@ function onStatusUpdated({ id, status }) {
     <h1 class="page-title">Admisiones y Beneficiarios</h1>
 
     <div class="row items-center q-my-sm">
-      <div class="col-auto">
-        <q-btn :loading="loading" color="primary" icon="description" outline to="/beneficiarios/reportes">
+      <div class="col-auto q-gutter-x-md"> <q-btn :loading="loading" color="primary" icon="description" outline
+          to="/beneficiarios/reportes">
           Reporte de Bajas
+        </q-btn>
+
+        <q-btn :loading="loading" color="primary" icon="history" outline :to="{ name: 'logs' }">
+          Reportes de cambio de Estado
         </q-btn>
       </div>
 

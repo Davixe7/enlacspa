@@ -82,9 +82,7 @@ const onScheduleEntry = (row) => {
           </template>
         </q-input>
 
-        <q-btn class="q-mt-md" :loading="loading" color="primary" @click="fetchBeneficiaries">
-          Buscar
-        </q-btn>
+        <q-btn class="q-mt-md" :loading="loading" color="primary" @click="fetchBeneficiaries" label="Buscar" />
       </div>
     </div>
 

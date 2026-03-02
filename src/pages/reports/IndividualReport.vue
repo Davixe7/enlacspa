@@ -35,15 +35,14 @@ const months = [
   { label: 'Diciembre', value: 12 }
 ]
 
-const monthOptions = [...months].splice(0, 7)
+const monthOptions = months
 
 const mapMonthLabels = computed(() => {
   let monthLabels = {}
-  let start = month.value - 1
-  let end = month.value + 5
-
-  for (let i = start; i < end; i++) {
-    monthLabels[`m${i}`] = months[i].label
+  // Genera m1..m6 con wrap-around dentro de los 12 meses
+  for (let i = 1; i <= 6; i++) {
+    const idx = (month.value - 1 + (i - 1)) % months.length
+    monthLabels[`m${i}`] = months[idx].label
   }
   return monthLabels
 })
@@ -133,7 +132,7 @@ async function exportXls() {
     })
 
     const contentDisposition = response.headers['content-disposition']
-    let filename = 'reporte_ejecutivo_' + month.value + '_' + '.xlsx'
+    let filename = 'reporte_individual_' + candidateData.value.full_name + '_mes_' + month.value + '_' + '.xlsx'
 
     if (contentDisposition) {
       // Ejemplo: attachment; filename="usuarios.xlsx"
@@ -257,7 +256,7 @@ async function exportXls() {
             </td>
           </template>
           <template v-else>
-            <td v-for="n in 6" :key="n">
+            <td v-for="n in 7" :key="n">
               N/A
             </td>
           </template>

@@ -22,7 +22,7 @@ async function attemptLogin() {
 <template>
   <div class="row login-row">
     <div class="col-12 col-md-6 login-brand-column">
-      <img src="../assets/logo_white.png" alt="Logo" />
+      <q-img src="~assets/logo_white.png" spinner-color="white" style="max-width: 260px" />
     </div>
 
     <div class="col-12 col-md-6 flex items-center q-pa-md login-form-column">
