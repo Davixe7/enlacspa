@@ -57,7 +57,7 @@ async function storeAppointment() {
         <q-icon
           name="calendar_today"
           class="q-mr-md"
-        ></q-icon>
+        />
         Programar Cita
       </div>
     </q-card-section>
@@ -74,7 +74,7 @@ async function storeAppointment() {
         option-label="full_name"
         option-value="id"
         map-options
-      ></q-select>
+      />
 
       <q-select
         outlined
@@ -88,7 +88,7 @@ async function storeAppointment() {
         option-value="id"
         map-options
         @update:modelValue="fetchPersonal"
-      ></q-select>
+      />
 
       <q-select
         outlined
@@ -101,7 +101,7 @@ async function storeAppointment() {
         option-label="name"
         option-value="id"
         map-options
-      ></q-select>
+      />
 
       <div class="row q-col-gutter-x-md">
         <div class="col-6">
@@ -182,7 +182,7 @@ async function storeAppointment() {
         label="Observaciones"
         v-model="appointment.comments"
         type="textarea"
-      ></q-input>
+      />
     </q-card-section>
     <q-card-section class="flex justify-end">
       <q-btn
@@ -191,14 +191,15 @@ async function storeAppointment() {
         unelevated
         outline
         color="primary"
-        >Cerrar</q-btn
-      >
+        label="Cerrar"
+      />
       <q-btn
         @click="storeAppointment"
         unelevated
         color="primary"
         :loading="loading"
-        >Guardar</q-btn
+        label="Guardar"
+      />
       >
     </q-card-section>
   </q-card>

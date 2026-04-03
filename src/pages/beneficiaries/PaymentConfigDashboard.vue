@@ -91,12 +91,12 @@ const amountEnlac = computed(() =>
               </td>
             </tr>
             <tr>
-              <td>Cuota de Padrinos:</td>
+              <td>Aportación de Padrinos:</td>
               <td>${{ amountSponsors }}</td>
               <td>{{ ((amountSponsors / candidate?.program_price) * 100).toFixed(2) }} %</td>
             </tr>
             <tr>
-              <td>Cuota de ENLAC:</td>
+              <td>Beca ENLAC:</td>
               <td>${{ amountEnlac }}</td>
               <td>${{ ((amountEnlac / candidate?.program_price) * 100).toFixed(2) }} %</td>
             </tr>

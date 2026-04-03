@@ -19,6 +19,18 @@ const loading = ref(false)
 const sponsors = ref([])
 const rows = computed(() => sponsors.value.filter((item) => !props.except.includes(item.id)))
 
+const search = ref('')
+
+const results = computed(() => {
+  if (search.value.trim() == '') {
+    return rows.value
+  }
+
+  return rows.value.filter((row) =>
+    row.full_name.toLowerCase().includes(search.value.toLowerCase())
+  )
+})
+
 async function fetchSponsors() {
   try {
     loading.value = true
@@ -66,13 +78,13 @@ async function fetchSponsors() {
             color="primary"
             class="q-mr-md"
             @click="staging = false"
-            >Cancelar</q-btn
-          >
+            label="Cancelar"
+          />
           <q-btn
             color="primary"
             @click="$router.push(`padrinos/${sponsorId}`)"
-            >Confirmar</q-btn
-          >
+            label="Confirmar"
+          />
         </div>
       </q-card-section>
     </q-card>
@@ -99,6 +111,8 @@ async function fetchSponsors() {
           outlined
           stack-label
           label="Buscar por nombre"
+          v-model="search"
+          debounce="500"
         >
           <template v-slot:prepend>
             <q-icon name="sym_o_search" />
@@ -107,7 +121,7 @@ async function fetchSponsors() {
         <q-list separator>
           <q-item
             clickable
-            v-for="sponsor in rows"
+            v-for="sponsor in results"
             :key="sponsor.id"
           >
             <q-item-section>
@@ -129,8 +143,8 @@ async function fetchSponsors() {
             :disable="!sponsorId"
             color="primary"
             @click="staging = true"
-            >Continuar</q-btn
-          >
+            label="Continuar"
+          />
         </div>
       </q-card-section>
     </q-card>

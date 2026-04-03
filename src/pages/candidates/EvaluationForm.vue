@@ -23,14 +23,6 @@ const rows = ref([])
 const dialog = ref(false)
 const dialog2 = ref(false)
 
-onMounted(async () => {
-  store.id = props.candidateId
-  await store.fetchCandidate()
-  await fetchFields()
-  brainFunctions.value = (await api.get('brain_functions')).data.data
-  setColumns()
-})
-
 async function fetchFields() {
   try {
     loading.value = true
@@ -114,6 +106,14 @@ function previousValue(cell) {
   if (!evaluationFieldsB.value[cell.rowIndex]) return null
   return evaluationFieldsB.value[cell.rowIndex].ranks[cell.value.brain_function_id]?.caracteristic
 }
+
+onMounted(async () => {
+  store.id = props.candidateId
+  await store.fetchCandidate()
+  await fetchFields()
+  brainFunctions.value = (await api.get('brain_functions')).data.data
+  setColumns()
+})
 </script>
 
 <template>
@@ -125,19 +125,19 @@ function previousValue(cell) {
       >
         Evaluación
       </h1>
+
       <q-btn
         @click="print"
         flat
         style="color: grey"
-        >Exportar a PDF</q-btn
-      >
+        label="Exportar a PDF"
+      />
     </div>
 
     <CandidateProfile
       :candidateId="candidateId"
       type="evaluation"
-    >
-    </CandidateProfile>
+    />
 
     <q-table
       flat

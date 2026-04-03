@@ -80,7 +80,7 @@ async function save() {
         class="q-field--required"
         :error="!!localErrors[`first_name`]"
         :error-message="localErrors[`first_name`]"
-      ></q-input>
+      />
       <q-input
         outlined
         stack-label
@@ -90,7 +90,7 @@ async function save() {
         class="q-field--required"
         :error="!!localErrors[`last_name`]"
         :error-message="localErrors[`last_name`]"
-      ></q-input>
+      />
       <q-input
         outlined
         stack-label
@@ -99,7 +99,7 @@ async function save() {
         v-model="contact.middle_name"
         :error="!!localErrors[`middle_name`]"
         :error-message="localErrors[`middle_name`]"
-      ></q-input>
+      />
       <q-select
         outlined
         stack-label
@@ -112,7 +112,17 @@ async function save() {
         :options="relationships"
         emit-value
         map-options
-      ></q-select>
+      />
+
+      <q-input
+        outlined
+        stack-label
+        hide-bottom-space
+        label="RFC"
+        v-model="contact.rfc"
+        :error="!!localErrors[`rfc`]"
+        :error-message="localErrors[`rfc`]"
+      />
     </div>
     <div class="col-12 col-md-6 q-gutter-y-lg">
       <q-input
@@ -145,7 +155,7 @@ async function save() {
         :error-message="localErrors[`whatsapp`]"
         mask="##########"
         type="tel"
-      ></q-input>
+      />
       <q-input
         outlined
         stack-label
@@ -156,7 +166,7 @@ async function save() {
         :error-message="localErrors[`home_phone`]"
         mask="##########"
         type="tel"
-      ></q-input>
+      />
 
       <div style="position: relative">
         <label
@@ -175,13 +185,19 @@ async function save() {
             :true-value="1"
             :false-value="0"
             class="q-mr-sm"
-          ></q-checkbox>
+          />
           <q-checkbox
             label="Responsable del Beneficiario"
             v-model="contact.enlac_responsible"
             :true-value="1"
             :false-value="0"
-          ></q-checkbox>
+          />
+          <q-checkbox
+            label="Es el contacto de emergencia"
+            v-model="contact.is_emergency_contact"
+            :true-value="1"
+            :false-value="0"
+          />
         </div>
       </div>
     </div>
@@ -197,7 +213,7 @@ async function save() {
         v-model="contact.street"
         :error="!!localErrors[`street`]"
         :error-message="localErrors[`street`]"
-      ></q-input>
+      />
       <q-input
         outlined
         stack-label
@@ -206,7 +222,7 @@ async function save() {
         v-model="contact.neighborhood"
         :error="!!localErrors[`neighborhood`]"
         :error-message="localErrors[`neighborhood`]"
-      ></q-input>
+      />
       <q-input
         outlined
         stack-label
@@ -215,7 +231,7 @@ async function save() {
         v-model="contact.state"
         :error="!!localErrors[`state`]"
         :error-message="localErrors[`state`]"
-      ></q-input>
+      />
       <q-input
         outlined
         stack-label
@@ -225,7 +241,7 @@ async function save() {
         :error="!!localErrors[`postal_code`]"
         :error-message="localErrors[`postal_code`]"
         type="number"
-      ></q-input>
+      />
     </div>
 
     <div class="col-12 col-md-6 q-gutter-y-md">
@@ -238,7 +254,7 @@ async function save() {
         :error="!!localErrors[`exterior_number`]"
         :error-message="localErrors[`exterior_number`]"
         type="number"
-      ></q-input>
+      />
       <q-input
         outlined
         stack-label
@@ -247,7 +263,7 @@ async function save() {
         v-model="contact.city"
         :error="!!localErrors[`city`]"
         :error-message="localErrors[`city`]"
-      ></q-input>
+      />
       <q-input
         outlined
         stack-label
@@ -256,7 +272,7 @@ async function save() {
         v-model="contact.country"
         :error="!!localErrors[`country`]"
         :error-message="localErrors[`country`]"
-      ></q-input>
+      />
     </div>
 
     <div

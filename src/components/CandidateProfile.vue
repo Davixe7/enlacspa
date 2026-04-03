@@ -1,6 +1,7 @@
 <script setup>
+import { storeToRefs } from 'pinia'
 import { useCandidateStore } from 'src/stores/candidate-store'
-import { onMounted, ref } from 'vue'
+import { onMounted } from 'vue'
 
 const props = defineProps({
   candidateId: {
@@ -14,18 +15,8 @@ const props = defineProps({
   }
 })
 
-onMounted(async () => {
-  if (!props.candidateId) {
-    return
-  }
-  if (!store.full_name) {
-    store.id = props.candidateId
-    store.fetchCandidate()
-  }
-})
-
 const store = useCandidateStore()
-const errors = ref({})
+const { errors } = storeToRefs(store)
 
 const relationships = [
   { label: 'Abuelo(a)', value: 'abuelo' },
@@ -36,6 +27,16 @@ const relationships = [
   { label: 'Primo(a)', value: 'primo' },
   { label: 'Tío(a)', value: 'tio' }
 ]
+
+onMounted(async () => {
+  if (!props.candidateId) {
+    return
+  }
+  if (!store.full_name) {
+    store.id = props.candidateId
+    store.fetchCandidate()
+  }
+})
 </script>
 
 <template>
@@ -65,17 +66,17 @@ const relationships = [
     <div v-if="type == 'interview'" class="flex column justify-between q-px-md q-gutter-y-md">
       <div>
         <q-input label="Nombre del entrevistado" outlined stack-label v-model="store.interviewee.name"
-          :error="errors.name" :error-message="errors.name"></q-input>
+          :error="!!errors['interviewee.name']" :error-message="errors['interviewee.name']" />
       </div>
       <div>
         <q-select outlined stack-label hide-bottom-space label="Parentesco" v-model="store.interviewee.relationship"
-          :error="!!errors.relationship" :error-message="errors.relationship" :options="relationships" emit-value
-          map-options></q-select>
+          :error="!!errors['interviewee.relationship']" :error-message="errors['interviewee.relationship']"
+          :options="relationships" emit-value map-options />
       </div>
       <div style="margin-left: -8px">
         <q-radio v-model="store.interviewee.legal_relationship" val="biologico" label="Hijo Biológico"
-          class="q-mr-md"></q-radio>
-        <q-radio v-model="store.interviewee.legal_relationship" val="adoptivo" label="Hijo Adoptivo"></q-radio>
+          class="q-mr-md" />
+        <q-radio v-model="store.interviewee.legal_relationship" val="adoptivo" label="Hijo Adoptivo" />
       </div>
     </div>
 

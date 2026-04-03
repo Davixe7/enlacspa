@@ -22,7 +22,11 @@ export const useCandidateStore = defineStore('candidate', {
     contact: null,
     picture: null,
     evaluation_schedule: null,
-    interviewee: {},
+    interviewee: {
+      name: '',
+      relationship: '',
+      legal_relationship: 'biologico'
+    },
     program: null,
     medications: [],
     requires_transport: 0,

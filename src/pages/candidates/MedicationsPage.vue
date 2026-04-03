@@ -9,7 +9,7 @@ const emits = defineEmits(['update:modelValue'])
 const props = defineProps({
   readonly: { type: Boolean, default: false },
   errors: { type: Object, required: false, default: () => ({}) },
-  candidateId: { type: Number, required: false, default: null },
+  candidateId: { type: [Number, String], required: false, default: null },
   modelValue: {
     type: Array,
     default: () => [],
@@ -150,85 +150,41 @@ const columns = ref([
   <div class="form-section">
     <div class="page-title">Tabla de Medicamentos</div>
 
-    <q-table
-      class="q-mb-lg"
-      hide-bottom
-      wrap-cells
-      flat
-      bordered
-      :columns="columns"
-      :rows="localMedications"
-      :pagination="{ rowsPerPage: 0 }"
-    >
+    <q-table class="q-mb-lg" hide-bottom wrap-cells flat bordered :columns="columns" :rows="localMedications"
+      :pagination="{ rowsPerPage: 0 }">
       <template v-slot:body="props">
         <q-tr :props="props">
           <q-td>
-            <q-toggle
-              @update:model-value="(value, event) => logStatus(value, props.row)"
-              v-model="props.row.status"
-              :true-value="1"
-              :false-value="0"
-              color="positive"
-            />
+            <q-toggle @update:model-value="(value, event) => logStatus(value, props.row)" v-model="props.row.status"
+              :true-value="1" :false-value="0" color="positive" />
           </q-td>
           <q-td>
-            <q-input
-              outlined
-              placeholder="Ej: Paracetamol"
-              v-model="props.row.name"
+            <q-input outlined placeholder="Ej: Paracetamol" v-model="props.row.name"
               :error="!!errors[`medications.${props.rowIndex}.name`]"
-              :error-message="errors[`medications.${props.rowIndex}.name`]"
-            ></q-input>
+              :error-message="errors[`medications.${props.rowIndex}.name`]"></q-input>
           </q-td>
           <q-td>
-            <q-input
-              outlined
-              placeholder="Ej: 500 mg"
-              v-model="props.row.dose"
+            <q-input outlined placeholder="Ej: 500 mg" v-model="props.row.dose"
               :error="!!errors[`medications.${props.rowIndex}.dose`]"
-              :error-message="errors[`medications.${props.rowIndex}.dose`]"
-            ></q-input>
+              :error-message="errors[`medications.${props.rowIndex}.dose`]"></q-input>
           </q-td>
           <q-td>
-            <q-input
-              outlined
-              placeholder="Ej: 2 Veces al dia"
-              v-model="props.row.frequency"
+            <q-input outlined placeholder="Ej: 2 Veces al dia" v-model="props.row.frequency"
               :error="!!errors[`medications.${props.rowIndex}.frequency`]"
-              :error-message="errors[`medications.${props.rowIndex}.frequency`]"
-            ></q-input>
+              :error-message="errors[`medications.${props.rowIndex}.frequency`]"></q-input>
           </q-td>
           <q-td>
-            <q-input
-              outlined
-              placeholder="Ej: 1 Semana"
-              v-model="props.row.duration"
+            <q-input outlined placeholder="Ej: 1 Semana" v-model="props.row.duration"
               :error="!!errors[`medications.${props.rowIndex}.duration`]"
-              :error-message="errors[`medications.${props.rowIndex}.duration`]"
-            ></q-input>
+              :error-message="errors[`medications.${props.rowIndex}.duration`]"></q-input>
           </q-td>
           <q-td>
-            <q-input
-              type="textarea"
-              outlined
-              v-model="props.row.observations"
-            ></q-input>
+            <q-input type="textarea" outlined v-model="props.row.observations"></q-input>
           </q-td>
           <q-td>
             <div class="q-table__actions">
-              <q-btn
-                flat
-                round
-                icon="delete"
-                @click="deleteMedication(props.row)"
-              />
-              <q-btn
-                v-if="candidateId"
-                flat
-                round
-                icon="save"
-                @click="saveMedication(props.row)"
-              />
+              <q-btn flat round icon="delete" @click="deleteMedication(props.row)" />
+              <q-btn v-if="candidateId" flat round icon="save" @click="saveMedication(props.row)" />
             </div>
           </q-td>
         </q-tr>
@@ -245,19 +201,8 @@ const columns = ref([
     </q-dialog>
 
     <div class="flex justify-end">
-      <q-btn
-        outline
-        color="primary"
-        @click="logsDialog = true"
-        label="Ver historial"
-        class="q-mr-md"
-      />
-      <q-btn
-        :disable="props.readonly"
-        color="primary"
-        icon="add"
-        @click="addMedication"
-      >
+      <q-btn outline color="primary" @click="logsDialog = true" label="Ver historial" class="q-mr-md" />
+      <q-btn :disable="props.readonly" color="primary" icon="add" @click="addMedication">
         Agregar Medicamento
       </q-btn>
     </div>

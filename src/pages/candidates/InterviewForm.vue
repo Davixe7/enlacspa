@@ -1,26 +1,20 @@
 <script setup>
-import { nextTick, ref } from 'vue'
-import CandidateProfile from 'components/CandidateProfile.vue'
-import { onMounted } from 'vue'
+import { nextTick, ref, onMounted } from 'vue'
 import { api } from 'src/boot/axios'
-import Notify from 'src/utils/notify'
 import { scrollToFirstError } from 'src/utils/focusError'
 import { useCandidateStore } from 'src/stores/candidate-store'
 import MedicationsPage from './MedicationsPage.vue'
+import CandidateProfile from 'components/CandidateProfile.vue'
+import Notify from 'src/utils/notify'
+import { storeToRefs } from 'pinia'
 
 const props = defineProps(['candidateId'])
 const store = useCandidateStore()
 
-onMounted(async () => {
-  store.id = props.candidateId
-  await store.fetchCandidate()
-  await fetchQuestions()
-  await fetchInterview()
-})
-
 const loading = ref(false)
 const errors = ref({})
 const interviewQuestions = ref([])
+const { errors: candidateErrors } = storeToRefs(store)
 
 const interview = ref({
   id: null,
@@ -49,6 +43,8 @@ async function fetchQuestions() {
 
 async function storeInterview() {
   loading.value = true
+  errors.value = {}
+  candidateErrors.value = {}
   let route = interview.value.id ? `interviews/${interview.value.id}` : 'interviews'
   let data = { ...interview.value, interviewee: store.interviewee }
   if (interview.value.id) {
@@ -60,7 +56,17 @@ async function storeInterview() {
     Notify.positive('Guardado con éxito')
   } catch (error) {
     Notify.negative('Error. Revise la informacion')
-    errors.value = error.formatted ? error.formatted : errors.value.formatted
+    errors.value = error.formatted ? error.formatted : errors.value
+    let validationFields = [
+      'interviewee.name',
+      'interviewee.relationship',
+      'interviewee.legal_relationship'
+    ]
+    Object.keys(errors.value).forEach((key) => {
+      if (validationFields.includes(key)) {
+        candidateErrors.value[key] = errors.value[key]
+      }
+    })
     nextTick(() => scrollToFirstError())
   }
   loading.value = false
@@ -70,6 +76,13 @@ async function signInterview() {
   interview.value.signed_at = new Date()
   await storeInterview()
 }
+
+onMounted(async () => {
+  store.id = props.candidateId
+  await store.fetchCandidate()
+  await fetchQuestions()
+  await fetchInterview()
+})
 </script>
 
 <template>
@@ -78,9 +91,10 @@ async function signInterview() {
       <div class="div">
         <div class="page-title q-mb-none">Entrevista</div>
       </div>
+
       <div class="div">
         <div
-          v-if="!interview.signed_at"
+          v-if="!interview.signed_at && store.status == 'pending'"
           class="flex justify-end items-center q-py-xl"
         >
           <div class="q-mr-lg">
@@ -96,17 +110,15 @@ async function signInterview() {
               name="info"
               size="24px"
               class="q-mr-sm"
-            >
-            </q-icon>
+            />
 
             <q-btn
               :loading="loading"
               outline
               color="primary"
               @click="storeInterview()"
-            >
-              Guardar
-            </q-btn>
+              label="Guardar"
+            />
           </div>
 
           <div
@@ -125,16 +137,14 @@ async function signInterview() {
               name="info"
               size="24px"
               class="q-mr-sm"
-            >
-            </q-icon>
+            />
 
             <q-btn
               :loading="loading"
               color="primary"
               @click="signInterview()"
-            >
-              Firmar
-            </q-btn>
+              label="Firmar"
+            />
           </div>
         </div>
 
@@ -145,10 +155,10 @@ async function signInterview() {
     </div>
 
     <CandidateProfile
+      v-if="store.status"
       :candidate-id="candidateId"
       type="interview"
-    >
-    </CandidateProfile>
+    />
 
     <div class="label-alt-2">Lista de preguntas</div>
 
@@ -185,10 +195,10 @@ async function signInterview() {
           dense
           v-model="interview.content"
           :disable="Boolean(interview.signed_at)"
-          :class="{ 'q-field--error': !!errors.content }"
+          :class="{ 'has-errors': !!errors.content, 'q-field--error': !!errors.content }"
           :error-message="errors.content"
           style="height: 100%"
-        ></q-editor>
+        />
       </div>
     </div>
 
@@ -240,7 +250,7 @@ async function signInterview() {
     </div>
 
     <div
-      v-if="!interview.signed_at"
+      v-if="!interview.signed_at && store.status == 'pending'"
       class="flex justify-end items-center q-py-xl"
     >
       <div class="q-mr-lg">
@@ -374,5 +384,9 @@ async function signInterview() {
   position: sticky;
   top: 144px;
   height: calc(100vh - 144px);
+}
+
+.has-errors {
+  border: 2px solid var(--q-negative);
 }
 </style>

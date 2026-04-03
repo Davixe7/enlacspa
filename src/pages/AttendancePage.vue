@@ -111,6 +111,6 @@ async function storeAttendances() {
   </q-table>
 
   <div class="flex justify-end q-mt-md">
-    <q-btn color="primary" :loading="loading" @click="storeAttendances" label="Guardar lista" />
+    <q-btn color="primary" :loading="loading" @click="storeAttendances" label="Guardar lista." />
   </div>
 </template>

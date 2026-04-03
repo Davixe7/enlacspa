@@ -53,8 +53,9 @@ async function fetchContacts() {
     contacts.value.push({ ...defaultContact.value })
   } catch (error) {
     console.log(error)
+  } finally {
+    loading.value = false
   }
-  loading.value = false
 }
 
 async function addContact() {
@@ -114,6 +115,7 @@ const defaultContact = ref({
   middle_name: '',
   last_name: '',
   relationship: '',
+  is_emergency_contact: 0,
   legal_guardian: 0,
   enlac_responsible: 0,
   email: '',
@@ -185,8 +187,7 @@ const columns = ref([
     :errors="firstContactErrors"
     @update:modelValue="saveContact"
     hide-bottom-space
-  >
-  </ContactForm>
+  />
 
   <template v-else>
     <div class="page-title">Datos del Contacto</div>

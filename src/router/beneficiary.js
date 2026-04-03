@@ -15,6 +15,13 @@ export default {
   props: true,
   children: [
     {
+      path: 'entrevistar',
+      meta: { label: 'Entrevistar' },
+      component: () => import('src/pages/candidates/InterviewForm.vue'),
+      props: true,
+      name: 'beneficiaries.interview'
+    },
+    {
       path: 'reportes',
       name: 'beneficiary.reports',
       component: () => import('src/pages/reports/BeneficiaryReports.vue'),

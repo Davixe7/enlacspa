@@ -6,6 +6,7 @@ import notify from 'src/utils/notify'
 const data = ref({
   id: null,
   plan_category_id: '',
+  activity_category_id: '',
   name: '',
   measurement_unit: '',
   goal_type: ''
@@ -13,9 +14,12 @@ const data = ref({
 const loading = ref(true)
 const dialog = ref(false)
 const searchFilter = ref({
-  planCategory: null,
+  planCategory: 1,
+  activityCategory: null,
   text: ''
 })
+
+const subcategories = ref([])
 const categories = ref([])
 const baseCategories = computed(() => categories.value.filter((cat) => cat.parent_id == null))
 
@@ -44,6 +48,12 @@ const columns = ref([
     sortable: true
   },
   { align: 'left', name: 'name', label: 'Actividad', field: 'name', sortable: true },
+  {
+    align: 'left',
+    name: 'activity_category',
+    label: 'Clasificacion',
+    field: (row) => row.activity_category.label
+  },
   { align: 'left', name: 'measurement_unit', label: 'Unidad', field: 'measurement_unit' },
   { align: 'left', name: 'goal_type', label: 'Meta', field: 'goal_type', sortable: true },
   { align: 'right', name: 'actions', label: 'Acciones', sortable: false }
@@ -55,13 +65,25 @@ const results = computed(() => {
   if (searchFilter.value.planCategory == null) {
     return [...rows.value]
   }
-  return rows.value.filter((row) => row.plan_category_id == searchFilter.value.planCategory)
+  let results = rows.value.filter((row) => row.plan_category_id == searchFilter.value.planCategory)
+  if (searchFilter.value.activityCategory) {
+    results = results.filter(
+      (row) => row.activity_category_id == searchFilter.value.activityCategory
+    )
+  }
+  return results
 })
 
 async function fetchActivities() {
   try {
+    let route = `activities/?plan_category_id=${searchFilter.value.planCategory}`
+
+    if (searchFilter.value.activityCategory) {
+      route = route + `&activity_category_id=${searchFilter.value.activityCategory}`
+    }
+
     loading.value = true
-    rows.value = (await api.get('activities')).data.data
+    rows.value = (await api.get(route)).data.data
   } catch (error) {
     console.log(error)
   } finally {
@@ -73,6 +95,24 @@ async function fetchCategories() {
   try {
     loading.value = true
     categories.value = (await api.get('plan_categories')).data.data
+  } catch (error) {
+    console.log(error)
+  } finally {
+    loading.value = false
+  }
+}
+
+async function fetchSubcategories(planCategoryId = null) {
+  planCategoryId = planCategoryId ?? searchFilter.value.planCategory
+  searchFilter.value.activityCategory = null
+  data.value.activity_category_id = null
+
+  try {
+    loading.value = true
+    let results = (await api.get(`activity_categories/?plan_category_id=${planCategoryId}`)).data
+      .data
+    results.unshift({ label: 'Seleccionar Clasificación', id: null })
+    subcategories.value = results
   } catch (error) {
     console.log(error)
   } finally {
@@ -104,15 +144,16 @@ async function save() {
 }
 
 onMounted(async () => {
+  await fetchCategories()
+  await fetchSubcategories()
   await fetchActivities()
-  fetchCategories()
 })
 </script>
 
 <template>
   <div class="page-title">Catálogo de Actividades</div>
-  <div class="row q-col-gutter-x-md q-my-md">
-    <div class="col-md-3">
+  <div class="row q-col-gutter-md q-my-md">
+    <div class="col-12 col-md-3 col-lg-2">
       <q-select
         outlined
         stack-label
@@ -123,9 +164,33 @@ onMounted(async () => {
         option-label="label"
         emit-value
         map-options
+        @update:model-value="
+          () => {
+            fetchActivities()
+            fetchSubcategories()
+          }
+        "
       />
     </div>
-    <div class="col-md-3">
+    <div class="col-12 col-md-3 col-lg-2">
+      <q-select
+        outlined
+        stack-label
+        label="Clasificación"
+        v-model="searchFilter.activityCategory"
+        :options="subcategories"
+        option-value="id"
+        option-label="label"
+        emit-value
+        map-options
+        @update:model-value="
+          () => {
+            fetchActivities()
+          }
+        "
+      />
+    </div>
+    <div class="col-12 col-md-3 col-lg-2">
       <q-input
         outlined
         type="search"
@@ -137,8 +202,7 @@ onMounted(async () => {
         </template>
       </q-input>
     </div>
-    <div class="col-md-3"></div>
-    <div class="col-md-3 flex justify-end">
+    <div class="col-12 col-md flex justify-end">
       <q-btn
         style="flex: 0 0 auto; align-self: end"
         color="primary"
@@ -192,12 +256,6 @@ onMounted(async () => {
                 }
               "
             />
-            <!-- <q-btn
-            flat
-            round
-            dense
-            icon="sym_o_delete"
-          /> -->
           </div>
         </q-td>
       </template>
@@ -219,6 +277,22 @@ onMounted(async () => {
                 outlined
                 v-model="data.plan_category_id"
                 :options="baseCategories"
+                emit-value
+                map-options
+                option-value="id"
+                option-label="label"
+                @update:model-value="fetchSubcategories(data.plan_category_id)"
+              />
+            </td>
+          </tr>
+          <tr>
+            <td>Clasificación</td>
+            <td>
+              <q-select
+                dense
+                outlined
+                v-model="data.activity_category_id"
+                :options="subcategories"
                 emit-value
                 map-options
                 option-value="id"
@@ -280,7 +354,9 @@ onMounted(async () => {
 table.activities-table td:nth-child(2),
 .activities table td:nth-child(2) {
   max-width: 250px;
-  white-space: wrap;
+  line-break: anywhere;
   padding-right: 2rem;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 </style>

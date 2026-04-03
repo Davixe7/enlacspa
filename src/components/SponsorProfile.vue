@@ -1,4 +1,5 @@
 <script setup>
+import { date } from 'quasar'
 import { api } from 'src/boot/axios'
 import { onMounted, ref } from 'vue'
 
@@ -35,7 +36,7 @@ onMounted(async () => {
 
         <div class="form-group">
           <div class="form-label">Fecha de Nacimiento</div>
-          <div class="form-value">{{ sponsor.birthdate }}</div>
+          <div class="form-value">{{ date.formatDate(sponsor.birthdate, 'DD/MM') }}</div>
         </div>
 
         <div class="form-group">

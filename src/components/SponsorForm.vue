@@ -14,7 +14,8 @@ const maritalStatusOptions = [
   { label: 'Casado(a)', value: 'Casado(a)' },
   { label: 'Divorciado(a)', value: 'Divorciado(a)' },
   { label: 'Viudo(a)', value: 'Viudo(a)' },
-  { label: 'Unión Libre', value: 'Union Libre' }
+  { label: 'Unión Libre', value: 'Union Libre' },
+  { label: 'Desconocido', value: 'Desconocido' }
 ]
 
 const defaultAddress = reactive({
@@ -77,6 +78,22 @@ async function deletePicture() {
     console.log(error)
   }
 }
+
+const birthDate = computed({
+  get() {
+    if (!sponsor.value.birthdate) return ''
+    const [year, month, day] = sponsor.value.birthdate.split('-')
+    console.log(year)
+    return `${day}/${month}`
+  },
+  set(val) {
+    const parts = val.split('/')
+    if (parts.length != 2) return
+    const month = parts[0].padStart(2, '0')
+    const day = parts[1].padStart(2, '0')
+    sponsor.value.birthdate = `2000-${month}-${day}`
+  }
+})
 
 onMounted(async () => {
   if (!props.sponsorId) return
@@ -159,7 +176,24 @@ onMounted(async () => {
           </q-file>
         </div>
 
-        <template v-if="!props.sponsorId">
+        <div class="row items-center">
+          <label class="col-12 col-md-6">Seleccione tipo</label>
+          <div>
+            <q-radio
+              v-model="sponsor.type"
+              label="Enlázate"
+              val="link"
+              class="q-mr-md"
+            />
+            <q-radio
+              v-model="sponsor.type"
+              label="General"
+              val="general"
+            />
+          </div>
+        </div>
+
+        <template v-if="!props.sponsorId && sponsor.type != 'general'">
           <div class="row items-center">
             <label class="col-12 col-md-6">Seleccione Candidato</label>
             <BeneficiariesPicker
@@ -263,13 +297,24 @@ onMounted(async () => {
             class="col-12 col-md-6"
             outlined
             stack-label
-            v-model="sponsor.birthdate"
-            mask="####-##-##"
-            type="date"
+            v-model="birthDate"
+            mask="##/##"
+            placeholder="DD/MM"
             hide-bottom-space
             :error="!!errors.birthdate"
             :error-message="errors.birthdate"
-          />
+          >
+            <template v-slot:append>
+              <q-icon name="sym_o_event">
+                <q-popup-proxy>
+                  <q-date
+                    v-model="sponsor.birthdate"
+                    mask="YYYY-MM-DD"
+                  />
+                </q-popup-proxy>
+              </q-icon>
+            </template>
+          </q-input>
         </div>
 
         <div class="row items-center">
@@ -384,6 +429,19 @@ onMounted(async () => {
             hide-bottom-space
             :error="!!errors[`addresses.${i}.neighborhood`]"
             :error-message="errors[`addresses.${i}.neighborhood`]"
+          />
+        </div>
+
+        <div class="row items-center">
+          <label class="col-12 col-md-6">Código Postal</label>
+          <q-input
+            class="col-12 col-md-6"
+            outlined
+            stack-label
+            v-model="sponsor.addresses[i].postal_code"
+            hide-bottom-space
+            :error="!!errors[`addresses.${i}.postal_code`]"
+            :error-message="errors[`addresses.${i}.postal_code`]"
           />
         </div>
 

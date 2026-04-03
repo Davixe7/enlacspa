@@ -2,6 +2,7 @@
 import { api } from 'src/boot/axios'
 import { onMounted, ref } from 'vue'
 import PaymentConfigForm from 'src/components/PaymentConfigForm.vue'
+import { exportXlsFile } from 'src/utils/exportXls'
 
 onMounted(async () => {
   sponsors.value = (await api.get('sponsors')).data.data
@@ -10,10 +11,21 @@ onMounted(async () => {
 const dialog2 = ref(false)
 const sponsorId = ref(null)
 const sponsors = ref([])
+const loadingExport = ref(false)
+
+async function exportXls() {
+  loadingExport.value = true
+  try {
+    await exportXlsFile('reports/sponsors/export')
+  } finally {
+    loadingExport.value = false
+  }
+}
+
 const columns = ref([
   {
     name: 'name',
-    field: 'name',
+    field: 'full_name',
     label: 'Nombre del Padrino',
     sortable: true,
     align: 'left'
@@ -40,22 +52,32 @@ const columns = ref([
 <template>
   <div class="flex items-center q-mb-md">
     <h1 class="page-title q-my-none">Padrinos</h1>
-    <q-btn
-      class="q-ml-auto"
-      color="primary"
-      icon="sym_o_add"
-      to="/padrinos/registrar"
-      label="Agregar Padrino"
-    />
+
+    <div class="q-ml-auto q-gutter-x-sm">
+      <q-btn
+        outline
+        color="primary"
+        icon="file_download"
+        label="Exportar Excel"
+        :loading="loadingExport"
+        @click="exportXls"
+      />
+
+      <q-btn
+        color="primary"
+        icon="sym_o_add"
+        to="/padrinos/registrar"
+        label="Agregar Padrino"
+      />
+    </div>
   </div>
 
   <q-table
     flat
     bordered
-    hide-bottom
     :rows="sponsors"
     :columns="columns"
-    :pagination="{ rowsPerPage: 0 }"
+    :pagination="{ rowsPerPage: 10 }"
   >
     <template v-slot:body-cell-actions="props">
       <q-td class="text-right">

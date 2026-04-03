@@ -6,7 +6,7 @@ import TransportModal from 'src/components/TransportModal.vue'
 //const props = defineProps(['candidateId'])
 
 const props = defineProps({
-  candidateId: Number,
+  candidateId: [Number, String],
   locationId: Number
 })
 const candidateStore = useCandidateStore()

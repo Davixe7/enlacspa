@@ -199,6 +199,7 @@ const cfdiOptions = [
       :error="!!props.errors['receipt.observations']"
       :error-message="props.errors['receipt.observations']"
     />
+
     <q-file
       outlined
       stack-label
@@ -208,6 +209,17 @@ const cfdiOptions = [
       :error="!!props.errors['receipt.fiscalStatus']"
       :error-message="props.errors['receipt.fiscalStatus']"
     />
+
+    <div
+      class="q-pt-md"
+      v-if="model.fiscalStatus"
+    >
+      <a
+        target="_blank"
+        :href="model.fiscalStatus"
+        >Descargar adjunto actual</a
+      >
+    </div>
   </div>
 </template>
 

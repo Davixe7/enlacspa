@@ -81,16 +81,35 @@ onMounted(async () => {
 <template>
   <div class="flex q-mb-lg">
     <div class="page-title">Tesorería</div>
-    <q-input outlined v-model="search" hide-bottom-space clearable class="q-ml-auto q-mr-md">
+    <q-input
+      outlined
+      v-model="search"
+      hide-bottom-space
+      clearable
+      class="q-ml-auto q-mr-md"
+    >
       <template v-slot:prepend>
         <q-icon name="search" />
       </template>
     </q-input>
-    <q-select dense outlined v-model="month" @update:modelValue="fetchFinancial" :options="mesesDisponibles" />
+    <q-select
+      dense
+      outlined
+      v-model="month"
+      @update:modelValue="fetchFinancial"
+      :options="mesesDisponibles"
+    />
   </div>
 
-  <q-table :loading="loading" bordered hide-bottom :filter="search" :rows="rows" :columns="columns"
-    :pagination="{ rowsPerPage: -1 }">
+  <q-table
+    :loading="loading"
+    bordered
+    hide-bottom
+    :filter="search"
+    :rows="rows"
+    :columns="columns"
+    :pagination="{ rowsPerPage: -1 }"
+  >
     <template v-slot:body-cell-name="props">
       <q-td>
         <router-link :to="{ name: 'financial.control', params: { candidateId: props.row.id } }">
@@ -122,10 +141,11 @@ onMounted(async () => {
 
     <template v-slot:loading>
       <div class="q-pa-md text-center text-weight-medium">
-        <q-spinner color="primary" class="q-mr-sm" />
-        <span style="font-size: 18px">
-          Cargando...
-        </span>
+        <q-spinner
+          color="primary"
+          class="q-mr-sm"
+        />
+        <span style="font-size: 18px"> Cargando... </span>
       </div>
     </template>
   </q-table>

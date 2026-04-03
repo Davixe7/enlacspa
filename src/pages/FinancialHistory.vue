@@ -1,6 +1,7 @@
 <script setup>
 import { api } from 'src/boot/axios'
 import { onMounted, ref } from 'vue'
+import { exportXlsFile } from 'src/utils/exportXls'
 const props = defineProps(['candidateId'])
 const loading = ref(true)
 const rows = ref([])
@@ -24,47 +25,9 @@ onMounted(async () => {
 })
 
 async function exportXls() {
+  loading.value = true
   try {
-    loading.value = true
-    let downloadurl = `payments/${props.candidateId}/export`
-    let response = await api({
-      url: downloadurl,
-      method: 'GET',
-      responseType: 'blob'
-    })
-
-    const contentDisposition = response.headers['content-disposition']
-    let filename = 'reporte_descargado.xlsx' // Nombre por defecto
-
-    if (contentDisposition) {
-      // Ejemplo: attachment; filename="usuarios.xlsx"
-      const filenameMatch = contentDisposition.match(/filename="(.+?)"/)
-      if (filenameMatch && filenameMatch[1]) {
-        filename = filenameMatch[1]
-      }
-    }
-
-    // 3. Crear el Blob a partir de los datos de la respuesta
-    const blob = new Blob([response.data], {
-      type: response.headers['content-type'] // Usar el tipo MIME correcto
-    })
-
-    // 4. Iniciar la descarga usando el API del navegador
-    const url = window.URL.createObjectURL(blob)
-    const link = document.createElement('a')
-
-    link.href = url
-    link.setAttribute('download', filename) // 👈 Aplicar el nombre del archivo
-    document.body.appendChild(link)
-    link.click() // 👈 Forzar el click para iniciar la descarga
-
-    // 5. Limpieza
-    document.body.removeChild(link)
-    window.URL.revokeObjectURL(url) // Liberar memoria del Blob
-
-    console.log(`Descarga de ${filename} iniciada.`)
-  } catch (error) {
-    console.log(error)
+    await exportXlsFile(`payments/${props.candidateId}/export`)
   } finally {
     loading.value = false
   }

@@ -16,7 +16,7 @@ const template = {
   candidate_id: props.candidateId ? Number(props.candidateId) : null,
   amount: 0,
   month_payday: 1,
-  frequency: 12,
+  frequency: 1,
   address_type: 'home',
   wants_pickup: 0,
   wants_reminder: 0,
@@ -29,6 +29,7 @@ const template = {
     email: '',
     observations: '',
     fiscalStatus: '',
+    fiscalStatusFile: null,
     street: '',
     external_number: '',
     neighborhood: '',
@@ -46,16 +47,26 @@ async function saveData() {
     let route = paymentConfig.value.id
       ? `/payment_configs/${paymentConfig.value.id}`
       : '/payment_configs'
-    let data = paymentConfig.value.id
-      ? { ...paymentConfig.value, _method: 'PUT' }
-      : { ...paymentConfig.value }
 
-    if (!paymentConfig.value.wants_deductible_receipt) {
-      console.log('Doesnt want receipt')
-      delete data.receipt
+    let formData = new FormData()
+
+    if (paymentConfig.value.id) {
+      formData.append('_method', 'PUT')
     }
 
-    await api.post(route, data)
+    Object.keys(paymentConfig.value).map((key) => {
+      if (key != 'receipt') {
+        formData.append(key, paymentConfig.value[key])
+      }
+    })
+
+    if (paymentConfig.value.wants_deductible_receipt) {
+      Object.keys(paymentConfig.value['receipt']).map((key) => {
+        formData.append(`receipt[${key}]`, paymentConfig.value['receipt'][key])
+      })
+    }
+
+    await api.post(route, formData)
     Notify.positive('Guardado con éxito')
     emits('save')
   } catch (error) {
@@ -239,9 +250,8 @@ onMounted(async () => {
             type="submit"
             color="primary"
             :loading="loading"
-          >
-            Guardar
-          </q-btn>
+            label="Guardar"
+          />
         </div>
       </q-form>
     </q-card-section>

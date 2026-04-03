@@ -1,8 +1,9 @@
 <script setup>
-import { api } from 'src/boot/axios';
-import { onMounted, ref, watch } from 'vue';
+import { api } from 'src/boot/axios'
+import { onMounted, ref, watch } from 'vue'
 import EnlacDate from 'src/components/EnlacDate.vue'
 import BeneficiarySelect from 'src/components/BeneficiarySelect.vue'
+import { exportXlsFile } from 'src/utils/exportXls'
 
 const startDate = ref(new Date().toISOString().split('T')[0])
 const endDate = ref(new Date().toISOString().split('T')[0])
@@ -24,9 +25,8 @@ async function fetchData() {
     daysCount.value = response.days
     average.value = response.average
   } catch (error) {
-    console.log(error);
-  }
-  finally {
+    console.log(error)
+  } finally {
     loading.value = false
   }
 }
@@ -37,51 +37,16 @@ watch(startDate, () => fetchData())
 watch(endDate, () => fetchData())
 
 async function exportXls() {
+  loading.value = true
   try {
-    loading.value = true
-    let downloadurl = `reports/attendances/export`
-    let response = await api({
-      url: downloadurl,
-      method: 'GET',
-      responseType: 'blob',
-      params: {
+    await exportXlsFile(
+      `reports/attendances/export`,
+      {
         start_date: startDate.value,
         end_date: endDate.value
-      }
-    })
-
-    const contentDisposition = response.headers['content-disposition']
-    let filename = 'reporte_de_asistencias_y_faltas_diarias_' + startDate.value + '_' + endDate.value + '.xlsx'
-
-    if (contentDisposition) {
-      // Ejemplo: attachment; filename="usuarios.xlsx"
-      const filenameMatch = contentDisposition.match(/filename="(.+?)"/)
-      if (filenameMatch && filenameMatch[1]) {
-        filename = filenameMatch[1]
-      }
-    }
-
-    // 3. Crear el Blob a partir de los datos de la respuesta
-    const blob = new Blob([response.data], {
-      type: response.headers['content-type'] // Usar el tipo MIME correcto
-    })
-
-    // 4. Iniciar la descarga usando el API del navegador
-    const url = window.URL.createObjectURL(blob)
-    const link = document.createElement('a')
-
-    link.href = url
-    link.setAttribute('download', filename) // 👈 Aplicar el nombre del archivo
-    document.body.appendChild(link)
-    link.click() // 👈 Forzar el click para iniciar la descarga
-
-    // 5. Limpieza
-    document.body.removeChild(link)
-    window.URL.revokeObjectURL(url) // Liberar memoria del Blob
-
-    console.log(`Descarga de ${filename} iniciada.`)
-  } catch (error) {
-    console.log(error)
+      },
+      'reporte_de_asistencias_y_faltas_diarias_' + startDate.value + '_' + endDate.value + '.xlsx'
+    )
   } finally {
     loading.value = false
   }
@@ -93,13 +58,25 @@ async function exportXls() {
     <h1 class="page-title">Reporte de Asistencias y Faltas Diarias</h1>
     <div class="row q-mb-md justify-between items-end">
       <div class="flex items-end">
-        <BeneficiarySelect v-model="candidateId" class="q-mr-md" />
-        <enlac-date v-model="startDate" class="q-mr-md" />
+        <BeneficiarySelect
+          v-model="candidateId"
+          class="q-mr-md"
+        />
+        <enlac-date
+          v-model="startDate"
+          class="q-mr-md"
+        />
         <enlac-date v-model="endDate" />
       </div>
 
       <div>
-        <q-btn outline color="primary" icon="file_download" label="Exportar Excel" @click="exportXls" />
+        <q-btn
+          outline
+          color="primary"
+          icon="file_download"
+          label="Exportar Excel"
+          @click="exportXls"
+        />
       </div>
     </div>
     <q-markup-table>
@@ -114,7 +91,10 @@ async function exportXls() {
         </tr>
       </thead>
       <tbody>
-        <tr v-for="row in rows" :key="row.candidate_id">
+        <tr
+          v-for="row in rows"
+          :key="row.candidate_id"
+        >
           <td>{{ row.full_name }}</td>
           <td>{{ daysCount }}</td>
           <td>{{ row.present }}</td>

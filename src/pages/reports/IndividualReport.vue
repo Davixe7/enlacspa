@@ -3,6 +3,7 @@ import { api } from 'src/boot/axios'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import BeneficiarySelect from 'src/components/BeneficiarySelect.vue'
+import { exportXlsFile } from 'src/utils/exportXls'
 
 const route = useRoute()
 const candidateId = ref(null)
@@ -51,11 +52,10 @@ async function fetchCandidateData() {
   try {
     loading.value = true
     let params = {
-      month: month.value,
+      month: month.value
     }
-    let response = (
-      await api.get(`beneficiaries/${candidateId.value}/individual`, { params })
-    ).data.data
+    let response = (await api.get(`beneficiaries/${candidateId.value}/individual`, { params })).data
+      .data
     candidateData.value = response.candidate
     issuesCount.value = response.issues
     attendances.value = response.attendances
@@ -115,54 +115,19 @@ onMounted(async () => {
   planCategories.value.push({ label: 'Totals', id: 'totals' })
 })
 
-watch(candidateId, () => candidateId.value ? update() : null)
-watch(month, () => candidateId.value ? update() : null)
+watch(candidateId, () => (candidateId.value ? update() : null))
+watch(month, () => (candidateId.value ? update() : null))
 
 async function exportXls() {
+  loading.value = true
   try {
-    loading.value = true
-    let downloadurl = `beneficiaries/${candidateId.value}/individual/export`
-    let response = await api({
-      url: downloadurl,
-      method: 'GET',
-      responseType: 'blob',
-      params: {
-        month: month.value,
-      }
-    })
-
-    const contentDisposition = response.headers['content-disposition']
-    let filename = 'reporte_individual_' + candidateData.value.full_name + '_mes_' + month.value + '_' + '.xlsx'
-
-    if (contentDisposition) {
-      // Ejemplo: attachment; filename="usuarios.xlsx"
-      const filenameMatch = contentDisposition.match(/filename="(.+?)"/)
-      if (filenameMatch && filenameMatch[1]) {
-        filename = filenameMatch[1]
-      }
-    }
-
-    // 3. Crear el Blob a partir de los datos de la respuesta
-    const blob = new Blob([response.data], {
-      type: response.headers['content-type'] // Usar el tipo MIME correcto
-    })
-
-    // 4. Iniciar la descarga usando el API del navegador
-    const url = window.URL.createObjectURL(blob)
-    const link = document.createElement('a')
-
-    link.href = url
-    link.setAttribute('download', filename) // 👈 Aplicar el nombre del archivo
-    document.body.appendChild(link)
-    link.click() // 👈 Forzar el click para iniciar la descarga
-
-    // 5. Limpieza
-    document.body.removeChild(link)
-    window.URL.revokeObjectURL(url) // Liberar memoria del Blob
-
-    console.log(`Descarga de ${filename} iniciada.`)
-  } catch (error) {
-    console.log(error)
+    await exportXlsFile(
+      `beneficiaries/${candidateId.value}/individual/export`,
+      {
+        month: month.value
+      },
+      'reporte_individual_' + candidateData.value.full_name + '_mes_' + month.value + '_' + '.xlsx'
+    )
   } finally {
     loading.value = false
   }
@@ -174,19 +139,44 @@ async function exportXls() {
     <h1 class="page-title q-mb-lg">Bitácora Individual del Beneficiario</h1>
     <div class="row q-mb-md justify-between items-end">
       <div class="flex items-end">
-        <BeneficiarySelect v-model="candidateId" class="q-mr-md" />
-        <q-select outlined :options="monthOptions" v-model="month" label="Primer mes a mostrar" emit-value map-options
-          class="q-mr-md" style="min-width: 230px" />
+        <BeneficiarySelect
+          v-model="candidateId"
+          class="q-mr-md"
+        />
+        <q-select
+          outlined
+          :options="monthOptions"
+          v-model="month"
+          label="Primer mes a mostrar"
+          emit-value
+          map-options
+          class="q-mr-md"
+          style="min-width: 230px"
+        />
       </div>
 
       <div>
-        <q-btn outline color="primary" icon="file_download" label="Exportar Excel" @click="exportXls" />
+        <q-btn
+          outline
+          color="primary"
+          icon="file_download"
+          label="Exportar Excel"
+          @click="exportXls"
+        />
       </div>
     </div>
-    <q-markup-table class="q-mb-lg" separator="vertical" flat bordered>
+    <q-markup-table
+      class="q-mb-lg"
+      separator="vertical"
+      flat
+      bordered
+    >
       <thead>
         <tr>
-          <th colspan="8" class="text-center">
+          <th
+            colspan="8"
+            class="text-center"
+          >
             Datos Base
           </th>
         </tr>
@@ -228,7 +218,10 @@ async function exportXls() {
     <q-markup-table class="q-mb-lg">
       <thead>
         <tr>
-          <th colspan="8" class="text-center">
+          <th
+            colspan="8"
+            class="text-center"
+          >
             Resumen de Traslados
           </th>
         </tr>
@@ -236,19 +229,28 @@ async function exportXls() {
       <thead>
         <tr>
           <th>Tipo</th>
-          <th v-for="m in Object.values(mapMonthLabels)" :key="m">
+          <th
+            v-for="m in Object.values(mapMonthLabels)"
+            :key="m"
+          >
             {{ m }}
           </th>
           <th>Total</th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="type in Object.keys(ridesTypeLabels)" :key="type">
+        <tr
+          v-for="type in Object.keys(ridesTypeLabels)"
+          :key="type"
+        >
           <td>
             {{ ridesTypeLabels[type] }}
           </td>
           <template v-if="rides[type]">
-            <td v-for="n in 6" :key="n">
+            <td
+              v-for="n in 6"
+              :key="n"
+            >
               {{ rides[type][`m${n}`] }}
             </td>
             <td>
@@ -256,7 +258,10 @@ async function exportXls() {
             </td>
           </template>
           <template v-else>
-            <td v-for="n in 7" :key="n">
+            <td
+              v-for="n in 7"
+              :key="n"
+            >
               N/A
             </td>
           </template>
@@ -267,7 +272,10 @@ async function exportXls() {
     <q-markup-table class="q-mb-lg">
       <thead>
         <tr>
-          <th colspan="8" class="text-center">
+          <th
+            colspan="8"
+            class="text-center"
+          >
             Sesiones, Claes o Consultas Recibidas
           </th>
         </tr>
@@ -275,19 +283,28 @@ async function exportXls() {
       <thead>
         <tr>
           <th>Tipo</th>
-          <th v-for="m in Object.values(mapMonthLabels)" :key="m">
+          <th
+            v-for="m in Object.values(mapMonthLabels)"
+            :key="m"
+          >
             {{ m }}
           </th>
           <th>Total</th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="category in planCategories" :key="category.id">
+        <tr
+          v-for="category in planCategories"
+          :key="category.id"
+        >
           <td>
             {{ category.label }}
           </td>
           <template v-if="areaAttendances[category.id]">
-            <td v-for="n in 6" :key="n">
+            <td
+              v-for="n in 6"
+              :key="n"
+            >
               {{ areaAttendances[category.id][`m${n}`] }}
             </td>
             <td>
@@ -295,18 +312,27 @@ async function exportXls() {
             </td>
           </template>
           <template v-else>
-            <td v-for="n in 7" :key="n">
+            <td
+              v-for="n in 7"
+              :key="n"
+            >
               N/A
             </td>
           </template>
         </tr>
 
-        <tr v-for="appointmentType in appointmentTypes" :key="appointmentType.id">
+        <tr
+          v-for="appointmentType in appointmentTypes"
+          :key="appointmentType.id"
+        >
           <td>
             {{ appointmentType.label }}
           </td>
           <template v-if="appointments[appointmentType.id]">
-            <td v-for="n in 6" :key="n">
+            <td
+              v-for="n in 6"
+              :key="n"
+            >
               {{ appointments[appointmentType.id][`m${n}`] }}
             </td>
             <td>
@@ -314,7 +340,10 @@ async function exportXls() {
             </td>
           </template>
           <template v-else>
-            <td v-for="n in 7" :key="n">
+            <td
+              v-for="n in 7"
+              :key="n"
+            >
               N/A
             </td>
           </template>
@@ -322,7 +351,10 @@ async function exportXls() {
 
         <tr>
           <th class="text-right">Total</th>
-          <td v-for="value in Object.values(totalsRow)" :key="value">
+          <td
+            v-for="value in Object.values(totalsRow)"
+            :key="value"
+          >
             {{ value }}
           </td>
           <td></td>
@@ -333,23 +365,35 @@ async function exportXls() {
     <q-markup-table v-if="scores">
       <thead>
         <tr>
-          <th colspan="8" class="text-center">
+          <th
+            colspan="8"
+            class="text-center"
+          >
             Resultados
           </th>
         </tr>
         <tr>
           <th>Area</th>
-          <th v-for="m in Object.values(mapMonthLabels)" :key="m">
+          <th
+            v-for="m in Object.values(mapMonthLabels)"
+            :key="m"
+          >
             {{ m }}
           </th>
           <th>Total</th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="category in planCategories" :key="category.id">
+        <tr
+          v-for="category in planCategories"
+          :key="category.id"
+        >
           <td>{{ category.label }}</td>
           <template v-if="scores.hasOwnProperty(category.id)">
-            <td v-for="n in 6" :key="n">
+            <td
+              v-for="n in 6"
+              :key="n"
+            >
               <q-badge color="positive">{{ scores[category.id][n].positive }}</q-badge>
               <q-badge color="warning">{{ scores[category.id][n].warning }}</q-badge>
               <q-badge color="negative">{{ scores[category.id][n].negative }}</q-badge>
@@ -361,7 +405,10 @@ async function exportXls() {
             </td>
           </template>
           <template v-else>
-            <td v-for="n in 7" :key="n">
+            <td
+              v-for="n in 7"
+              :key="n"
+            >
               <!-- <q-badge color="positive">0</q-badge>
                             <q-badge color="warning">0</q-badge>
                             <q-badge color="negative">0</q-badge> -->
