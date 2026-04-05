@@ -148,7 +148,7 @@ async function deleteFile(collectionName) {
             </q-file>
 
             <q-btn
-              style="flex: 0 0"
+              style="flex: none"
               :disable="!kardex[props.row.slug]"
               @click="uploadFile(props.row.slug)"
               color="primary"

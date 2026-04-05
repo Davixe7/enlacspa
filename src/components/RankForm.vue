@@ -4,14 +4,32 @@ import { api } from 'src/boot/axios'
 import { onMounted, ref } from 'vue'
 
 const emits = defineEmits(['rankUpdated', 'close'])
-const props = defineProps(['rank'])
+const props = defineProps(['rank', 'disableP'])
 const errors = ref({})
 const loading = ref(false)
 const brainFunction = ref({})
 const localRank = ref({ ...props.rank })
+const spec = ref('')
+
+async function fetchBrainFunctionSpec() {
+  try {
+    loading.value = true
+    let params = {
+      brain_function_id: localRank.value.brain_function_id,
+      brain_level_id: localRank.value.brain_level_id
+    }
+    let response = (await api.get('brain_function_specs', { params })).data.data
+    spec.value = response.content
+  } catch (error) {
+    console.log(error)
+  } finally {
+    loading.value = false
+  }
+}
 
 onMounted(async () => {
   brainFunction.value = (await api.get(`brain_functions/${props.rank.brain_function_id}`)).data.data
+  fetchBrainFunctionSpec()
 })
 
 async function storeRank() {
@@ -49,7 +67,11 @@ async function storeRank() {
         @click="emits('close')"
       ></q-btn>
     </q-card-section>
-    <q-card-section>
+
+    <q-card-section class="q-pt-none">
+      <div class="q-mb-lg">
+        {{ spec }}
+      </div>
       <div class="flex justify-between q-mb-lg">
         <div
           @click="localRank.caracteristic = '0'"
@@ -67,10 +89,15 @@ async function storeRank() {
         >
           F
         </div>
+
         <div
           @click="localRank.caracteristic = 'P'"
           class="impact-btn"
-          :class="{ 'impact-btn--active': localRank.caracteristic == 'P' }"
+          :class="{
+            'impact-btn--active': localRank.caracteristic == 'P',
+            'disabled': props.disableP,
+            'no-pointer-events': props.disableP
+          }"
           style="background-color: #8daf12"
         >
           P

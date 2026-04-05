@@ -27,6 +27,10 @@ export const useSponsorStore = defineStore('sponsor', {
       )
     },
     async saveData(sponsor) {
+      if (sponsor.type == 'link' && !sponsor.candidate_id) {
+        alert('Debe seleccionar un candidato')
+        return
+      }
       this.loading = true
       this.errors = {}
 
@@ -61,10 +65,11 @@ export const useSponsorStore = defineStore('sponsor', {
         }
 
         Notify.positive('Guardado con éxito')
-        let redirectTo =
-          this.router.currentRoute.value.name == 'sponsors.edit'
-            ? `/padrinos/${sponsor.id}`
-            : `/beneficiarios/${sponsor.candidate_id}/padrinos/${newSponsor.id}`
+
+        let routeName = this.router.currentRoute.value.name
+        let redirectTo = (routeName == 'sponsors.edit' || routeName == 'sponsor.create' && !sponsor.candidate_id)
+          ? `/padrinos/${sponsor.id}`
+          : `/beneficiarios/${sponsor.candidate_id}/padrinos/${newSponsor.id}`
         this.router.push(redirectTo)
       } catch (error) {
         console.log(error)

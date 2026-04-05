@@ -21,6 +21,7 @@ const template = {
   wants_pickup: 0,
   wants_reminder: 0,
   wants_deductible_receipt: 0,
+  currency: 'mxn',
   receipt: {
     rfc: '',
     company_name: '',
@@ -133,7 +134,17 @@ onMounted(async () => {
             hide-bottom-space
             :error="!!errors.amount"
             :error-message="errors.amount"
-          />
+          >
+            <template v-slot:append>
+              <q-select
+                dense
+                class="q-select--curreny"
+                hide-bottom-space
+                :options="['mxn', 'usd']"
+                v-model="paymentConfig.currency"
+              />
+            </template>
+          </q-input>
         </div>
 
         <div class="form-row">
@@ -259,6 +270,10 @@ onMounted(async () => {
 </template>
 
 <style lang="scss">
+.q-select--currency .q-field--auto-height .q-field__control {
+  height: 30px;
+  padding-left: 0.25rem;
+}
 .label::after {
   content: '*';
   color: #dc3545;

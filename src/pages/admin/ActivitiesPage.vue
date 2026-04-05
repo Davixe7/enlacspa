@@ -14,7 +14,7 @@ const data = ref({
 const loading = ref(true)
 const dialog = ref(false)
 const searchFilter = ref({
-  planCategory: 1,
+  planCategory: null,
   activityCategory: null,
   text: ''
 })
@@ -44,7 +44,7 @@ const columns = ref([
     align: 'left',
     name: 'plan',
     label: 'Plan',
-    field: (row) => row.plan_category.label,
+    field: (row) => row.plan_category?.label,
     sortable: true
   },
   { align: 'left', name: 'name', label: 'Actividad', field: 'name', sortable: true },
@@ -52,7 +52,7 @@ const columns = ref([
     align: 'left',
     name: 'activity_category',
     label: 'Clasificacion',
-    field: (row) => row.activity_category.label
+    field: (row) => row.activity_category?.label
   },
   { align: 'left', name: 'measurement_unit', label: 'Unidad', field: 'measurement_unit' },
   { align: 'left', name: 'goal_type', label: 'Meta', field: 'goal_type', sortable: true },

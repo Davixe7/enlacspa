@@ -15,6 +15,13 @@ export default {
   props: true,
   children: [
     {
+      path: 'socioeconomico',
+      meta: { label: 'Perfil Socio-económico' },
+      component: () => import('src/pages/beneficiaries/SocioeconomicPage.vue'),
+      props: true,
+      name: 'beneficiaries.socioeconomic'
+    },
+    {
       path: 'entrevistar',
       meta: { label: 'Entrevistar' },
       component: () => import('src/pages/candidates/InterviewForm.vue'),

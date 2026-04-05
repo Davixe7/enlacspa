@@ -69,6 +69,24 @@ async function fetchFinancial() {
     loading.value = false
   }
 }
+
+const sponsorStatusFilter = ref(null)
+const parentStatusFilter = ref(null)
+
+const results = computed(() => {
+  let results = [...rows.value]
+
+  if (parentStatusFilter.value) {
+    results = results.filter((row) => row.parent_status == parentStatusFilter.value)
+  }
+
+  if (sponsorStatusFilter.value) {
+    results = results.filter((row) => row.sponsr_status == sponsorStatusFilter.value)
+  }
+
+  return results
+})
+
 onMounted(async () => {
   month.value = {
     value: { month: mesActual, year: anioActual },
@@ -81,17 +99,50 @@ onMounted(async () => {
 <template>
   <div class="flex q-mb-lg">
     <div class="page-title">Tesorería</div>
+
+    <q-select
+      style="width: 150px"
+      class="q-ml-auto q-mr-md"
+      dense
+      outlined
+      v-model="parentStatusFilter"
+      emit-value
+      map-options
+      clearable
+      :options="[
+        { label: 'Solvente', value: 'green-2' },
+        { label: 'Pendiente', value: 'red-2' },
+        { label: 'Todos', value: null }
+      ]"
+    />
+
+    <q-select
+      dense
+      outlined
+      class="q-mr-md"
+      v-model="sponsorStatusFilter"
+      emit-value
+      map-options
+      clearable
+      :options="[
+        { label: 'Solvente', value: 'green-2' },
+        { label: 'Pendiente', value: 'red-2' },
+        { label: 'Todos', value: null }
+      ]"
+    />
+
     <q-input
       outlined
       v-model="search"
       hide-bottom-space
       clearable
-      class="q-ml-auto q-mr-md"
+      class="q-mr-md"
     >
       <template v-slot:prepend>
         <q-icon name="search" />
       </template>
     </q-input>
+
     <q-select
       dense
       outlined
@@ -106,7 +157,7 @@ onMounted(async () => {
     bordered
     hide-bottom
     :filter="search"
-    :rows="rows"
+    :rows="results"
     :columns="columns"
     :pagination="{ rowsPerPage: -1 }"
   >

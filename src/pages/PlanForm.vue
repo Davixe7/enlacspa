@@ -23,7 +23,7 @@ const plan = ref({
   group_id: props.groupId,
   candidate_id: props.candidateId,
   category_id: 1,
-  subcategory_id: 1,
+  plan_type_id: 1,
   name: '',
   status: 1,
   start_date: null,
@@ -147,8 +147,8 @@ onMounted(async () => {
         option-value="id"
         option-label="label"
         v-model="plan.plan_type_id"
-        :error="!!(errors && errors.subcategory_id)"
-        :error-message="errors.subcategory_id"
+        :error="!!(errors && errors.plan_type_id)"
+        :error-message="errors.plan_type_id"
       />
       <q-input
         class="q-field--required"

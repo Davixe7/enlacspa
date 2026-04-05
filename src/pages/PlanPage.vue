@@ -40,7 +40,7 @@ onMounted(async () => {
     class="page-subtitle q-mb-lg text-center"
     v-if="program && program.id"
   >
-    {{ program.category.label }} <span class="text-grey">/</span> {{ program.subcategory.label }}
+    {{ program.category.label }} <span class="text-grey">/</span> {{ program.plan_type.label }}
     <span class="text-grey">/</span> {{ program.name }}
   </div>
 

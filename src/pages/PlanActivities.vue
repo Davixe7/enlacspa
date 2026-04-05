@@ -34,7 +34,7 @@ const results = computed(() => {
 
   if (searchFilter.value.query) {
     results = results.filter((activity) =>
-      String(activity.name).toLowerCase().includes(searchFilter.value.toLowerCase())
+      String(activity.name).toLowerCase().includes(searchFilter.value.query.toLowerCase())
     )
   }
 
@@ -50,9 +50,8 @@ const results = computed(() => {
 async function fetchSubcategories() {
   try {
     loading.value = true
-    let route = 'activity_categories'
-    let params = { plan_category_id: props.categoryId }
-    let results = (await api.get(route, params)).data.data
+    let route = `activity_categories/?plan_category_id=${props.categoryId}`
+    let results = (await api.get(route)).data.data
     results.unshift({ label: 'Clasificación', id: null })
     subcategories.value = results
   } catch (error) {

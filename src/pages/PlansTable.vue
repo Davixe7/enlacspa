@@ -11,7 +11,7 @@ const recentId = ref(route.query.recent ? route.query.recent : null)
 
 function planLinkByType(planId, action = '') {
   if (props.candidateId) {
-    return `/beneficiarios/${props.candidateId}/planes/${planId}/${action}`;
+    return `/beneficiarios/${props.candidateId}/planes/${planId}/${action}`
   }
   return `/grupos/${props.groupId}/planes/${planId}/${action}`
 }
@@ -26,9 +26,9 @@ watch(
 
 const columns = ref([
   { name: 'category', label: 'Plan', field: (row) => row.category.label },
-  { name: 'subcategory', label: 'Tipo de Plan', field: (row) => row.subcategory.label },
+  { name: 'plan_type', label: 'Tipo de Plan', field: (row) => row.plan_type.label },
   { name: 'name', label: 'Nombre del plan', field: 'name' },
-  { name: 'created_at', label: 'Fecha de Elaboración', field: 'created_at' },
+  { name: 'date', label: 'Fecha de Elaboración', field: 'date' },
   { name: 'status', label: 'Estatus', field: (row) => (row.status ? 'Activo' : 'Inactivo') },
   { name: 'actions', label: 'Acciones', align: 'right' }
 ])
@@ -56,12 +56,30 @@ onMounted(async () => {
 </script>
 
 <template>
-  <q-table flat bordered :columns="columns" :rows="rows" :pagination="{ rowsPerPage: 0 }">
+  <q-table
+    flat
+    bordered
+    :columns="columns"
+    :rows="rows"
+    :pagination="{ rowsPerPage: 0 }"
+  >
     <template v-slot:body-cell-actions="props">
       <q-td :class="{ highlight: props.row.id == recentId }">
         <div class="q-table__actions">
-          <q-btn flat round dense icon="sym_o_visibility" :to="planLinkByType(props.row.id)" />
-          <q-btn flat round dense icon="sym_o_edit" :to="planLinkByType(props.row.id, 'editar')" />
+          <q-btn
+            flat
+            round
+            dense
+            icon="sym_o_visibility"
+            :to="planLinkByType(props.row.id)"
+          />
+          <q-btn
+            flat
+            round
+            dense
+            icon="sym_o_edit"
+            :to="planLinkByType(props.row.id, 'editar')"
+          />
         </div>
       </q-td>
     </template>

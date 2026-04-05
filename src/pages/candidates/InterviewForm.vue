@@ -94,7 +94,7 @@ onMounted(async () => {
 
       <div class="div">
         <div
-          v-if="!interview.signed_at && store.status == 'pending'"
+          v-if="!interview.signed_at && store.status == 'pendiente'"
           class="flex justify-end items-center q-py-xl"
         >
           <div class="q-mr-lg">
@@ -250,7 +250,7 @@ onMounted(async () => {
     </div>
 
     <div
-      v-if="!interview.signed_at && store.status == 'pending'"
+      v-if="!interview.signed_at && store.status == 'pendiente'"
       class="flex justify-end items-center q-py-xl"
     >
       <div class="q-mr-lg">

@@ -27,6 +27,12 @@ export default [
         component: () => import('src/pages/beneficiaries/BeneficiariesPage.vue'),
         meta: { label: 'Admisiones y Beneficiarios' }
       },
+      {
+        path: 'beneficiarios/archivados',
+        name: 'beneficiaries.archive',
+        component: () => import('src/pages/beneficiaries/BeneficiariesArchive.vue'),
+        meta: { label: 'Reporte de Bajas' }
+      },
       ...admin,
       candidates,
       beneficiary,

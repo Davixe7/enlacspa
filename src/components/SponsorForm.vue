@@ -43,6 +43,7 @@ const mediaId = computed(() => {
 })
 
 const sponsor = ref({
+  type: 'link',
   candidate_id: props.candidateId ? props.candidateId : null,
   is_anonymous: 0,
   name: '',

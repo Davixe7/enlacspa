@@ -23,6 +23,20 @@ const rows = ref([])
 const dialog = ref(false)
 const dialog2 = ref(false)
 
+const disableP = computed(() => {
+  if (rank.value.brain_level_id != 7) {
+    return false
+  }
+
+  let index = rank.value.brain_function_id
+
+  return evaluationFields.value
+    .filter((item) => item.id !== 7)
+    .some((item) => {
+      return item.ranks[index].caracteristic == 'F' || item.ranks[index].caracteristic == '0'
+    })
+})
+
 async function fetchFields() {
   try {
     loading.value = true
@@ -119,12 +133,7 @@ onMounted(async () => {
 <template>
   <q-page>
     <div class="flex justify-between items-center q-mb-xl">
-      <h1
-        class="page-title"
-        style="margin-bottom: 0"
-      >
-        Evaluación
-      </h1>
+      <h1 class="page-title q-mb-none">Evaluación</h1>
 
       <q-btn
         @click="print"
@@ -197,6 +206,7 @@ onMounted(async () => {
     <q-dialog v-model="dialog">
       <RankForm
         :rank="rank"
+        :disableP="disableP"
         @rank-updated="updateRank"
         @close="dialog = false"
       />

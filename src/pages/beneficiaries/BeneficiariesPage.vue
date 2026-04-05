@@ -36,13 +36,6 @@ async function fetchStatuses() {
   }
 }
 
-onMounted(async () => {
-  loading.value = true
-  await fetchStatuses()
-  rows.value = (await api.get('beneficiaries')).data.data
-  loading.value = false
-})
-
 const statusDialog = ref(false)
 const selectedRow = ref(null)
 
@@ -70,7 +63,8 @@ const actions = ref([
   { disable: false, icon: 'calendar_month', route: 'citas', label: 'Citas' },
   { disable: false, icon: 'attach_money', route: 'cuotas', label: 'Control de Cuotas' },
   { disable: false, icon: 'list_alt_check', route: 'planes', label: 'Programacion Individual' },
-  { disable: false, icon: 'content_paste', route: 'entrevistar', label: 'Entrevistar' }
+  { disable: false, icon: 'content_paste', route: 'entrevistar', label: 'Entrevistar' },
+  { disable: false, icon: 'local_parking', route: 'socioeconomico', label: 'Socioeconomico' }
 ])
 
 const onScheduleEntry = (row) => {
@@ -101,6 +95,73 @@ function onStatusUpdated({ id, status }) {
     notify.positive('Movido a la tabla de reportes.')
   }
 }
+
+const planTypes = ref([])
+const planTypeFilter = ref(null)
+const groups = ref([])
+const groupFilter = ref(null)
+
+async function fetchPlanTypes() {
+  try {
+    loading.value = true
+    planTypes.value = (await api.get('plan_types')).data.data.map((planType) => ({
+      label: planType.label,
+      value: planType.id
+    }))
+    planTypes.value.unshift({ label: 'Todos los tipos', value: null })
+  } catch (error) {
+    console.log(error)
+    notify.negative('Error al obtener los tipos de plan')
+  } finally {
+    loading.value = false
+  }
+}
+
+async function fetchGroups() {
+  try {
+    loading.value = true
+    groups.value = (await api.get('groups')).data.data.map((group) => ({
+      label: group.name,
+      value: group.id
+    }))
+    groups.value.unshift({ label: 'Todos los grupos', value: null })
+  } catch (error) {
+    console.log(error)
+    notify.negative('Error al obtener los grupos')
+  } finally {
+    loading.value = false
+  }
+}
+
+async function fetchRows() {
+  try {
+    loading.value = true
+    let route = 'beneficiaries'
+    if (planTypeFilter.value) {
+      route = route + `?plan_type_id=${planTypeFilter.value}`
+    }
+
+    if (groupFilter.value) {
+      route = route + `?group_id=${groupFilter.value}`
+    }
+
+    rows.value = (await api.get(route)).data.data
+  } catch (error) {
+    console.log(error)
+    notify.negative('Error al obtener los tipos de plan')
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(async () => {
+  loading.value = true
+  await fetchStatuses()
+  await fetchPlanTypes()
+  await fetchGroups()
+  await fetchRows()
+  loading.value = false
+})
 </script>
 
 <template>
@@ -114,7 +175,7 @@ function onStatusUpdated({ id, status }) {
           color="primary"
           icon="description"
           outline
-          to="/beneficiarios/reportes"
+          to="/beneficiarios/archivados"
           label="Reporte de Bajas"
         />
 
@@ -144,6 +205,7 @@ function onStatusUpdated({ id, status }) {
         </q-input>
 
         <q-select
+          class="q-mr-md"
           outlined
           hide-bottom-space
           :options="statusesOptions"
@@ -153,6 +215,36 @@ function onStatusUpdated({ id, status }) {
           style="width: 250px"
           emit-value
           map-options
+          clearable
+        />
+
+        <q-select
+          class="q-mr-md"
+          outlined
+          hide-bottom-space
+          :options="groups"
+          v-model="groupFilter"
+          stack-label
+          dense
+          style="width: 250px"
+          emit-value
+          map-options
+          @update:model-value="fetchRows()"
+          clearable
+        />
+
+        <q-select
+          outlined
+          hide-bottom-space
+          :options="planTypes"
+          v-model="planTypeFilter"
+          stack-label
+          dense
+          style="width: 250px"
+          emit-value
+          map-options
+          @update:model-value="fetchRows()"
+          clearable
         />
       </div>
     </div>
