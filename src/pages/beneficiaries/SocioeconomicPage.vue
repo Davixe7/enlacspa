@@ -260,7 +260,7 @@
     outlined
     class="q-pa-md q-mt-md"
   >
-    <div class="text-h6 q-mb-md">Datos Generales del Solicitante</div>
+    <div class="text-h6 q-mb-md">Datos Generales del Solicitante del Estudio Socio-Económico</div>
 
     <div class="row q-col-gutter-md">
       <!-- 1. Nombre de quien solicita -->
@@ -736,7 +736,7 @@
     outlined
     class="q-pa-md q-mt-md"
   >
-    <div class="text-h6 q-mb-md">Información Adicional del Hogar</div>
+    <div class="text-h6 q-mb-md">Personas que Habitan en el Hogar e Ingresos Mensuales</div>
 
     <FamilyMembers
       :candidateId="props.candidateId"

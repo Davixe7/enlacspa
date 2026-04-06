@@ -16,7 +16,7 @@ const loadingExport = ref(false)
 async function exportXls() {
   loadingExport.value = true
   try {
-    await exportXlsFile('reports/sponsors/export')
+    await exportXlsFile('sponsors/export')
   } finally {
     loadingExport.value = false
   }
