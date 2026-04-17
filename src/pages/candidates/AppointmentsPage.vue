@@ -175,7 +175,7 @@ onMounted(async () => {
               stack-label
               hide-bottom-space
               label="Tipo de Cita"
-              v-model="appointment.type"
+              :model-value="appointmentTypes[appointment.type_id]"
               readonly
             />
             <q-input

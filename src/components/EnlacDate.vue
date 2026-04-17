@@ -1,11 +1,33 @@
 <template>
-  <q-input :filled="isFilled" :outlined="outlined" v-model="dateDisplay" mask="##/##/####" v-bind="$attrs">
+  <q-input
+    :filled="isFilled"
+    :outlined="outlined"
+    v-model="dateDisplay"
+    mask="##/##/####"
+    v-bind="$attrs"
+  >
     <template v-slot:append>
-      <q-icon name="event" class="cursor-pointer">
-        <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-          <q-date v-model="proxyModel" mask="YYYY-MM-DD" :options="limitToPast">
+      <q-icon
+        name="event"
+        class="cursor-pointer"
+      >
+        <q-popup-proxy
+          cover
+          transition-show="scale"
+          transition-hide="scale"
+        >
+          <q-date
+            v-model="proxyModel"
+            mask="YYYY-MM-DD"
+            :options="limitToPast"
+          >
             <div class="row items-center justify-end">
-              <q-btn v-close-popup label="Cerrar" color="primary" flat />
+              <q-btn
+                v-close-popup
+                label="Cerrar"
+                color="primary"
+                flat
+              />
             </div>
           </q-date>
         </q-popup-proxy>
@@ -23,12 +45,17 @@ const props = defineProps({
   filled: {
     type: Boolean,
     default: true
+  },
+  limitToPast: {
+    type: Boolean,
+    default: true
   }
 })
 
 const isFilled = computed(() => (props.outlined ? false : props.filled))
 
 const limitToPast = (dateString) => {
+  if (!props.limitToPast) return true
   const dateToCheck = DateTime.fromFormat(dateString, 'yyyy/MM/dd')
   const today = DateTime.now().startOf('day')
   return dateToCheck <= today

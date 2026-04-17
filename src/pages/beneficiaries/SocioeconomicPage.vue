@@ -1148,7 +1148,8 @@ async function fetchProfile() {
   try {
     loading.value = true
     let route = `socioeconomic_profiles/?candidate_id=${props.candidateId}`
-    form.value = (await api.get(route)).data.data
+    let response = (await api.get(route)).data.data
+    form.value = response?.id ? response : form.value
     console.log(form.value)
   } catch (error) {
     console.log(error)

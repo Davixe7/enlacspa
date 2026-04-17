@@ -131,7 +131,12 @@ onMounted(async () => {
         emit-value
         option-value="id"
         v-model="plan.category_id"
-        @update:model-value="fetchPlanTypes()"
+        @update:model-value="
+          () => {
+            fetchPlanTypes()
+            plan.plan_type_id = null
+          }
+        "
         :error="!!(errors && errors.category_id)"
         :error-message="errors.category_id"
       />
@@ -173,6 +178,7 @@ onMounted(async () => {
             outlined
             label="Fecha de cierre"
             v-model="plan.end_date"
+            :limit-to-past="false"
           />
         </div>
       </div>

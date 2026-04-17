@@ -1,5 +1,4 @@
 <script setup>
-import { storeToRefs } from 'pinia'
 import { useCandidateStore } from 'src/stores/candidate-store'
 import { onMounted } from 'vue'
 
@@ -12,11 +11,15 @@ const props = defineProps({
     type: String,
     required: true,
     default: 'interview'
+  },
+  errors: {
+    type: Object,
+    required: false,
+    default: () => ({})
   }
 })
 
 const store = useCandidateStore()
-const { errors } = storeToRefs(store)
 
 const relationships = [
   { label: 'Abuelo(a)', value: 'abuelo' },
@@ -40,9 +43,18 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="flex" style="margin-bottom: 65px">
-    <q-img width="174px" height="169px" color="grey" class="bg-grey-4" style="margin-right: 20px; object-fit: cover"
-      :src="store.picture"></q-img>
+  <div
+    class="flex"
+    style="margin-bottom: 65px"
+  >
+    <q-img
+      width="174px"
+      height="169px"
+      color="grey"
+      class="bg-grey-4"
+      style="margin-right: 20px; object-fit: cover"
+      :src="store.picture"
+    ></q-img>
 
     <div class="flex column justify-between q-px-md">
       <div>
@@ -63,26 +75,59 @@ onMounted(async () => {
       </div>
     </div>
 
-    <div v-if="type == 'interview'" class="flex column justify-between q-px-md q-gutter-y-md">
+    <div
+      v-if="type == 'interview'"
+      class="flex column justify-between q-px-md q-gutter-y-md"
+    >
       <div>
-        <q-input label="Nombre del entrevistado" outlined stack-label v-model="store.interviewee.name"
-          :error="!!errors['interviewee.name']" :error-message="errors['interviewee.name']" />
+        <q-input
+          label="Nombre del entrevistado"
+          outlined
+          stack-label
+          v-model="store.interviewee.name"
+          :error="!!errors['interviewee.name']"
+          :error-message="errors['interviewee.name']"
+        />
       </div>
       <div>
-        <q-select outlined stack-label hide-bottom-space label="Parentesco" v-model="store.interviewee.relationship"
-          :error="!!errors['interviewee.relationship']" :error-message="errors['interviewee.relationship']"
-          :options="relationships" emit-value map-options />
+        <q-select
+          outlined
+          stack-label
+          hide-bottom-space
+          label="Parentesco"
+          v-model="store.interviewee.relationship"
+          :error="!!errors['interviewee.relationship']"
+          :error-message="errors['interviewee.relationship']"
+          :options="relationships"
+          emit-value
+          map-options
+        />
       </div>
       <div style="margin-left: -8px">
-        <q-radio v-model="store.interviewee.legal_relationship" val="biologico" label="Hijo Biológico"
-          class="q-mr-md" />
-        <q-radio v-model="store.interviewee.legal_relationship" val="adoptivo" label="Hijo Adoptivo" />
+        <q-radio
+          v-model="store.interviewee.legal_relationship"
+          val="biologico"
+          label="Hijo Biológico"
+          class="q-mr-md"
+        />
+        <q-radio
+          v-model="store.interviewee.legal_relationship"
+          val="adoptivo"
+          label="Hijo Adoptivo"
+        />
       </div>
     </div>
 
-    <div v-else-if="store.evaluation_schedule?.evaluator?.name"
-      class="flex column justify-between q-px-md q-gutter-y-md">
-      <q-input label="Nombre del Evaluador" outlined stack-label v-model="store.evaluation_schedule.evaluator.name" />
+    <div
+      v-else-if="store.evaluation_schedule?.evaluator?.name"
+      class="flex column justify-between q-px-md q-gutter-y-md"
+    >
+      <q-input
+        label="Nombre del Evaluador"
+        outlined
+        stack-label
+        v-model="store.evaluation_schedule.evaluator.name"
+      />
     </div>
   </div>
 </template>

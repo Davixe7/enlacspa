@@ -21,7 +21,7 @@ const template = {
   wants_pickup: 0,
   wants_reminder: 0,
   wants_deductible_receipt: 0,
-  currency: 'mxn',
+  amount_usd: null,
   receipt: {
     rfc: '',
     company_name: '',
@@ -135,15 +135,21 @@ onMounted(async () => {
             :error="!!errors.amount"
             :error-message="errors.amount"
           >
-            <template v-slot:append>
-              <q-select
-                dense
-                class="q-select--curreny"
-                hide-bottom-space
-                :options="['mxn', 'usd']"
-                v-model="paymentConfig.currency"
-              />
-            </template>
+            <template v-slot:append> <div class="text-caption">MXN</div> </template>
+          </q-input>
+        </div>
+
+        <div class="form-row">
+          <label for="#">Cantidad en dolares</label>
+          <q-input
+            outlined
+            class="q-field--required"
+            v-model="paymentConfig.amount_usd"
+            hide-bottom-space
+            :error="!!errors.amount_usd"
+            :error-message="errors.amount_usd"
+          >
+            <template v-slot:append> <div class="text-caption">USD</div> </template>
           </q-input>
         </div>
 

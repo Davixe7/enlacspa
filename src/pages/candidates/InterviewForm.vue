@@ -6,7 +6,6 @@ import { useCandidateStore } from 'src/stores/candidate-store'
 import MedicationsPage from './MedicationsPage.vue'
 import CandidateProfile from 'components/CandidateProfile.vue'
 import Notify from 'src/utils/notify'
-import { storeToRefs } from 'pinia'
 
 const props = defineProps(['candidateId'])
 const store = useCandidateStore()
@@ -14,7 +13,6 @@ const store = useCandidateStore()
 const loading = ref(false)
 const errors = ref({})
 const interviewQuestions = ref([])
-const { errors: candidateErrors } = storeToRefs(store)
 
 const interview = ref({
   id: null,
@@ -44,7 +42,6 @@ async function fetchQuestions() {
 async function storeInterview() {
   loading.value = true
   errors.value = {}
-  candidateErrors.value = {}
   let route = interview.value.id ? `interviews/${interview.value.id}` : 'interviews'
   let data = { ...interview.value, interviewee: store.interviewee }
   if (interview.value.id) {
@@ -57,16 +54,6 @@ async function storeInterview() {
   } catch (error) {
     Notify.negative('Error. Revise la informacion')
     errors.value = error.formatted ? error.formatted : errors.value
-    let validationFields = [
-      'interviewee.name',
-      'interviewee.relationship',
-      'interviewee.legal_relationship'
-    ]
-    Object.keys(errors.value).forEach((key) => {
-      if (validationFields.includes(key)) {
-        candidateErrors.value[key] = errors.value[key]
-      }
-    })
     nextTick(() => scrollToFirstError())
   }
   loading.value = false
@@ -157,6 +144,7 @@ onMounted(async () => {
     <CandidateProfile
       v-if="store.status"
       :candidate-id="candidateId"
+      :errors="errors"
       type="interview"
     />
 

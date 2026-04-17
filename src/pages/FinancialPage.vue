@@ -101,10 +101,11 @@ onMounted(async () => {
     <div class="page-title">Tesorería</div>
 
     <q-select
-      style="width: 150px"
-      class="q-ml-auto q-mr-md"
-      dense
+      style="width: 200px"
       outlined
+      stack-label
+      label="Cuota de Padres"
+      class="q-ml-auto q-mr-md"
       v-model="parentStatusFilter"
       emit-value
       map-options
@@ -117,7 +118,8 @@ onMounted(async () => {
     />
 
     <q-select
-      dense
+      style="width: 200px"
+      label="Cuota de Padrinos"
       outlined
       class="q-mr-md"
       v-model="sponsorStatusFilter"
@@ -137,6 +139,8 @@ onMounted(async () => {
       hide-bottom-space
       clearable
       class="q-mr-md"
+      stack-label
+      label="Beneficiario"
     >
       <template v-slot:prepend>
         <q-icon name="search" />
@@ -144,8 +148,9 @@ onMounted(async () => {
     </q-input>
 
     <q-select
-      dense
       outlined
+      stack-label
+      label="Mes"
       v-model="month"
       @update:modelValue="fetchFinancial"
       :options="mesesDisponibles"

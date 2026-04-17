@@ -23,20 +23,21 @@ const columns = [
     label: 'Aportación mensual',
     field: 'monthly_contribution',
     align: 'left'
-  }
+  },
+  { name: 'actions', label: 'Acciones', align: 'right' }
 ]
 
 // 1. Fila por defecto
 const rows = ref([
   {
-    name: 'Juan Pérez',
-    age: 30,
-    relationship: 'Titular',
-    marital_status: 'Soltero',
-    scolarship: 'Licenciatura',
-    ocupation: 'Desarrollador',
-    monthly_income: 25000,
-    monthly_contribution: 5000
+    name: '',
+    age: 0,
+    relationship: '',
+    marital_status: '',
+    scolarship: '',
+    ocupation: '',
+    monthly_income: 0,
+    monthly_contribution: 0
   }
 ])
 
@@ -79,8 +80,20 @@ const loading = ref(false)
 const onSave = async () => {
   try {
     loading.value = true
-    let response = (await api.post('family_members', { ...formData.value })).data.data
-    rows.value.push(response)
+    let route = formData.value.id ? `family_members/${formData.value.id}` : 'family_members'
+    let data = formData.value.id ? { ...formData.value, _method: 'PUT' } : { ...formData.value }
+
+    let response = (await api.post(route, data)).data.data
+
+    let index = formData.value.id
+      ? rows.value.indexOf((item) => item.id == formData.value.id)
+      : null
+
+    index ? rows.value.splice(index - 1, 1, response) : rows.value.push(response)
+
+    let message = formData.value.id ? 'Actualizado' : 'Registrado'
+    notify.positive(message + ' exitosamente')
+
     showDialog.value = false
     clearForm()
   } catch (error) {
@@ -131,6 +144,11 @@ watch(monthlyIncomeSum, (newVal) => {
 watch(monthlyContributionSum, (newVal) => {
   model.value = { income: monthlyIncomeSum.value, contribution: newVal }
 })
+
+function editMember(row) {
+  showDialog.value = true
+  formData.value = { ...row }
+}
 </script>
 
 <template>
@@ -147,7 +165,7 @@ watch(monthlyContributionSum, (newVal) => {
       <template v-slot:bottom-row>
         <q-tr class="bg-grey-2 text-weight-bold">
           <q-td
-            colspan="6"
+            colspan="7"
             class="text-right"
           >
             Totales:
@@ -155,8 +173,19 @@ watch(monthlyContributionSum, (newVal) => {
           <q-td> $ {{ monthlyIncomeSum }} </q-td>
           <q-td> $ {{ monthlyContributionSum }} </q-td>
         </q-tr>
-      </template></q-table
-    >
+      </template>
+
+      <template v-slot:body-cell-actions="props">
+        <q-td class="text-right">
+          <q-btn
+            flat
+            round
+            icon="sym_o_edit"
+            @click="editMember(props.row)"
+          />
+        </q-td>
+      </template>
+    </q-table>
 
     <div class="flex justify-end">
       <q-btn

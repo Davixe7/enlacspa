@@ -63,7 +63,7 @@ const actions = ref([
   { disable: false, icon: 'calendar_month', route: 'citas', label: 'Citas' },
   { disable: false, icon: 'attach_money', route: 'cuotas', label: 'Control de Cuotas' },
   { disable: false, icon: 'list_alt_check', route: 'planes', label: 'Programacion Individual' },
-  { disable: false, icon: 'content_paste', route: 'entrevistar', label: 'Entrevistar' },
+  { disable: false, icon: 'chat', route: 'entrevistar', label: 'Entrevistar' },
   { disable: false, icon: 'local_parking', route: 'socioeconomico', label: 'Socioeconomico' }
 ])
 
@@ -105,7 +105,7 @@ async function fetchPlanTypes() {
   try {
     loading.value = true
     planTypes.value = (await api.get('plan_types')).data.data.map((planType) => ({
-      label: planType.label,
+      label: planType.plan_category.label + ' - ' + planType.label,
       value: planType.id
     }))
     planTypes.value.unshift({ label: 'Todos los tipos', value: null })

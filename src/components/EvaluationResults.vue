@@ -32,7 +32,14 @@ const cellMonthsMap = {
   32: 24.0,
   33: 27.0,
   34: 30.0,
-  35: 33.0
+  35: 33.0,
+  36: 36.0,
+  37: 42.0,
+  38: 48.0,
+  39: 54.0,
+  40: 60.0,
+  41: 66.0,
+  42: 72.0
 }
 
 const store = useCandidateStore()
@@ -43,42 +50,31 @@ const chronologicalAge2 = store.chronological_age2
   ? store.chronological_age2.split('.')[0] + ' años'
   : 0
 
-const developmentRateA = computed(() => {
-  let evaluated = props.ranks.length
-  let evaluatedFP = props.ranks.filter((rank) => ['F', 'P'].includes(rank.caracteristic)).length
-  if (evaluatedFP <= 5) {
-    return 'Menos que recién nacido.'
-  }
-  if (evaluatedFP == 6) {
-    return 'Recién nacido.'
-  }
-  let months = cellMonthsMap[evaluatedFP]
-  return ((months / evaluated) * 100).toFixed(2)
+const neurologicalAgeMonths = computed(() => {
+  let key = props.ranks.reduce(
+    (accumulator, item) => accumulator + (['F', 'P'].includes(item.caracteristic) ? 1 : 0),
+    0
+  )
+
+  return cellMonthsMap[key]
 })
 
-const developmentRateB = computed(() => {
-  let evaluated = props.ranks.length
-  let evaluatedFP = props.ranks.filter((rank) => ['F', 'P'].includes(rank.caracteristic)).length
-  if (evaluatedFP <= 5) {
-    return 'Menos que recién nacido.'
+const neurologicalAgeYears = computed(() => {
+  if (isNaN(neurologicalAgeMonths.value)) {
+    return neurologicalAgeMonths.value
   }
-  if (evaluatedFP == 6) {
-    return 'Recién nacido.'
-  }
-  let months = cellMonthsMap[evaluatedFP]
-  return ((months / evaluated) * 100).toFixed(2)
+
+  return (neurologicalAgeMonths.value / 12).toFixed(2)
 })
 
-const neurologicalAge = computed(() => {
-  if (isNaN(developmentRate.value)) {
+const developmentRate = computed(() => {
+  if (isNaN(neurologicalAgeMonths.value)) {
     return 0
   }
-  return ((store.chronological_age * developmentRateA.value) / 100).toFixed(2)
+
+  return ((neurologicalAgeMonths.value / store.chronological_age.split('.')[0]) * 100).toFixed(2)
 })
-const neurologicalAge2 = computed(() => (neurologicalAge.value / 12).toFixed(2))
-const developmentRate = computed(() =>
-  ((neurologicalAge.value / store.chronological_age) * 100).toFixed(2)
-)
+
 const damageExtension = computed(() => {
   let brainFunctions = { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false }
   props.ranks.map((rank) => {
@@ -96,13 +92,14 @@ const damageExtension = computed(() => {
     6: 'Difusa'
   }[count]
 })
+
 const damageGrade = computed(() => {
   let damageGrades = {
     Completa: [0],
     Profunda: [0.0001, 25],
-    Severa: [25.0001, 50],
-    Moderada: [50.0001, 75],
-    Leve: [75.0001, 99]
+    Severa: [25.01, 50],
+    Moderada: [50.01, 75],
+    Leve: [75.01, 99]
   }
 
   if (developmentRate.value <= 0) {
@@ -127,10 +124,11 @@ const damageGrade = computed(() => {
   }
   return null
 })
+
 const damageLaterality = computed(() => {
   var lateralities = { l: false, r: false }
   props.ranks.map((rank) => {
-    if (!['F', '0'].includes(rank.caracteristic)) return
+    //if (!['F', '0'].includes(rank.caracteristic)) return
     lateralities[rank.laterality_impact] = true
   })
   return Object.values(lateralities).filter((val) => val).length > 1 ? 'Bilateral' : 'Unilateral'
@@ -176,7 +174,7 @@ const damageLevel = computed(() => {
         outlined
         stack-label
         label="Edad neurológica (meses)(*)"
-        :modelValue="neurologicalAge + ' meses'"
+        :modelValue="neurologicalAgeMonths + ' meses'"
       />
     </div>
 
@@ -185,7 +183,7 @@ const damageLevel = computed(() => {
         outlined
         stack-label
         label="Edad neurológica (años)(*)"
-        :modelValue="neurologicalAge2 + ' años'"
+        :modelValue="neurologicalAgeYears + ' años'"
       />
     </div>
 
@@ -211,17 +209,8 @@ const damageLevel = computed(() => {
       <q-input
         outlined
         stack-label
-        label="Tasa de desarrollo (sin N/A)"
-        :modelValue="developmentRateA + '%'"
-      />
-    </div>
-
-    <div class="col-12 col-md-3">
-      <q-input
-        outlined
-        stack-label
-        label="Tasa de desarrollo (con N/A)"
-        :modelValue="developmentRateB + '%'"
+        label="Tasa de desarrollo"
+        :modelValue="developmentRate + '%'"
       />
     </div>
   </div>

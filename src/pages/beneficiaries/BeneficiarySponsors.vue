@@ -153,7 +153,7 @@ async function checkHistory() {
           class="q-ml-md"
           color="primary"
           icon="sym_o_add"
-          to="registrar-padrino"
+          to="padrinos/crear"
           label="Registrar nuevo"
         />
       </div>

@@ -113,6 +113,9 @@ function btnLabel(cell) {
   if (cell.row.P <= store.chronological_age) {
     return cell.value.caracteristic ? cell.value.caracteristic : ''
   }
+  if (cell.value.caracteristic) {
+    return cell.value.caracteristic
+  }
   return 'N/A'
 }
 
