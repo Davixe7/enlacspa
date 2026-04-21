@@ -1,6 +1,7 @@
 <script setup>
 import { api } from 'src/boot/axios'
 import notify from 'src/utils/notify'
+import { money } from 'src/utils/filters'
 import { computed, onMounted, ref, watch } from 'vue'
 
 const props = defineProps(['candidateId'])
@@ -17,12 +18,19 @@ const columns = [
   { name: 'marital_status', label: 'Estado civil', field: 'marital_status', align: 'left' },
   { name: 'scolarship', label: 'Escolaridad', field: 'scolarship', align: 'left' },
   { name: 'ocupation', label: 'Ocupación', field: 'ocupation', align: 'left' },
-  { name: 'monthly_income', label: 'Ingresos mensuales', field: 'monthly_income', align: 'left' },
+  {
+    name: 'monthly_income',
+    label: 'Ingresos mensuales',
+    field: 'monthly_income',
+    align: 'left',
+    format: (val) => money(val)
+  },
   {
     name: 'monthly_contribution',
     label: 'Aportación mensual',
     field: 'monthly_contribution',
-    align: 'left'
+    align: 'left',
+    format: (val) => money(val)
   },
   { name: 'actions', label: 'Acciones', align: 'right' }
 ]
@@ -165,13 +173,14 @@ function editMember(row) {
       <template v-slot:bottom-row>
         <q-tr class="bg-grey-2 text-weight-bold">
           <q-td
-            colspan="7"
+            colspan="6"
             class="text-right"
           >
             Totales:
           </q-td>
-          <q-td> $ {{ monthlyIncomeSum }} </q-td>
-          <q-td> $ {{ monthlyContributionSum }} </q-td>
+          <q-td> {{ money(monthlyIncomeSum) }} </q-td>
+          <q-td> {{ money(monthlyContributionSum) }} </q-td>
+          <q-td></q-td>
         </q-tr>
       </template>
 

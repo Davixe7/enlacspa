@@ -935,15 +935,15 @@
 
           <tr>
             <td>Total de gastos:</td>
-            <td>$ {{ totalExpenses }}</td>
+            <td>{{ money(totalExpenses) }}</td>
           </tr>
           <tr>
             <td>Total de ingresos:</td>
-            <td>$ {{ familyData.income }}</td>
+            <td>{{ money(familyData.income) }}</td>
           </tr>
           <tr>
             <td>Diferencia:</td>
-            <td>$ {{ familyData.income - totalExpenses }}</td>
+            <td>{{ money(familyData.income - totalExpenses) }}</td>
           </tr>
           <tr>
             <td>Solvencia económica:</td>
@@ -997,7 +997,9 @@ import { api } from 'src/boot/axios'
 import FamilyMembers from 'src/components/FamilyMembers.vue'
 import notify from 'src/utils/notify'
 import { computed, onMounted, ref } from 'vue'
+import { money } from 'src/utils/filters'
 
+const props = defineProps(['candidateId'])
 // Fecha de hoy por defecto como indica el documento [1]
 const today = new Date().toISOString().substr(0, 10)
 
@@ -1073,7 +1075,8 @@ const form = ref({
   monthly_contribution_amount: 0,
 
   solvency_notes: '',
-  economic_level: ''
+  economic_level: '',
+  candidate_id: props.candidateId
 })
 
 const expensesFormFields = [
@@ -1125,8 +1128,6 @@ const maritalStatusOptions = [
 const customWall = ref('')
 const customRoof = ref('')
 const customHousing = ref('')
-
-const props = defineProps(['candidateId'])
 
 const loading = ref(false)
 async function storeProfile() {

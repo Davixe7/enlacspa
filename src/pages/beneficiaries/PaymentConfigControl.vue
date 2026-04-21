@@ -63,8 +63,14 @@ function setPayment(config) {
   } */
 
   selectedConfig.value = configs.value[config]
-  let firstDue = Object.values(configs.value[config]).flat().find((i) => i.status == 'red')
-  firstDue = firstDue ? firstDue : Object.values(configs.value[config]).flat().find((i) => i.status == 'yellow')
+  let firstDue = Object.values(configs.value[config])
+    .flat()
+    .find((i) => i.status == 'red')
+  firstDue = firstDue
+    ? firstDue
+    : Object.values(configs.value[config])
+        .flat()
+        .find((i) => i.status == 'yellow')
 
   let sponsorId = config ? config : null
   payment.value.maxAmount = rows.value.find((r) => r.sponsor_id == sponsorId).monthly_amount
@@ -152,11 +158,16 @@ onMounted(async () => {
               :class="[`bg-${payment.status}-2`]"
               @click="true ? setPayment(sponsorId) : ''"
             >
-            <div style="display: flex;">
-              <div v-for="payment in configs[sponsorId][month]" :key="payment.id" style="flex: 1 1 auto" :class="[`bg-${payment.status}-2`]">
-                {{ payment.abono }}
+              <div style="display: flex">
+                <div
+                  v-for="payment in configs[sponsorId][month]"
+                  :key="payment.id"
+                  style="flex: 1 1 auto"
+                  :class="[`bg-${payment.status}-2`]"
+                >
+                  {{ payment.abono }}
+                </div>
               </div>
-            </div>
             </td>
           </template>
         </tr>

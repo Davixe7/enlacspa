@@ -8,8 +8,8 @@ const auth = useAuthStore()
 
 const areaPermissions = ref({
   8: [1, 4, 5, 6],
-  4: [3],
-  7: [2],
+  4: [3, 7],
+  7: [2]
 })
 
 const driverOptions = [
@@ -25,7 +25,9 @@ const categoryOptions = computed(() => {
 })
 
 function isAllowed(option) {
-  let allowedByArea = areaPermissions.value[auth.data.user.work_area_id] && areaPermissions.value[auth.data.user.work_area_id].some((allowed) => allowed == option.id)
+  let allowedByArea =
+    areaPermissions.value[auth.data.user.work_area_id] &&
+    areaPermissions.value[auth.data.user.work_area_id].some((allowed) => allowed == option.id)
   let allowedByRoleName = auth.data.user.role.name == option.role
   return allowedByArea || allowedByRoleName
 }
@@ -39,10 +41,23 @@ onMounted(async () => {
   <q-page>
     <h1 class="page-title">Seleccione el área:</h1>
     <div class="row q-col-gutter-xl">
-      <template v-for="option in categoryOptions" :key="option.id">
-        <div v-if="isAllowed(option)" class="col-12 col-sm-6">
-          <router-link :to="option.path" style="text-decoration: none !important">
-            <q-card bordered flat class="home-menu-card">
+      <template
+        v-for="option in categoryOptions"
+        :key="option.id"
+      >
+        <div
+          v-if="isAllowed(option)"
+          class="col-12 col-sm-6"
+        >
+          <router-link
+            :to="option.path"
+            style="text-decoration: none !important"
+          >
+            <q-card
+              bordered
+              flat
+              class="home-menu-card"
+            >
               <q-card-section class="q-pa-xl">
                 <div class="page-subtitle q-mb-0">
                   {{ option.label }}
