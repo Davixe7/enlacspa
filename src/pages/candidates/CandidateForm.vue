@@ -213,7 +213,7 @@ onMounted(async () => {
           class="q-field--required"
           :error="!!errors['candidate.first_name']"
           :error-message="errors['candidate.first_name']"
-        ></q-input>
+        />
         <q-input
           outlined
           stack-label
@@ -223,7 +223,7 @@ onMounted(async () => {
           class="q-field--required"
           :error="!!errors['candidate.last_name']"
           :error-message="errors['candidate.last_name']"
-        ></q-input>
+        />
         <q-input
           outlined
           stack-label
@@ -233,7 +233,7 @@ onMounted(async () => {
           class="q-field--required"
           :error="!!errors['candidate.middle_name']"
           :error-message="errors['candidate.middle_name']"
-        ></q-input>
+        />
       </div>
       <div class="col-12 col-md-6 q-gutter-y-lg">
         <q-input
@@ -246,7 +246,7 @@ onMounted(async () => {
           :error="!!errors['candidate.birth_date']"
           :error-message="errors['candidate.birth_date']"
           type="date"
-        ></q-input>
+        />
         <q-input
           readonly
           outlined
@@ -254,7 +254,7 @@ onMounted(async () => {
           hide-bottom-space
           label="Edad"
           v-model.number="age"
-        ></q-input>
+        />
         <q-input
           readonly
           outlined
@@ -262,7 +262,7 @@ onMounted(async () => {
           hide-bottom-space
           label="Edad Cronológica*"
           v-model="chronological_age"
-        ></q-input>
+        />
       </div>
       <q-btn
         v-if="candidate?.can_reingresar"
@@ -290,7 +290,7 @@ onMounted(async () => {
               :label="channel"
               :val="channel"
               v-model="candidate.info_channel"
-            ></q-radio>
+            />
           </div>
         </div>
       </div>
@@ -307,7 +307,7 @@ onMounted(async () => {
         v-model="candidate.diagnosis"
         :error="!!errors['candidate.diagnosis']"
         :error-message="errors['candidate.diagnosis']"
-      ></q-input>
+      />
     </div>
 
     <MedicationsPage
@@ -315,8 +315,7 @@ onMounted(async () => {
       v-model="medications"
       :candidateId="candidate.id"
       :errors="errors"
-    >
-    </MedicationsPage>
+    />
 
     <div class="form-section">
       <div class="page-title">Programar Evaluación</div>
@@ -338,7 +337,7 @@ onMounted(async () => {
             map-options
             :error="!!errors['evaluation_schedule.evaluator_id']"
             :error-message="errors['evaluation_schedule.evaluator_id']"
-          ></q-select>
+          />
         </div>
         <div class="col-12 col-md-2">
           <q-input
@@ -437,7 +436,7 @@ onMounted(async () => {
           label="Nombre de la persona"
           type="text"
           v-model="recepient.name"
-        ></q-input>
+        />
         <q-input
           outlined
           stack-label
@@ -445,12 +444,12 @@ onMounted(async () => {
           type="tel"
           mask="##########"
           v-model="recepient.phone"
-        ></q-input>
+        />
         <q-btn
           style="width: 100px; height: 48px; align-self: flex-end"
           color="primary"
-          >Enviar</q-btn
-        >
+          label="Enviar"
+        />
       </div>
 
       <div class="subtitle q-my-md">Envío de Encuesta de Satisfacción</div>
@@ -461,7 +460,7 @@ onMounted(async () => {
           label="Nombre de la persona"
           type="text"
           v-model="recepient.name"
-        ></q-input>
+        />
         <q-input
           outlined
           stack-label
@@ -469,12 +468,12 @@ onMounted(async () => {
           type="tel"
           mask="##########"
           v-model="recepient.phone"
-        ></q-input>
+        />
         <q-btn
           style="width: 100px; height: 48px; align-self: flex-end"
           color="primary"
-          >Enviar</q-btn
-        >
+          label="Enviar"
+        />
       </div>
     </div>
 
@@ -498,7 +497,7 @@ onMounted(async () => {
             v-model="picture"
           >
             <template v-slot:append>
-              <q-icon name="attachment"></q-icon>
+              <q-icon name="attachment" />
             </template>
           </q-file>
         </div>

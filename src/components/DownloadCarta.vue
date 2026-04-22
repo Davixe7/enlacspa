@@ -73,6 +73,7 @@ onMounted(async () => {
             dense
             icon="close"
             class="q-ml-auto"
+            @click="showDownloadDialog = false"
           />
         </div>
         <q-form>

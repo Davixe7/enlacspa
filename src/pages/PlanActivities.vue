@@ -318,6 +318,7 @@ onMounted(() => {
                   round
                   dense
                   icon="sym_o_info"
+                  color="red"
                   @click="setActivity(activity)"
                   :disable="!instructables.includes(category.name)"
                 />

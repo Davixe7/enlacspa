@@ -11,14 +11,24 @@ const props = defineProps({
 
 const candidate = ref()
 const appointment = ref(null)
+const appointments = ref([])
+const appointmentTypes = ref([])
+const dialog = ref(false)
 const dialog2 = ref(false)
+const loading = ref(false)
+
+onMounted(async () => {
+  candidate.value = (await api.get(`candidates/${props.candidateId}`)).data.data
+  let response = (await api.get('work_areas')).data.data
+  response.map((item) => (appointmentTypes.value[item.id] = { label: item.name, value: item.id }))
+  appointmentTypes.value[0] = { label: 'Evaluación', value: 0 }
+  appointments.value = (await api.get(`appointments/?candidate_id=${props.candidateId}`)).data.data
+})
 
 function setAppointment(target) {
   appointment.value = target
   dialog2.value = true
 }
-
-const loading = ref(false)
 
 async function updateAppointment() {
   try {
@@ -34,20 +44,20 @@ async function updateAppointment() {
   }
 }
 
-const appointmentTypes = ref([
+/* const appointmentTypes = ref([
   'Evaluación',
   'Médico',
   'Nutrición',
   'Psicología',
   'Comunicación',
   'Programa Escucha'
-])
+]) */
 
 const columns = ref([
   {
     name: 'type',
     label: 'Tipo de cita',
-    field: (row) => appointmentTypes.value[row.type_id],
+    field: (row) => appointmentTypes.value[row.type_id].label,
     align: 'left'
   },
   {
@@ -61,10 +71,6 @@ const columns = ref([
   { name: 'actions', label: 'Acciones' }
 ])
 
-const dialog = ref(false)
-
-const appointments = ref([])
-
 const pastAppointments = computed(() => {
   return appointments.value.filter((appointment) => new Date(appointment.date) <= new Date())
 })
@@ -77,13 +83,6 @@ function updateAppointments(appointment) {
   dialog.value = false
   appointments.value.push(appointment)
 }
-
-onMounted(async () => {
-  candidate.value = (await api.get(`candidates/${props.candidateId}`)).data.data
-  appointments.value = (await api.get(`appointments/?candidate_id=${props.candidateId}`)).data.data
-  let appointmentTypesResponse = (await api.get('work_areas')).data.data
-  appointmentTypes.value = appointmentTypesResponse.map((type) => type.name)
-})
 </script>
 
 <template>
@@ -112,15 +111,17 @@ onMounted(async () => {
     :pagination="{ rowsPerPage: 0 }"
     no-data-label="No hay citas pendientes para mostrar"
     row-key="id"
-    :hide-bottom="pendingAppointments.length"
+    :hide-bottom="pendingAppointments.length > 0"
   />
 
   <h1 class="page-subtitle">Citas previas</h1>
   <q-table
     :rows="pastAppointments"
     :columns="columns"
-    hide-bottom
     :pagination="{ rowsPerPage: 0 }"
+    no-data-label="No hay citas para mostrar"
+    row-key="id"
+    :hide-bottom="pastAppointments.length > 0"
   >
     <template v-slot:body-cell-actions="props">
       <q-td class="text-right">
