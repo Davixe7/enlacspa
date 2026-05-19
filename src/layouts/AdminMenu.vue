@@ -11,7 +11,9 @@ const adminLinks = ref([
   { label: 'Usuarios', link: '/usuarios' },
   { label: 'Areas', link: '/areas-de-trabajo' },
   { label: 'Puestos', link: '/puestos' },
-  { label: 'Carrusel', link: '/carrusel' }
+  { label: 'Carrusel', link: '/carrusel' },
+  { label: 'Carrusel', link: '/carrusel' },
+  { label: 'Administración de Programas', link: '/programas' }
 ])
 </script>
 

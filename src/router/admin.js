@@ -39,5 +39,11 @@ export default [
     name: 'actividades.index',
     meta: { label: 'Actividades' },
     component: () => import('src/pages/admin/ActivitiesPage.vue')
+  },
+  {
+    path: '/programas',
+    name: 'programas.index',
+    meta: { label: 'Programas' },
+    component: () => import('src/pages/admin/ProgramsPage.vue')
   }
 ]
