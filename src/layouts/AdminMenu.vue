@@ -12,8 +12,8 @@ const adminLinks = ref([
   { label: 'Areas', link: '/areas-de-trabajo' },
   { label: 'Puestos', link: '/puestos' },
   { label: 'Carrusel', link: '/carrusel' },
-  { label: 'Carrusel', link: '/carrusel' },
-  { label: 'Administración de Programas', link: '/programas' }
+  { label: 'Administración de Programas', link: '/programas' },
+  { label: 'Catálogo de Claves Radiomaratón', link: '/radiomaraton-claves' }
 ])
 </script>
 

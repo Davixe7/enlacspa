@@ -45,5 +45,17 @@ export default [
     name: 'programas.index',
     meta: { label: 'Programas' },
     component: () => import('src/pages/admin/ProgramsPage.vue')
+  },
+  {
+    path: 'radiomaraton-claves',
+    component: () => import('src/pages/RadiomaratonKeys.vue')
+  },
+  {
+    path: 'actividades',
+    component: () => import('src/pages/ActivityFondosCatalog.vue')
+  },
+  {
+    path: 'donors',
+    component: () => import('src/pages/DonorsIndex.vue')
   }
 ]
