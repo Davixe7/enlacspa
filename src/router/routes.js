@@ -66,5 +66,11 @@ export default [
   {
     path: '/:catchAll(.*)*',
     component: () => import('pages/ErrorNotFound.vue')
+  },
+  {
+    path: '/donativos/aplicar',
+    name: 'apply-donation',
+    component: () => import('src/pages/ApplyDonationPage.vue'),
+    meta: { title: 'Aplicar Donativo' }
   }
 ]

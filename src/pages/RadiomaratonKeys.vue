@@ -57,6 +57,9 @@ async function saveKey() {
       rows.value.unshift(savedData)
     }
 
+    rows.value.sort((a, b) =>
+      a.code.localeCompare(b.code, undefined, { numeric: true, sensitivity: 'base' })
+    )
     notify.positive('Guardado con éxito')
     dialog.value = false
   } catch (error) {

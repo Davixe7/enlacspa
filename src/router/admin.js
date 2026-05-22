@@ -51,8 +51,8 @@ export default [
     component: () => import('src/pages/RadiomaratonKeys.vue')
   },
   {
-    path: 'actividades',
-    component: () => import('src/pages/ActivityFondosCatalog.vue')
+    path: 'procuracion-fondos',
+    component: () => import('src/pages/ProcurationActivitiesCatalog.vue')
   },
   {
     path: 'donors',
