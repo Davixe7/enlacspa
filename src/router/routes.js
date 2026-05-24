@@ -33,6 +33,12 @@ export default [
         component: () => import('src/pages/beneficiaries/BeneficiariesArchive.vue'),
         meta: { label: 'Reporte de Bajas' }
       },
+      {
+        path: '/capacitaciones',
+        name: 'capacitaciones',
+        component: () => import('src/pages/CapacitationIndex.vue'),
+        meta: { title: 'Control de Capacitaciones' }
+      },
       ...admin,
       candidates,
       beneficiary,
@@ -64,13 +70,13 @@ export default [
     component: () => import('src/pages/auth/ResetPassword.vue')
   },
   {
-    path: '/:catchAll(.*)*',
-    component: () => import('pages/ErrorNotFound.vue')
-  },
-  {
     path: '/donativos/aplicar',
     name: 'apply-donation',
     component: () => import('src/pages/ApplyDonationPage.vue'),
     meta: { title: 'Aplicar Donativo' }
-  }
+  },
+  {
+    path: '/:catchAll(.*)*',
+    component: () => import('pages/ErrorNotFound.vue')
+  },
 ]

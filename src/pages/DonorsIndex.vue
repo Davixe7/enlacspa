@@ -184,8 +184,7 @@ onMounted(() => {
     <template v-slot:body-cell-actions="props">
       <q-td class="flex justify-end">
         <q-btn
-          icon="sym_o_badge"
-          label="Kardex"
+          icon="sym_o_edit"
           flat
           dense
           color="secondary"

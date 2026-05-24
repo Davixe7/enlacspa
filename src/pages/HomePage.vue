@@ -98,13 +98,13 @@ const modules = ref([
     label: 'Capacitaciones',
     color: '#D4242980',
     icon: 'capacitaciones',
-    path: '/'
+    path: '/capacitaciones'
   },
   {
     label: 'Donantes',
     color: '#36087680',
     icon: 'fondos',
-    path: '/donors' // lleva directo a la pantalla operativa principal de donantes
+    path: '/donors'
   },
   {
     label: 'Personal ENLAC',

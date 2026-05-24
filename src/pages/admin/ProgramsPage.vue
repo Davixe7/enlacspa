@@ -12,11 +12,11 @@ const rows = ref([])
 const columns = ref([
   { align: 'left', name: 'order', label: '#', field: 'order' },
   { align: 'left', name: 'name', label: 'Nombre del programa', field: 'name' },
-  { align: 'left', name: 'price', label: 'Precio', field: (row) => money(row.price) },
+  { align: 'left', name: 'price', label: 'Precio Vigente', field: (row) => money(row.price) },
   {
     align: 'right',
     name: 'status',
-    label: 'Status',
+    label: 'Estatus',
     field: (row) => (row.is_active ? 'Activo' : 'Inactivo')
   },
   { align: 'right', name: 'actions', label: 'Acciones' }
@@ -139,7 +139,7 @@ onMounted(async () => {
                 </td>
               </tr>
               <tr>
-                <td>Desde</td>
+                <td>A partir del</td>
                 <td>
                   <EnlacDate
                     outlined
