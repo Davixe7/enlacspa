@@ -98,6 +98,7 @@ function open(rowData = null) {
       spouse_birth_date: rowData.spouse_birth_date ? rowData.spouse_birth_date.split('T')[0] : '',
       is_private_contact: rowData.is_private_contact ? 1 : 0,
       prospect_for: Array.isArray(rowData.prospect_for) ? rowData.prospect_for : [],
+      knows_facilities: rowData.knows_facilities ? 'SÍ' : 'No',
 
       // Forzamos a que si viene desde el backend como fiscal_records, se asigne correctamente,
       // y si viene nulo o indefinido, inicialice como un array vacío para que el v-for no falle.
