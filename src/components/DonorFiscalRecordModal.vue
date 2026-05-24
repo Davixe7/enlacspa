@@ -79,7 +79,11 @@ defineExpose({ open })
   >
     <q-card style="width: 750px; max-width: 90vw">
       <q-form @submit.prevent="submit">
-        <q-card-section class="bg-secondary text-white q-py-sm flex items-center">
+        <input
+          type="hidden"
+          v-model="form.donor_id"
+        />
+        <q-card-section class="bg-primary text-white q-py-sm flex items-center">
           <div class="text-subtitle1 text-weight-bold">
             {{
               editingIndex !== null ? 'Editar Registro Fiscal' : 'Nuevo Registro Fiscal y Cobranza'
@@ -438,9 +442,9 @@ defineExpose({ open })
           />
           <q-btn
             type="submit"
-            color="secondary"
+            color="primary"
             icon="sym_o_check_circle"
-            label="Aceptar Cuenta"
+            label="Aceptar"
           />
         </q-card-actions>
       </q-form>

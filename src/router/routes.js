@@ -39,6 +39,13 @@ export default [
         component: () => import('src/pages/CapacitationIndex.vue'),
         meta: { title: 'Control de Capacitaciones' }
       },
+      {
+        path: '/donors/:id',
+        name: 'donor-show',
+        component: () => import('src/components/DonorShow.vue')
+      },
+      { path: 'reports/donations', component: () => import('pages/reports/DonationsReport.vue') },
+      { path: 'reports/visits', component: () => import('pages/reports/VisitsReport.vue') },
       ...admin,
       candidates,
       beneficiary,

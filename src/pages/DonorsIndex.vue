@@ -1,9 +1,12 @@
 <script setup>
 import { api } from 'src/boot/axios'
 import { onMounted, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import notify from 'src/utils/notify'
 import DonorKardexModal from 'components/DonorKardexModal.vue'
 import ApplyDonationDialog from 'components/ApplyDonationDialog.vue'
+
+const $router = useRouter()
 
 const loading = ref(false)
 const rows = ref([])
@@ -96,11 +99,8 @@ async function fetchDonors() {
     if (filterName.value) params.search = filterName.value
 
     const response = await api.get(url, { params })
-
-    // Al usar response.json($donors) en Laravel, la data viene directamente en response.data
     let data = response.data.data || response.data || []
 
-    // Mantener orden alfabético seguro en el front
     rows.value = [...data].sort((a, b) => {
       const nameA = a.full_name || a.first_name || ''
       const nameB = b.full_name || b.first_name || ''
@@ -114,7 +114,6 @@ async function fetchDonors() {
   }
 }
 
-// Switch Activo / Inactivo tolerando booleanos planos
 async function toggleStatus(row) {
   try {
     const route = `/donors/${row.id}/toggle-status`
@@ -127,24 +126,20 @@ async function toggleStatus(row) {
   }
 }
 
-// Lógica de exportación básica (CSV) que puedes expandir
 function exportData() {
   if (rows.value.length === 0) {
     notify.warning('No hay datos disponibles para exportar')
     return
   }
   notify.info('Preparando la descarga del reporte...')
-  // Aquí puedes integrar XLSX, un CSV manual o redireccionar a tu ruta de Laravel de Excel
-  console.log('Exportando donantes...', rows.value)
 }
 
-// Métodos vacíos para los futuros reportes solicitados
 function openDonationsReport() {
-  notify.info('Módulo de Reporte de Donativos (Próximamente)')
+  $router.push('/reports/donations')
 }
 
 function openVisitsReport() {
-  notify.info('Módulo de Reporte de Visitas (Próximamente)')
+  $router.push('/reports/visits')
 }
 
 function openCreate() {
@@ -155,7 +150,6 @@ function openEdit(row) {
   kardexModalRef.value.open(row)
 }
 
-// Observadores para recargar automáticamente cuando cambien los selectores
 watch([selectedActivityId, selectedMonth, filterName], () => {
   fetchDonors()
 })
@@ -233,7 +227,6 @@ onMounted(() => {
   <!-- Barra de Filtros Avanzada -->
   <div class="row q-col-gutter-md q-mb-lg justify-start">
     <div class="col-12 col-md-7 row q-col-gutter-sm items-center">
-      <!-- 1. Filtro por Nombre / Empresa -->
       <div class="col-12 col-sm-4">
         <q-input
           v-model="filterName"
@@ -251,7 +244,6 @@ onMounted(() => {
         </q-input>
       </div>
 
-      <!-- 2. Filtro por Actividad -->
       <div class="col-12 col-sm-4">
         <q-select
           outlined
@@ -269,7 +261,6 @@ onMounted(() => {
         />
       </div>
 
-      <!-- 3. Filtro por Mes de Cumpleaños -->
       <div class="col-12 col-sm-4">
         <q-select
           outlined
@@ -300,7 +291,6 @@ onMounted(() => {
     flat
     bordered
   >
-    <!-- Columna Personalizada para Estatus -->
     <template v-slot:body-cell-is_active="props">
       <q-td class="text-center">
         <q-toggle
@@ -313,14 +303,22 @@ onMounted(() => {
       </q-td>
     </template>
 
-    <!-- Columna Personalizada para Acciones -->
     <template v-slot:body-cell-actions="props">
       <q-td class="text-right">
+        <q-btn
+          icon="sym_o_visibility"
+          flat
+          dense
+          color="secondary"
+          @click="$router.push(`/donors/${props.row.id}`)"
+          title="Ver perfil completo"
+        />
         <q-btn
           icon="sym_o_edit"
           flat
           dense
           color="secondary"
+          title="Edicion Rapida"
           @click="openEdit(props.row)"
         />
       </q-td>
@@ -349,7 +347,7 @@ onMounted(() => {
 }
 .custom-link {
   text-decoration: none !important;
-  background-image: linear-sheet(to right, currentColor, currentColor);
+  background-image: linear-gradient(to right, currentColor, currentColor);
   background-position: 1.3em 100%;
   background-size: calc(100% - 1.3em) 1px;
   background-repeat: no-repeat;
