@@ -60,7 +60,7 @@ async function saveProgram() {
 }
 
 onMounted(async () => {
-  rows.value = (await api.get(`/programs`)).data.data
+  rows.value = (await api.get(`/admin/programs`)).data.data
 })
 </script>
 
