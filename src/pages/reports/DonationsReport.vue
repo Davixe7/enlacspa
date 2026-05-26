@@ -3,6 +3,7 @@ import { ref, onMounted, watch } from 'vue'
 import { api } from 'src/boot/axios'
 import { useRouter } from 'vue-router'
 import notify from 'src/utils/notify'
+import { exportXlsFile } from 'src/utils/exportXls'
 
 const loading = ref(false)
 const rows = ref([])
@@ -23,12 +24,24 @@ const searchDonor = ref('')
 const columns = [
   {
     name: 'donor_name',
-    label: 'NOMBRE DEL DONANTE',
+    label: 'NOMBRE DEL DONANTE / PADRINO',
     align: 'left',
     field: (row) => {
-      if (!row.donor) return 'N/A'
-      if (row.donor.full_name) return row.donor.full_name
-      return `${row.donor.first_name || ''} ${row.donor.last_name || ''}`.trim()
+      // 1. Intentar con Donante
+      if (row.donor) {
+        return (
+          row.donor.full_name ||
+          `${row.donor.first_name || ''} ${row.donor.last_name || ''} ${row.donor.second_last_name || ''}`.trim()
+        )
+      }
+      // 2. Intentar con Sponsor (Construimos el full_name manualmente)
+      if (row.sponsor) {
+        return (
+          `${row.sponsor.name || ''} ${row.sponsor.last_name || ''} ${row.sponsor.second_last_name || ''}`.trim() ||
+          'Sponsor sin nombre'
+        )
+      }
+      return 'N/A'
     },
     sortable: true
   },
@@ -103,6 +116,23 @@ async function fetchDonationsReport() {
   }
 }
 
+async function exportXls() {
+  loading.value = true
+  try {
+    await exportXlsFile(
+      '/reports/donations/export',
+      {
+        date_from: dateFrom.value,
+        date_to: dateTo.value,
+        search_donor: searchDonor.value
+      },
+      'Reporte_Donativos.xlsx'
+    )
+  } finally {
+    loading.value = false
+  }
+}
+
 // Escucha activa de filtros para recargar automáticamente
 watch([dateFrom, dateTo, searchDonor], () => {
   fetchDonationsReport()
@@ -115,7 +145,6 @@ onMounted(() => {
 
 <template>
   <q-page class="q-pa-lg bg-grey-3">
-    <!-- Botón de regreso y Título -->
     <div class="row items-center q-mb-md">
       <q-btn
         flat
@@ -126,24 +155,32 @@ onMounted(() => {
         class="q-mr-sm"
       />
       <h1 class="text-h5 text-weight-bold q-my-none text-dark">Reporte General de Donativos</h1>
+
+      <q-space />
+      <q-btn
+        unelevated
+        color="primary"
+        icon="sym_o_file_download"
+        label="Exportar Excel"
+        @click="exportXls"
+        :loading="loading"
+      />
     </div>
 
-    <!-- Panel de Filtros -->
-    <!-- Panel de Filtros -->
     <q-card
       flat
       bordered
       class="q-mb-lg"
     >
       <q-card-section class="row q-col-gutter-md items-center">
-        <!-- Filtro 1: Nombre Donante -->
-        <div class="col-12 col-md-4">
+        <div class="col-12 col-md-5">
           <q-input
             v-model="searchDonor"
             outlined
             dense
             bg-color="white"
-            placeholder="Buscar por nombre de donante..."
+            placeholder="Buscar por nombre de donante o padrino..."
+            hint="Escribe el nombre de un Donante o Padrino"
             debounce="400"
             clearable
           >
@@ -153,34 +190,33 @@ onMounted(() => {
           </q-input>
         </div>
 
-        <!-- Filtro 2: Fecha Desde -->
-        <div class="col-12 col-sm-6 col-md-3">
+        <div class="col-12 col-sm-6 col-md-2">
           <q-input
             v-model="dateFrom"
             outlined
             dense
             bg-color="white"
             type="date"
-            placeholder="Fecha inicio (Desde)"
+            hint="Fecha inicio (Desde)"
             clearable
+            stack-label
           />
         </div>
 
-        <!-- Filtro 3: Fecha Hasta -->
-        <div class="col-12 col-sm-6 col-md-3">
+        <div class="col-12 col-sm-6 col-md-2">
           <q-input
             v-model="dateTo"
             outlined
             dense
             bg-color="white"
             type="date"
-            placeholder="Fecha fin (Hasta)"
+            hint="Fecha fin (Hasta)"
             clearable
+            stack-label
           />
         </div>
 
-        <!-- Botón de Limpieza Rápida -->
-        <div class="col-12 col-md-2 text-right">
+        <div class="col-12 col-md-3 text-right">
           <q-btn
             flat
             color="negative"
@@ -193,7 +229,6 @@ onMounted(() => {
       </q-card-section>
     </q-card>
 
-    <!-- Tabla de Resultados -->
     <q-card
       flat
       bordered

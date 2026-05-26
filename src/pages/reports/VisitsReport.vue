@@ -3,6 +3,7 @@ import { ref, onMounted, watch } from 'vue'
 import { api } from 'src/boot/axios'
 import { useRouter } from 'vue-router'
 import notify from 'src/utils/notify'
+import { exportXlsFile } from 'src/utils/exportXls'
 
 const loading = ref(false)
 const rows = ref([])
@@ -34,8 +35,9 @@ const columns = [
     name: 'responsible_name',
     label: 'CONTACTO ENLAC RESPONSABLE',
     align: 'left',
-    field: (row) => (row.responsible ? row.responsible.name : 'N/A'),
-    sortable: true
+    field: (row) => (row.responsible ? row.responsible.full_name : 'N/A'),
+    sortable: true,
+    sort: (a, b) => a.localeCompare(b)
   },
   {
     name: 'sector',
@@ -122,6 +124,26 @@ function clearFilters() {
   selectedActivity.value = null
 }
 
+async function exportXls() {
+  loading.value = true
+  try {
+    await exportXlsFile(
+      '/reports/visits/export',
+      {
+        date_from: dateFrom.value,
+        date_to: dateTo.value,
+        activity_type: selectedActivity.value
+      },
+      `Reporte_Visitas_${dateFrom.value || 'Inicio'}_al_${dateTo.value || 'Fin'}.xlsx`
+    )
+  } catch (error) {
+    notify.negative('Error al descargar el archivo Excel')
+    console.error(error)
+  } finally {
+    loading.value = false
+  }
+}
+
 watch([dateFrom, dateTo, selectedActivity], () => {
   fetchVisitsReport()
 })
@@ -142,7 +164,18 @@ onMounted(() => {
         @click="$router.go(-1)"
         class="q-mr-sm"
       />
-      <h1 class="text-h5 text-weight-bold q-my-none text-dark">Reporte Metas y Visitas</h1>
+      <h1 class="text-h5 text-weight-bold q-my-none text-dark">Reporte de Visitas</h1>
+
+      <q-space />
+
+      <q-btn
+        unelevated
+        color="primary"
+        icon="sym_o_file_download"
+        label="Exportar Excel"
+        @click="exportXls"
+        :loading="loading"
+      />
     </div>
 
     <q-card
@@ -158,7 +191,7 @@ onMounted(() => {
             dense
             bg-color="white"
             type="date"
-            placeholder="Fecha inicio (Desde)"
+            hint="Fecha inicio (Desde)"
             clearable
           />
         </div>
@@ -170,7 +203,7 @@ onMounted(() => {
             dense
             bg-color="white"
             type="date"
-            placeholder="Fecha fin (Hasta)"
+            hint="Fecha fin (Hasta)"
             clearable
           />
         </div>
@@ -182,7 +215,7 @@ onMounted(() => {
             outlined
             dense
             bg-color="white"
-            placeholder="Seleccionar Tipo de Actividad"
+            hint="Seleccionar Tipo de Actividad"
             clearable
           />
         </div>

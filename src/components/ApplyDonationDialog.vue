@@ -88,13 +88,13 @@ async function filterDonors(val, update, abort) {
     return
   }
   try {
-    const response = await api.get(`/donors?search=${val}`)
-    const dataFetched = response.data.data || response.data || []
+    const response = await api.get(`/donors/search-all?search=${val}`)
+    const dataFetched = response.data || []
     update(() => {
       donorOptions.value = dataFetched
     })
   } catch (e) {
-    console.error('Error al filtrar donantes:', e)
+    console.error('Error al filtrar:', e)
     abort()
   }
 }
@@ -123,15 +123,28 @@ async function filterBeneficiaries(val, update, abort) {
 // Cambios en Donante
 watch(
   () => form.value.donor_id,
-  (newDonor) => {
+  (newVal) => {
     form.value.fiscal_record_id = null
-    if (newDonor && newDonor.fiscal_records && newDonor.fiscal_records.length > 0) {
-      fiscalOptions.value = newDonor.fiscal_records
-      if (newDonor.fiscal_records.length === 1) {
-        form.value.fiscal_record_id = newDonor.fiscal_records[0].id
+    fiscalOptions.value = []
+
+    if (!newVal) return
+
+    if (newVal.origin === 'donante') {
+      if (newVal.fiscal_records?.length > 0) {
+        fiscalOptions.value = newVal.fiscal_records
+        if (newVal.fiscal_records.length === 1) {
+          form.value.fiscal_record_id = newVal.fiscal_records[0].id
+        }
       }
-    } else {
-      fiscalOptions.value = []
+    } else if (newVal.origin === 'sponsor') {
+      fiscalOptions.value = [
+        {
+          id: 'sponsor-' + newVal.id, // ID único para diferenciarlo
+          tax_name: newVal.company_name || newVal.full_name, // Su razón social
+          rfc: 'N/A'
+        }
+      ]
+      form.value.fiscal_record_id = 'sponsor-' + newVal.id
     }
   }
 )
@@ -195,7 +208,8 @@ async function save() {
 
     const payload = {
       ...form.value,
-      donor_id: form.value.donor_id?.id || null,
+      donor_id: form.value.donor_id?.origin === 'donante' ? form.value.donor_id.id : null,
+      sponsor_id: form.value.donor_id?.origin === 'sponsor' ? form.value.donor_id.id : null,
       beneficiary_id: form.value.beneficiary_id?.id || null
     }
 
@@ -209,6 +223,51 @@ async function save() {
     } else {
       notify.negative('Error al guardar el donativo')
     }
+  } finally {
+    loading.value = false
+  }
+}
+
+async function saveAndPrint() {
+  try {
+    loading.value = true
+    errors.value = {}
+
+    const payload = {
+      ...form.value,
+      donor_id: form.value.donor_id?.origin === 'donante' ? form.value.donor_id.id : null,
+      sponsor_id: form.value.donor_id?.origin === 'sponsor' ? form.value.donor_id.id : null,
+      fiscal_record_id:
+        typeof form.value.fiscal_record_id === 'string' &&
+        form.value.fiscal_record_id.startsWith('sponsor-')
+          ? null
+          : form.value.fiscal_record_id,
+      beneficiary_id: form.value.beneficiary_id?.id || null
+    }
+
+    const response = await api.post('/donations/print', payload, {
+      responseType: 'blob'
+    })
+
+    // ... el resto del código sigue igual
+
+    // 2. Creamos el objeto URL y forzamos la descarga
+    const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `recibo_donativo_${Date.now()}.pdf`)
+    document.body.appendChild(link)
+    link.click()
+
+    // 3. Limpieza
+    link.parentNode.removeChild(link)
+    window.URL.revokeObjectURL(url)
+
+    notify.positive('Donativo registrado y Ticket generado.')
+    dialog.value = false
+  } catch (error) {
+    console.error('Error al generar PDF:', error)
+    notify.negative('Error al guardar o generar el PDF')
   } finally {
     loading.value = false
   }
@@ -295,16 +354,25 @@ defineExpose({ open })
                     <template v-slot:option="scope">
                       <q-item v-bind="scope.itemProps">
                         <q-item-section>
-                          <q-item-label>{{ scope.opt.full_name }}</q-item-label>
+                          <q-item-label>
+                            {{ scope.opt.full_name }}
+                            <q-badge :color="scope.opt.origin === 'donante' ? 'primary' : 'orange'">
+                              {{ scope.opt.origin === 'donante' ? 'Donante' : 'Padrino' }}
+                            </q-badge>
+                          </q-item-label>
+
+                          <!-- Solo mostramos registros fiscales si es Donante -->
                           <q-item-label
                             caption
-                            v-if="scope.opt.fiscal_records?.length"
+                            v-if="
+                              scope.opt.origin === 'donante' && scope.opt.fiscal_records?.length
+                            "
                           >
                             Contiene {{ scope.opt.fiscal_records.length }} registro(s) fiscal(es)
                           </q-item-label>
                           <q-item-label
                             caption
-                            v-else
+                            v-else-if="scope.opt.origin === 'donante'"
                             class="text-amber-9"
                           >
                             Sin registros fiscales
@@ -329,6 +397,7 @@ defineExpose({ open })
                     clearable
                     :options="fiscalOptions"
                     option-value="id"
+                    option-label="tax_name"
                     map-options
                     emit-value
                     :disable="!form.donor_id || fiscalOptions.length === 0"
@@ -423,12 +492,12 @@ defineExpose({ open })
                 <tr>
                   <td class="text-bold">No. de Bote / 10%</td>
                   <td>
-                    <div class="row q-col-gutter-xs">
+                    <div class="row q-col-gutter-sm">
                       <q-input
                         v-model="form.boteo_can_number"
                         outlined
                         dense
-                        label="No. Bote"
+                        placeholder="No. de Bote"
                         class="col-6"
                         hide-bottom-space
                       />
@@ -436,7 +505,7 @@ defineExpose({ open })
                         v-model="form.boteo_ten_percent"
                         outlined
                         dense
-                        label="10% (Autocalculado)"
+                        placeholder="10% (Autocalculado)"
                         readonly
                         class="col-6"
                         bg-color="grey-2"
@@ -648,7 +717,7 @@ defineExpose({ open })
                     v-model="form.tax_receipt_number"
                     outlined
                     dense
-                    label="No. de Recibo"
+                    placeholder="No. de Recibo"
                     class="q-ml-md"
                     hide-bottom-space
                   />
@@ -663,14 +732,24 @@ defineExpose({ open })
               label="Cancelar"
               v-close-popup
             />
+
             <q-btn
               unelevated
-              icon="save"
-              label="Confirmar y Guardar"
+              icon="print"
+              label="Guardar e Imprimir"
               color="primary"
-              type="submit"
+              @click="saveAndPrint"
               :loading="loading"
             />
+
+            <!-- <q-btn
+              unelevated
+              icon="save"
+              label="Guardar"
+              color="primary"
+              @click="save"
+              :loading="loading"
+            /> -->
           </div>
         </q-form>
       </q-card-section>

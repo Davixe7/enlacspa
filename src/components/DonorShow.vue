@@ -53,16 +53,14 @@ async function loadDonorData() {
 // Formateador de fechas legible
 function formatDate(isoString) {
   if (!isoString) return 'N/A'
-  const date = new Date(isoString)
-  if (isNaN(date.getTime())) return isoString
 
-  const day = String(date.getDate()).padStart(2, '0')
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const year = date.getFullYear()
-  const hours = String(date.getHours()).padStart(2, '0')
-  const minutes = String(date.getMinutes()).padStart(2, '0')
+  // Si la fecha ya viene como 2026-05-25, el Date constructor puede ser engañoso por la zona horaria
+  // Si el backend envía 'YYYY-MM-DD', puedes usar este split rápido:
+  const [year, month, day] = isoString.split('T')[0].split('-')
 
-  return `${day}/${month}/${year} a las ${hours}:${minutes} hrs`
+  if (!year || !month || !day) return isoString
+
+  return `${day}/${month}/${year}`
 }
 
 // Funciones para abrir modales
@@ -102,33 +100,26 @@ onMounted(loadDonorData)
           <!-- Sección Identidad -->
           <div class="col-12 col-md-4">
             <div class="text-subtitle2 text-primary text-weight-bold q-mb-md">Identidad</div>
-            <q-list
-              dense
-              separator
-            >
-              <q-item>
-                <q-item-section side>ID:</q-item-section>
-                <q-item-section class="text-weight-bold">{{ donor.id }}</q-item-section>
-              </q-item>
-              <q-item>
-                <q-item-section side>Nombre:</q-item-section>
-                <q-item-section class="text-weight-bold">{{ donor.full_name }}</q-item-section>
-              </q-item>
-              <q-item>
-                <q-item-section side>Preferido:</q-item-section>
-                <q-item-section>{{ donor.preferred_name || 'N/A' }}</q-item-section>
-              </q-item>
-              <q-item>
-                <q-item-section side>Estado Civil:</q-item-section>
-                <q-item-section>{{ donor.marital_status || 'N/A' }}</q-item-section>
-              </q-item>
-              <q-item>
-                <q-item-section side>Género:</q-item-section>
-                <q-item-section>{{ donor.gender || 'N/A' }}</q-item-section>
-              </q-item>
-              <q-item>
-                <q-item-section side>Nacimiento:</q-item-section>
-                <q-item-section>{{ donor.birth_date || 'N/A' }}</q-item-section>
+            <q-list dense>
+              <q-item
+                v-for="(val, label) in {
+                  'ID:': donor.id,
+                  'Nombre:': donor.full_name,
+                  'Preferido:': donor.preferred_name || 'N/A',
+                  'Estado Civil:': donor.marital_status || 'N/A',
+                  'Género:': donor.gender || 'N/A',
+                  'Nacimiento:': donor.birth_date || 'N/A'
+                }"
+                :key="label"
+                class="row"
+              >
+                <q-item-section
+                  side
+                  class="text-weight-bold text-grey-8"
+                  style="width: 100px"
+                  >{{ label }}</q-item-section
+                >
+                <q-item-section>{{ val }}</q-item-section>
               </q-item>
             </q-list>
           </div>
@@ -138,46 +129,58 @@ onMounted(loadDonorData)
             <div class="text-subtitle2 text-primary text-weight-bold q-mb-md">
               Contacto y Domicilio
             </div>
-            <q-list
-              dense
-              separator
-            >
-              <q-item>
-                <q-item-section side>Celular:</q-item-section>
-                <q-item-section>{{ donor.cellphone || 'N/A' }}</q-item-section>
-              </q-item>
-              <q-item>
-                <q-item-section side>Fijo:</q-item-section>
-                <q-item-section>{{ donor.landline || 'N/A' }}</q-item-section>
-              </q-item>
-              <q-item>
-                <q-item-section side>Email:</q-item-section>
-                <q-item-section>{{ donor.personal_email || 'N/A' }}</q-item-section>
-              </q-item>
-              <q-item>
-                <q-item-section side>Sector:</q-item-section>
-                <q-item-section>{{ donor.sector || 'N/A' }}</q-item-section>
-              </q-item>
-              <q-item>
-                <q-item-section side>Domicilio:</q-item-section>
-                <q-item-section>
-                  {{
-                    [
-                      donor.street,
-                      donor.exterior_number,
-                      donor.neighborhood,
-                      donor.city,
-                      donor.state,
-                      donor.country
-                    ]
-                      .filter(Boolean)
-                      .join(', ') || 'N/A'
-                  }}
-                </q-item-section>
-              </q-item>
-              <q-item>
-                <q-item-section side>CP:</q-item-section>
-                <q-item-section>{{ donor.postal_code || 'N/A' }}</q-item-section>
+            <q-list dense>
+              <q-item class="row"
+                ><q-item-section
+                  side
+                  class="text-weight-bold text-grey-8"
+                  style="width: 100px"
+                  >Celular:</q-item-section
+                ><q-item-section>{{ donor.cellphone || 'N/A' }}</q-item-section></q-item
+              >
+              <q-item class="row"
+                ><q-item-section
+                  side
+                  class="text-weight-bold text-grey-8"
+                  style="width: 100px"
+                  >Fijo:</q-item-section
+                ><q-item-section>{{ donor.landline || 'N/A' }}</q-item-section></q-item
+              >
+              <q-item class="row"
+                ><q-item-section
+                  side
+                  class="text-weight-bold text-grey-8"
+                  style="width: 100px"
+                  >Email:</q-item-section
+                ><q-item-section>{{ donor.personal_email || 'N/A' }}</q-item-section></q-item
+              >
+              <q-item class="row"
+                ><q-item-section
+                  side
+                  class="text-weight-bold text-grey-8"
+                  style="width: 100px"
+                  >Sector:</q-item-section
+                ><q-item-section>{{ donor.sector || 'N/A' }}</q-item-section></q-item
+              >
+              <q-item class="row items-start"
+                ><q-item-section
+                  side
+                  class="text-weight-bold text-grey-8"
+                  style="width: 100px"
+                  >Domicilio:</q-item-section
+                >
+                <q-item-section class="text-caption">{{
+                  [
+                    donor.street,
+                    donor.exterior_number,
+                    donor.neighborhood,
+                    donor.city,
+                    donor.state,
+                    donor.country
+                  ]
+                    .filter(Boolean)
+                    .join(', ') || 'N/A'
+                }}</q-item-section>
               </q-item>
             </q-list>
           </div>
@@ -187,60 +190,56 @@ onMounted(loadDonorData)
             <div class="text-subtitle2 text-primary text-weight-bold q-mb-md">
               Profesional y Estatus
             </div>
-            <q-list
-              dense
-              separator
-            >
-              <q-item>
-                <q-item-section side>Empresa:</q-item-section>
-                <q-item-section>{{ donor.company_name || 'N/A' }}</q-item-section>
-              </q-item>
-              <q-item>
-                <q-item-section side>Puesto:</q-item-section>
-                <q-item-section>{{ donor.job_title || 'N/A' }}</q-item-section>
-              </q-item>
-              <q-item>
-                <q-item-section side>Referido por:</q-item-section>
-                <q-item-section>
-                  {{ donor.referred_by || 'N/A' }}
-                  <span
-                    v-if="donor.referral_relationship"
-                    class="text-caption text-grey-7"
-                  >
-                    ({{ donor.referral_relationship }})
-                  </span>
-                </q-item-section>
-              </q-item>
-              <q-item>
-                <q-item-section side>Prospecto para:</q-item-section>
-                <q-item-section>{{ donor.prospect_for || 'N/A' }}</q-item-section>
-              </q-item>
-              <q-item>
-                <q-item-section side>Estatus:</q-item-section>
-                <q-item-section>
+            <q-list dense>
+              <q-item class="row"
+                ><q-item-section
+                  side
+                  class="text-weight-bold text-grey-8"
+                  style="width: 100px"
+                  >Empresa:</q-item-section
+                ><q-item-section>{{ donor.company_name || 'N/A' }}</q-item-section></q-item
+              >
+              <q-item class="row"
+                ><q-item-section
+                  side
+                  class="text-weight-bold text-grey-8"
+                  style="width: 100px"
+                  >Puesto:</q-item-section
+                ><q-item-section>{{ donor.job_title || 'N/A' }}</q-item-section></q-item
+              >
+              <q-item class="row">
+                <q-item-section
+                  side
+                  class="text-weight-bold text-grey-8"
+                  style="width: 100px"
+                  >Estatus:</q-item-section
+                >
+                <!-- Aquí corregimos el tamaño del badge -->
+                <q-item-section side>
                   <q-badge
                     :color="donor.is_active ? 'positive' : 'negative'"
                     class="q-px-sm"
                   >
-                    {{ donor.is_active ? 'Activo' : 'Inactivo' }}
+                    {{ donor.is_active ? 'ACTIVO' : 'INACTIVO' }}
                   </q-badge>
                 </q-item-section>
+                <q-item-section></q-item-section>
               </q-item>
-              <q-item>
-                <q-item-section side>Privado:</q-item-section>
-                <q-item-section>{{ donor.is_private_contact ? 'SÍ' : 'No' }}</q-item-section>
-              </q-item>
-              <q-item>
-                <q-item-section side>Instalaciones:</q-item-section>
-                <q-item-section>{{
-                  donor.knows_facilities ? 'Las conoce' : 'No las conoce'
-                }}</q-item-section>
-              </q-item>
+              <q-item class="row"
+                ><q-item-section
+                  side
+                  class="text-weight-bold text-grey-8"
+                  style="width: 100px"
+                  >Privado:</q-item-section
+                ><q-item-section>{{
+                  donor.is_private_contact ? 'SÍ' : 'No'
+                }}</q-item-section></q-item
+              >
             </q-list>
           </div>
         </div>
 
-        <!-- Sección Cónyuge -->
+        <!-- Cónyuge (Sección mantenida igual por estética) -->
         <div class="row q-mt-lg">
           <div class="col-12">
             <div class="text-subtitle2 text-primary text-weight-bold q-mb-sm">
@@ -256,10 +255,10 @@ onMounted(loadDonorData)
                 }}
               </div>
               <div class="col-12 col-md-4">
-                <strong>Nacimiento Cónyuge:</strong> {{ donor.spouse_birth_date || 'N/A' }}
+                <strong>Nacimiento:</strong> {{ donor.spouse_birth_date || 'N/A' }}
               </div>
               <div class="col-12 col-md-4">
-                <strong>Aniversario de Bodas:</strong> {{ donor.wedding_anniversary || 'N/A' }}
+                <strong>Aniversario:</strong> {{ donor.wedding_anniversary || 'N/A' }}
               </div>
             </div>
           </div>
@@ -416,7 +415,7 @@ onMounted(loadDonorData)
               v-for="visit in donor.visits"
               :key="visit.id"
             >
-              <td>{{ visit.visit_date }}</td>
+              <td>{{ formatDate(visit.visit_date) }}</td>
               <td>{{ visit.responsible?.name }} {{ visit.responsible?.last_name }}</td>
               <td>{{ visit.reason }}</td>
               <td class="text-right">
@@ -469,7 +468,7 @@ onMounted(loadDonorData)
               v-for="gratitude in donor.gratitudes"
               :key="gratitude.id"
             >
-              <td>{{ gratitude.date }}</td>
+              <td>{{ formatDate(gratitude.date) }}</td>
               <td>{{ gratitude.campaign_program }}</td>
               <td>{{ gratitude.type }}</td>
               <td>{{ gratitude.delivery_method }}</td>
@@ -524,7 +523,7 @@ onMounted(loadDonorData)
               v-for="shipment in donor.shipments"
               :key="shipment.id"
             >
-              <td>{{ shipment.date }}</td>
+              <td>{{ formatDate(shipment.date) }}</td>
               <td>{{ shipment.material_description }}</td>
               <td>{{ shipment.delivery_method }}</td>
               <td class="text-right">
@@ -634,6 +633,48 @@ onMounted(loadDonorData)
       </q-card-section>
     </q-card>
 
+    <q-card
+      flat
+      bordered
+      class="q-mb-xl"
+    >
+      <q-card-section class="row items-center q-py-md bg-grey-1">
+        <div class="text-h6 text-grey-9 text-weight-medium">Historial de Cambios de Estatus</div>
+      </q-card-section>
+
+      <q-card-section class="q-pa-none">
+        <q-markup-table flat>
+          <thead>
+            <tr class="bg-grey-1 text-grey-7">
+              <th class="text-left">Estatus Cambiado a</th>
+              <th class="text-left">Fecha y Hora</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="log in donor.status_logs"
+              :key="log.id"
+            >
+              <td>
+                <q-badge :color="log.is_active ? 'positive' : 'negative'">
+                  {{ log.is_active ? 'ACTIVO' : 'INACTIVO' }}
+                </q-badge>
+              </td>
+              <td>{{ formatDate(log.changed_at) }}</td>
+            </tr>
+            <tr v-if="!donor.status_logs || donor.status_logs.length === 0">
+              <td
+                colspan="2"
+                class="text-center text-grey-6 q-py-md"
+              >
+                No hay historial de cambios registrado.
+              </td>
+            </tr>
+          </tbody>
+        </q-markup-table>
+      </q-card-section>
+    </q-card>
+
     <!-- Modales -->
     <DonorVisitModal
       ref="visitModalRef"
@@ -653,4 +694,3 @@ onMounted(loadDonorData)
     />
   </q-page>
 </template>
-s
