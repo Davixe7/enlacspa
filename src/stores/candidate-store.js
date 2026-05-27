@@ -23,11 +23,6 @@ export const useCandidateStore = defineStore('candidate', {
     picture: null,
     evaluation_schedule: null,
     status: 'pendiente',
-    interviewee: {
-      name: '',
-      relationship: '',
-      legal_relationship: 'biologico'
-    },
     program: null,
     medications: [],
     requires_transport: 0,

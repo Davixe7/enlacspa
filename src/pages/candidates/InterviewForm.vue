@@ -16,8 +16,6 @@ const interviewQuestions = ref([])
 
 const interview = ref({
   id: null,
-  interviewee_name: 'John Doe',
-  interviewee_relationship: 'padre',
   candidate_id: props.candidateId,
   content: '',
   observation: '',
@@ -27,9 +25,30 @@ const interview = ref({
   answers: []
 })
 
+const relationships = [
+  { label: 'Abuelo(a)', value: 'abuelo' },
+  { label: 'Hermano(a)', value: 'hermano' },
+  { label: 'Hermanastro(a)', value: 'hermanastro' },
+  { label: 'Madre/Padre', value: 'madre_padre' },
+  { label: 'Padrastro/Madrastra', value: 'padrastro_madrastra' },
+  { label: 'Primo(a)', value: 'primo' },
+  { label: 'Tío(a)', value: 'tio' }
+]
+
+const interviewee = ref({
+  id: null,
+  candidate_id: props.candidateId,
+  name: '',
+  relationship: null,
+  legal_relationship: 'biologico'
+})
+
 async function fetchInterview() {
   try {
-    interview.value = (await api.get(`/interviews/?candidate_id=${props.candidateId}`)).data.data
+    let response = (await api.get(`/interviews/?candidate_id=${props.candidateId}`)).data.data
+    const { interviewee: intervieweeData, ...rest } = response
+    interview.value = rest
+    interviewee.value = intervieweeData
   } catch (error) {
     if (error.status == 404) return
   }
@@ -43,7 +62,7 @@ async function storeInterview() {
   loading.value = true
   errors.value = {}
   let route = interview.value.id ? `interviews/${interview.value.id}` : 'interviews'
-  let data = { ...interview.value, interviewee: store.interviewee }
+  let data = { ...interview.value, interviewee: interviewee.value }
   if (interview.value.id) {
     data._method = 'PUT'
   }
@@ -145,8 +164,47 @@ onMounted(async () => {
       v-if="store.status"
       :candidate-id="candidateId"
       :errors="errors"
-      type="interview"
-    />
+    >
+      <div class="flex column justify-between q-px-md q-gutter-y-md">
+        <div>
+          <q-input
+            label="Nombre del entrevistado"
+            outlined
+            stack-label
+            v-model="interviewee.name"
+            :error="!!errors['interviewee.name']"
+            :error-message="errors['interviewee.name']"
+          />
+        </div>
+        <div>
+          <q-select
+            outlined
+            stack-label
+            hide-bottom-space
+            label="Parentesco"
+            v-model="interviewee.relationship"
+            :error="!!errors['interviewee.relationship']"
+            :error-message="errors['interviewee.relationship']"
+            :options="relationships"
+            emit-value
+            map-options
+          />
+        </div>
+        <div style="margin-left: -8px">
+          <q-radio
+            v-model="interviewee.legal_relationship"
+            val="biologico"
+            label="Hijo Biológico"
+            class="q-mr-md"
+          />
+          <q-radio
+            v-model="interviewee.legal_relationship"
+            val="adoptivo"
+            label="Hijo Adoptivo"
+          />
+        </div>
+      </div>
+    </CandidateProfile>
 
     <div class="label-alt-2">Lista de preguntas</div>
 

@@ -21,16 +21,6 @@ const props = defineProps({
 
 const store = useCandidateStore()
 
-const relationships = [
-  { label: 'Abuelo(a)', value: 'abuelo' },
-  { label: 'Hermano(a)', value: 'hermano' },
-  { label: 'Hermanastro(a)', value: 'hermanastro' },
-  { label: 'Madre/Padre', value: 'madre_padre' },
-  { label: 'Padrastro/Madrastra', value: 'padrastro_madrastra' },
-  { label: 'Primo(a)', value: 'primo' },
-  { label: 'Tío(a)', value: 'tio' }
-]
-
 onMounted(async () => {
   if (!props.candidateId) {
     return
@@ -75,51 +65,8 @@ onMounted(async () => {
       </div>
     </div>
 
-    <div
-      v-if="type == 'interview'"
-      class="flex column justify-between q-px-md q-gutter-y-md"
-    >
-      <div>
-        <q-input
-          label="Nombre del entrevistado"
-          outlined
-          stack-label
-          v-model="store.interviewee.name"
-          :error="!!errors['interviewee.name']"
-          :error-message="errors['interviewee.name']"
-        />
-      </div>
-      <div>
-        <q-select
-          outlined
-          stack-label
-          hide-bottom-space
-          label="Parentesco"
-          v-model="store.interviewee.relationship"
-          :error="!!errors['interviewee.relationship']"
-          :error-message="errors['interviewee.relationship']"
-          :options="relationships"
-          emit-value
-          map-options
-        />
-      </div>
-      <div style="margin-left: -8px">
-        <q-radio
-          v-model="store.interviewee.legal_relationship"
-          val="biologico"
-          label="Hijo Biológico"
-          class="q-mr-md"
-        />
-        <q-radio
-          v-model="store.interviewee.legal_relationship"
-          val="adoptivo"
-          label="Hijo Adoptivo"
-        />
-      </div>
-    </div>
-
-    <div
-      v-else-if="store.evaluation_schedule?.evaluator?.name"
+    <!-- <div
+      v-if="store.evaluation_schedule?.evaluator?.name"
       class="flex column justify-between q-px-md q-gutter-y-md"
     >
       <q-input
@@ -128,6 +75,8 @@ onMounted(async () => {
         stack-label
         v-model="store.evaluation_schedule.evaluator.name"
       />
-    </div>
+    </div> -->
+
+    <slot></slot>
   </div>
 </template>
