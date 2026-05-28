@@ -31,6 +31,12 @@ const plan = ref({
   activities: []
 })
 
+const REQUIRED_LABELS = ['Físico', 'Gimnasia', 'Natación', 'Equinoterapia']
+
+const isRequiredCategory = computed(() => {
+  return category.value && REQUIRED_LABELS.includes(category.value.label)
+})
+
 async function fetchPlan() {
   if (!props.planId) return
   try {
@@ -57,9 +63,15 @@ async function fetchCategories() {
 async function fetchPlanTypes() {
   try {
     loading.value = true
-    planTypes.value = (
-      await api.get(`plan_types/?plan_category_id=${plan.value.category_id}`)
-    ).data.data
+    const response = (await api.get(`plan_types/?plan_category_id=${plan.value.category_id}`)).data
+      .data
+
+    // Filtrar duplicados basados en el label
+    const uniqueTypes = response.filter(
+      (value, index, self) => index === self.findIndex((t) => t.label === value.label)
+    )
+
+    planTypes.value = uniqueTypes
   } catch (error) {
     notify.negative('Error al cargar los tipos de plan')
     console.log(error)
@@ -69,6 +81,17 @@ async function fetchPlanTypes() {
 }
 
 async function savePlan() {
+  if (isRequiredCategory.value) {
+    const hasMissing = plan.value.activities.some(
+      (a) => !a.intensity || !a.frequency || !a.duration
+    )
+    if (hasMissing) {
+      notify.negative(
+        'La Intensidad, Frecuencia y Duración son obligatorias para cada actividad en planes Físicos/Gimnasia/Natación/Equinoterapia.'
+      )
+      return
+    }
+  }
   try {
     loading.value = true
     let data = {
@@ -171,6 +194,7 @@ onMounted(async () => {
             outlined
             label="Fecha de inicio"
             v-model="plan.start_date"
+            :limit-to-past="false"
           />
         </div>
         <div class="col">
@@ -193,6 +217,14 @@ onMounted(async () => {
         :false-value="0"
       />
     </div>
+  </div>
+
+  <div
+    v-if="isRequiredCategory"
+    class="q-mb-md text-negative text-weight-bold"
+  >
+    <q-icon name="warning" /> Se requiere completar Intensidad, Frecuencia y Duración en cada
+    actividad.
   </div>
 
   <PlanActivities

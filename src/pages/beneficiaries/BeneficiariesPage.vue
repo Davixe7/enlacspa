@@ -48,7 +48,14 @@ const sortable = true
 
 const rows = ref([])
 const columns = ref([
-  { name: 'name', label: 'Nombre del Beneficiario', field: 'name', align: 'left', sortable },
+  {
+    name: 'name',
+    label: 'Nombre del Beneficiario',
+    field: 'name',
+    align: 'left',
+    sortable: true,
+    sort: (a, b) => a.localeCompare(b)
+  },
   { name: 'sheet', label: 'Folio', field: 'id', align: 'left', sortable },
   { name: 'status', label: 'Estado del beneficiario', align: 'left', sortable },
   { name: 'program_name', label: 'Programa', field: 'program_name', align: 'left', sortable },

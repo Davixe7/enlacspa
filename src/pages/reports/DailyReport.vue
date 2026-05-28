@@ -9,12 +9,20 @@ import AbsenceForm from 'src/components/AbsenceForm.vue'
 import { exportXlsFile } from 'src/utils/exportXls'
 
 const loading = ref(true)
-
 const props = defineProps(['candidateId'])
 
 const selectedDate = ref(new Date().toISOString().split('T')[0])
 const issuesDialog = ref(false)
 const absenceDialog = ref(false)
+
+// Ref para la tabla
+const dailyIssuesRef = ref(null)
+
+function handleIssueSaved() {
+  if (dailyIssuesRef.value) {
+    dailyIssuesRef.value.fetchIssues()
+  }
+}
 
 async function exportXls() {
   loading.value = true
@@ -52,6 +60,7 @@ async function exportXls() {
         <IssuesForm
           :candidate-id="candidateId"
           @close="issuesDialog = false"
+          @saved="handleIssueSaved"
         />
       </q-card>
     </q-dialog>
@@ -86,7 +95,6 @@ async function exportXls() {
         v-model="selectedDate"
         class="q-mr-md"
       />
-
       <div class="q-gutter-x-md q-ml-auto flex">
         <q-btn
           outline
@@ -117,6 +125,7 @@ async function exportXls() {
       class="q-mb-xl"
     />
     <DailyIssues
+      ref="dailyIssuesRef"
       :candidate-id="candidateId"
       :date="selectedDate"
       class="q-mb-xl"

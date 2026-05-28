@@ -4,9 +4,7 @@ import { ref, onMounted } from 'vue'
 
 const props = defineProps(['planId'])
 const loading = ref(false)
-const program = ref({
-  activities: []
-})
+const program = ref(null)
 
 async function fetchProgram() {
   try {
@@ -27,13 +25,6 @@ onMounted(async () => {
 <template>
   <div class="flex items-center">
     <div class="page-title">Detalles del Programa</div>
-    <!--   <q-btn
-      outline
-      class="q-ml-auto"
-      color="primary"
-      label="Nuevo"
-      icon="sym_o_add"
-    /> -->
   </div>
 
   <div
@@ -45,11 +36,7 @@ onMounted(async () => {
   </div>
 
   <div class="row">
-    <div
-      class="col-md-10 q-mx-auto"
-      @drop="onDrop"
-      @dragover.prevent=""
-    >
+    <div class="col-md-10 q-mx-auto">
       <q-markup-table
         flat
         bordered
@@ -59,13 +46,12 @@ onMounted(async () => {
           <tr>
             <th class="text-left">Actividad</th>
             <th class="text-left">Unidad</th>
-            <th
-              class="text-left"
-              style="white-space: nowrap"
-            >
-              Tipo de Meta
-            </th>
+            <th class="text-left">Tipo de Meta</th>
             <th class="text-left">Meta diaria</th>
+            <th class="text-left">Meta final</th>
+            <th class="text-left">Intensidad</th>
+            <th class="text-left">Frecuencia</th>
+            <th class="text-left">Duración</th>
           </tr>
         </thead>
         <tbody>
@@ -76,7 +62,11 @@ onMounted(async () => {
             <td>{{ activity.name }}</td>
             <td>{{ activity.measurement_unit }}</td>
             <td>{{ activity.goal_type }}</td>
-            <td>{{ activity.daily_goal }}</td>
+            <td>{{ activity.daily_goal || 'N/A' }}</td>
+            <td>{{ (activity.final_goal ?? activity.pivot?.final_goal) || 'N/A' }}</td>
+            <td>{{ (activity.intensity ?? activity.pivot?.intensity) || 'N/A' }}</td>
+            <td>{{ (activity.frequency ?? activity.pivot?.frequency) || 'N/A' }}</td>
+            <td>{{ (activity.duration ?? activity.pivot?.duration) || 'N/A' }}</td>
           </tr>
         </tbody>
       </q-markup-table>

@@ -101,6 +101,10 @@ function setActivity(activity) {
 
 const instructables = ['fisico', 'natacion', 'gimnasia', 'equinoterapia']
 
+function inputClass(val) {
+  return !val && instructables.includes(props.category?.name) ? 'error-border' : ''
+}
+
 onMounted(() => {
   fetchActivities()
   fetchSubcategories()
@@ -138,35 +142,38 @@ onMounted(() => {
       <q-markup-table>
         <tbody>
           <tr>
-            <td>Intensidad</td>
+            <td>Intensidad <span class="text-negative">*</span></td>
             <td>
               <q-input
                 outlined
                 stack-label
                 hide-bottom-space
                 v-model="selectedActivity.intensity"
+                :class="inputClass(selectedActivity.intensity)"
               />
             </td>
           </tr>
           <tr>
-            <td>Frencuencia</td>
+            <td>Frecuencia <span class="text-negative">*</span></td>
             <td>
               <q-input
                 outlined
                 stack-label
                 hide-bottom-space
                 v-model="selectedActivity.frequency"
+                :class="inputClass(selectedActivity.frequency)"
               />
             </td>
           </tr>
           <tr>
-            <td>Duración</td>
+            <td>Duración <span class="text-negative">*</span></td>
             <td>
               <q-input
                 outlined
                 stack-label
                 hide-bottom-space
                 v-model="selectedActivity.duration"
+                :class="inputClass(selectedActivity.duration)"
               />
             </td>
           </tr>
@@ -340,3 +347,9 @@ onMounted(() => {
     </div>
   </div>
 </template>
+<style scoped>
+.error-border {
+  border: 1px solid #c10015;
+  border-radius: 4px;
+}
+</style>

@@ -9,27 +9,15 @@ const emit = defineEmits(['update:modelValue', 'save'])
 
 const candidateStore = useCandidateStore()
 
-function isValidGoogleMapsLink(url) {
-  return (
-    /^https?:\/\/(www\.)?google\.[a-z]+\/maps/.test(url) ||
-    /^https?:\/\/maps\.app\.goo\.gl/.test(url)
-  )
-}
-
-/* function openGoogleMaps() {
-  if (isValidGoogleMapsLink(model.value.transport_location_link)) {
-    window.open(model.value.transport_location_link, '_blank')
-  }
-}
- */
 async function saveTransport() {
   try {
     loading.value = true
-    await candidateStore.saveLocation(model.value)
+    const payload = { ...model.value, candidate_id: candidateStore.id }
+    await candidateStore.saveLocation(payload)
     notify.positive('Datos de transporte actualizados correctamente.')
     emit('close')
   } catch (error) {
-    console.log(error)
+    console.error(error)
     notify.negative('Error al guardar los datos.')
   } finally {
     loading.value = false
@@ -51,34 +39,37 @@ async function saveTransport() {
         filled
         class="q-mb-md"
       />
+
       <q-input
         outlined
         v-model="model.transport_location_link"
         label="Ubicación (Google Maps)"
         filled
-        type="url"
-        class="q-mb-sm"
+        class="q-mb-md"
+        hint="Pega aquí el enlace de Google Maps"
       />
 
-      <template v-if="isValidGoogleMapsLink(model.transport_location_link)">
-        <div class="form-label q-mt-md">Vista previa del mapa</div>
-        <iframe
-          :src="model.transport_location_link"
-          width="100%"
-          height="300"
-          style="border: 0"
-          allowfullscreen
-          loading="lazy"
-          referrerpolicy="no-referrer-when-downgrade"
+      <!-- Botón de acción rápida -->
+      <div
+        v-if="model.transport_location_link"
+        class="q-mb-md"
+      >
+        <q-btn
+          label="Abrir ubicación en Google Maps"
+          color="secondary"
+          icon="open_in_new"
+          outline
+          target="_blank"
+          :href="model.transport_location_link"
+          class="full-width"
         />
-      </template>
+      </div>
 
       <q-input
         outlined
         v-model="model.curp"
         label="CURP"
         filled
-        class="q-mt-md"
       />
     </q-card-section>
 
@@ -86,6 +77,7 @@ async function saveTransport() {
       <q-btn
         label="Guardar"
         color="primary"
+        :loading="loading"
         @click="saveTransport"
       />
       <q-btn

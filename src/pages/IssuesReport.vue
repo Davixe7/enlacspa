@@ -9,7 +9,7 @@ const loading = ref(false)
 const rows = ref([])
 
 const columns = ref([
-  { name: 'category', label: 'Area', field: row => row.plan_category.label, align: 'left' },
+  { name: 'category', label: 'Area', field: (row) => row.plan_category.label, align: 'left' },
   {
     name: 'type',
     label: 'Asunto',
@@ -94,7 +94,7 @@ onMounted(() => {
 <template>
   <q-page class="q-pa-md">
     <div class="flex q-mb-md">
-      <h1 class="page-title q-mb-none">Incidencias</h1>
+      <h1 class="page-title q-mb-none">Incidencias Reportes</h1>
       <enlac-date
         v-model="dateISO"
         class="q-ml-auto"

@@ -13,10 +13,14 @@ const props = defineProps(['candidateId'])
 
 const categoryStore = useCategoryStore()
 const categories = storeToRefs(categoryStore).categories
+const emit = defineEmits(['close', 'saved'])
 
-watch(() => props.candidateId, () => {
-  fetchCandidate()
-})
+watch(
+  () => props.candidateId,
+  () => {
+    fetchCandidate()
+  }
+)
 
 async function fetchCandidate() {
   if (!props.candidateId) return
@@ -26,56 +30,19 @@ async function fetchCandidate() {
 
 const route = useRoute()
 const category = ref(null)
-
 const subjects = ref([
-  {
-    id: 1,
-    label: 'Alimentación'
-  },
-  {
-    id: 2,
-    label: 'Retardo'
-  },
-  {
-    id: 3,
-    label: 'Higiene'
-  },
-  {
-    id: 4,
-    label: 'Falta a Cita Médica'
-  },
-  {
-    id: 5,
-    label: 'Falta a Cita Nutrición'
-  },
-  {
-    id: 6,
-    label: 'Falta a Cita Psicología'
-  },
-  {
-    id: 7,
-    label: 'Falta a Cita Comunicación'
-  },
-  {
-    id: 8,
-    label: 'Falta a Capacitación'
-  },
-  {
-    id: 9,
-    label: 'Falta a Reunión de Padres'
-  },
-  {
-    id: 10,
-    label: 'Falta Actividades de Recaudación de Fondos'
-  },
-  {
-    id: 11,
-    label: 'Indisciplina'
-  },
-  {
-    id: 12,
-    label: 'Otro'
-  }
+  { id: 1, label: 'Alimentación' },
+  { id: 2, label: 'Retardo' },
+  { id: 3, label: 'Higiene' },
+  { id: 4, label: 'Falta a Cita Médica' },
+  { id: 5, label: 'Falta a Cita Nutrición' },
+  { id: 6, label: 'Falta a Cita Psicología' },
+  { id: 7, label: 'Falta a Cita Comunicación' },
+  { id: 8, label: 'Falta a Capacitación' },
+  { id: 9, label: 'Falta a Reunión de Padres' },
+  { id: 10, label: 'Falta Actividades de Recaudación de Fondos' },
+  { id: 11, label: 'Indisciplina' },
+  { id: 12, label: 'Otro' }
 ])
 const date = ref(DateTime.now().toFormat('dd/MM/yyyy'))
 const comments = ref('')
@@ -84,8 +51,7 @@ const userId = ref(null)
 const users = ref([])
 const loading = ref(false)
 const files = ref([])
-
-const emit = defineEmits(['close'])
+const errors = ref([])
 
 async function fetchUsers() {
   try {
@@ -98,27 +64,24 @@ async function fetchUsers() {
   }
 }
 
-const errors = ref([])
-
 async function storeIssue() {
   try {
-    loading.value = false
+    loading.value = true
     errors.value = {}
     let data = new FormData()
-
     data.append('candidate_id', props.candidateId)
     data.append('plan_category_id', category.value.id)
     data.append('user_id', userId.value)
     data.append('type', type.value)
     data.append('date', DateTime.fromFormat(date.value, 'dd/MM/yyyy').toISODate())
     data.append('comments', comments.value)
-
     files.value.forEach((file) => {
       data.append('media[]', file)
     })
 
-    await api.post('issues', data)
-    notify.positive('Incidencia registrada con exito')
+    const response = await api.post('issues', data)
+    emit('saved', response.data.data)
+    notify.positive('Incidencia registrada con éxito')
     emit('close')
   } catch (error) {
     if (error.formatted) {
@@ -135,7 +98,7 @@ onMounted(async () => {
   await useCategoryStore().fetchCategories({ base_only: true })
   let categoryName = route.params.categoryName
   category.value = categoryName
-    ? (await categoryStore.getCategoryByName(categoryName))
+    ? await categoryStore.getCategoryByName(categoryName)
     : categories.value[0]
   fetchUsers()
 })
@@ -143,17 +106,29 @@ onMounted(async () => {
 
 <template>
   <q-form>
-    <q-markup-table flat bordered square separator="cell" dense>
+    <q-markup-table
+      flat
+      bordered
+      square
+      separator="cell"
+      dense
+    >
       <table class="full-width custom-table">
         <tbody>
           <tr>
             <td>Área</td>
             <td class="q-pa-sm">
-              <q-select dense stack-label hide-bottom-space outlined v-model="category"
-                :readonly="!!route.params.categoryName" :options="categories" />
+              <q-select
+                dense
+                stack-label
+                hide-bottom-space
+                outlined
+                v-model="category"
+                :readonly="!!route.params.categoryName"
+                :options="categories"
+              />
             </td>
           </tr>
-
           <tr>
             <td>Beneficiario</td>
             <td class="q-py-lg">
@@ -162,17 +137,36 @@ onMounted(async () => {
               </div>
             </td>
           </tr>
-
           <tr>
             <td>Fecha</td>
             <td class="q-pa-sm">
-              <q-input outlined stack-label v-model="date" class="q-field--required">
+              <q-input
+                outlined
+                stack-label
+                v-model="date"
+                class="q-field--required"
+              >
                 <template v-slot:append>
-                  <q-icon name="event" class="cursor-pointer">
-                    <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                      <q-date v-model="date" mask="DD/MM/YYYY">
+                  <q-icon
+                    name="event"
+                    class="cursor-pointer"
+                  >
+                    <q-popup-proxy
+                      cover
+                      transition-show="scale"
+                      transition-hide="scale"
+                    >
+                      <q-date
+                        v-model="date"
+                        mask="DD/MM/YYYY"
+                      >
                         <div class="row items-center justify-end">
-                          <q-btn v-close-popup label="Cerrar" color="primary" flat @click="dialog = false" />
+                          <q-btn
+                            v-close-popup
+                            label="Cerrar"
+                            color="primary"
+                            flat
+                          />
                         </div>
                       </q-date>
                     </q-popup-proxy>
@@ -181,46 +175,83 @@ onMounted(async () => {
               </q-input>
             </td>
           </tr>
-
           <tr>
             <td>Reportó</td>
             <td class="q-pa-sm">
-              <q-select dense stack-label outlined hide-bottom-space v-model="userId" :options="users"
-                option-label="name" option-value="id" emit-value map-options :error="!!errors['user_id']"
-                :error-message="errors['user_id']" />
+              <q-select
+                dense
+                stack-label
+                outlined
+                hide-bottom-space
+                v-model="userId"
+                :options="users"
+                option-label="name"
+                option-value="id"
+                emit-value
+                map-options
+                :error="!!errors['user_id']"
+                :error-message="errors['user_id']"
+              />
             </td>
           </tr>
-
           <tr>
             <td>Tipo</td>
             <td class="q-pa-sm">
-              <q-select dense stack-label outlined hide-bottom-space v-model="type" :options="subjects"
-                option-label="label" option-value="id" emit-value map-options :error="!!errors['type']"
-                :error-message="errors['type']" />
+              <q-select
+                dense
+                stack-label
+                outlined
+                hide-bottom-space
+                v-model="type"
+                :options="subjects"
+                option-label="label"
+                option-value="id"
+                emit-value
+                map-options
+                :error="!!errors['type']"
+                :error-message="errors['type']"
+              />
             </td>
           </tr>
-
           <tr>
             <td>Comentarios</td>
             <td class="q-pa-sm">
-              <q-input type="textarea" stack-label outlined hide-bottom-space v-model="comments"
-                :error="!!errors['comments']" :error-message="errors['comments']" />
+              <q-input
+                type="textarea"
+                stack-label
+                outlined
+                hide-bottom-space
+                v-model="comments"
+                :error="!!errors['comments']"
+                :error-message="errors['comments']"
+              />
             </td>
           </tr>
           <tr>
             <td>Adjuntos</td>
             <td>
               <div class="row">
-                <q-file ref="filePicker" v-model="files" append multiple use-chips outlined class="full-width" />
+                <q-file
+                  v-model="files"
+                  append
+                  multiple
+                  use-chips
+                  outlined
+                  class="full-width"
+                />
               </div>
             </td>
           </tr>
         </tbody>
       </table>
     </q-markup-table>
-
     <div class="q-pa-md flex justify-end">
-      <q-btn color="primary" label="Guardar" :loading="loading" @click="storeIssue" />
+      <q-btn
+        color="primary"
+        label="Guardar"
+        :loading="loading"
+        @click="storeIssue"
+      />
     </div>
   </q-form>
 </template>
@@ -230,8 +261,4 @@ th {
   text-align: left;
   font-weight: 400;
 }
-
-/* .q-field--outlined .q-field__control:before {
-
-} */
 </style>
