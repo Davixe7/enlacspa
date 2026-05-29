@@ -236,6 +236,7 @@ onMounted(async () => {
       <ScoresTable
         v-if="optionId"
         v-model:rows="scores"
+        :category-id="category?.id"
         :readonly="deferredDate"
         :mode="searchType"
         :loading="loading"

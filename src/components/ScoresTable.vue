@@ -6,7 +6,8 @@ const props = defineProps({
   mode: { type: String, default: 'user' },
   loading: { type: Boolean, default: false },
   disable: { type: Boolean, default: false },
-  errors: { type: Object, default: () => ({}) }
+  errors: { type: Object, default: () => ({}) },
+  categoryId: { type: [String, Number], default: null }
 })
 
 const infoDialog = ref(false)
@@ -17,30 +18,49 @@ const openInfo = (row) => {
   infoDialog.value = true
 }
 
-const columns = computed(() => [
-  {
-    align: 'left',
-    name: 'name',
-    label: props.mode == 'user' ? 'Actividad' : 'Beneficiario',
-    field: (row) => (props.mode == 'user' ? row.activity.name : row.candidate.name)
-  },
-  { align: 'left', name: 'goal_type', label: 'Tipo', field: (row) => row.activity.goal_type },
-  {
-    align: 'left',
-    name: 'daily_goal',
-    label: 'Meta diaria',
-    field: (row) => row.activity.daily_goal
-  },
-  {
-    align: 'left',
-    name: 'final_goal',
-    label: 'Meta final',
-    field: (row) => row.activity.final_goal
-  },
-  { align: 'left', name: 'qualify', label: 'Dato Real' },
-  { align: 'center', name: 'info', label: 'Detalles' },
-  { align: 'left', name: 'comments', label: 'Comentario' }
-])
+const columns = computed(() => {
+  // Definimos las columnas base
+  const baseCols = [
+    {
+      align: 'left',
+      name: 'name',
+      label: props.mode == 'user' ? 'Actividad' : 'Beneficiario',
+      field: (row) => (props.mode == 'user' ? row.activity.name : row.candidate.name)
+    },
+    { align: 'left', name: 'goal_type', label: 'Tipo', field: (row) => row.activity.goal_type }
+  ]
+
+  // Condición: Si NO es categoría 2 (Académico), agregamos las columnas de metas
+  if (String(props.categoryId) !== '2') {
+    baseCols.push(
+      {
+        align: 'left',
+        name: 'daily_goal',
+        label: 'Meta diaria',
+        field: (row) => row.activity.daily_goal
+      },
+      {
+        align: 'left',
+        name: 'final_goal',
+        label: 'Meta final',
+        field: (row) => row.activity.final_goal
+      }
+    )
+  }
+
+  // Agregamos la columna 'Dato Real'
+  baseCols.push({ align: 'left', name: 'qualify', label: 'Dato Real' })
+
+  // Condición: Si NO es categoría 2 (Académico), agregamos la columna 'Detalles'
+  if (String(props.categoryId) !== '2') {
+    baseCols.push({ align: 'center', name: 'info', label: 'Detalles' })
+  }
+
+  // Agregamos la columna 'Comentario'
+  baseCols.push({ align: 'left', name: 'comments', label: 'Comentario' })
+
+  return baseCols
+})
 </script>
 
 <template>
@@ -68,7 +88,6 @@ const columns = computed(() => [
       </q-card>
     </q-dialog>
 
-    <!-- Tabla dentro del flujo normal (se ajustará al ancho de su contenedor padre) -->
     <q-table
       bordered
       flat
@@ -78,6 +97,18 @@ const columns = computed(() => [
       :pagination="{ rowsPerPage: 0 }"
       no-data-label="NO HAY RESULTADOS PARA MOSTRAR"
     >
+      <template v-slot:body-cell-comments="props">
+        <q-td :props="props">
+          <q-input
+            v-model="props.row.comments"
+            dense
+            outlined
+            :disable="disable || props.row.closed == 1"
+            placeholder="Añadir comentario..."
+            style="min-width: 150px"
+          />
+        </q-td>
+      </template>
       <template v-slot:body-cell-info="props">
         <q-td :props="props">
           <q-btn
