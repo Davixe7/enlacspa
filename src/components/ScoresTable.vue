@@ -19,7 +19,7 @@ const openInfo = (row) => {
 }
 
 const columns = computed(() => {
-  // Definimos las columnas base
+  // Columnas fijas sin metas
   const baseCols = [
     {
       align: 'left',
@@ -30,33 +30,15 @@ const columns = computed(() => {
     { align: 'left', name: 'goal_type', label: 'Tipo', field: (row) => row.activity.goal_type }
   ]
 
-  // Condición: Si NO es categoría 2 (Académico), agregamos las columnas de metas
-  if (String(props.categoryId) !== '2') {
-    baseCols.push(
-      {
-        align: 'left',
-        name: 'daily_goal',
-        label: 'Meta diaria',
-        field: (row) => row.activity.daily_goal
-      },
-      {
-        align: 'left',
-        name: 'final_goal',
-        label: 'Meta final',
-        field: (row) => row.activity.final_goal
-      }
-    )
-  }
-
-  // Agregamos la columna 'Dato Real'
+  // Agregar Dato Real siempre
   baseCols.push({ align: 'left', name: 'qualify', label: 'Dato Real' })
 
-  // Condición: Si NO es categoría 2 (Académico), agregamos la columna 'Detalles'
+  // Solo mostrar Detalles si NO es Académico (ID 2)
   if (String(props.categoryId) !== '2') {
     baseCols.push({ align: 'center', name: 'info', label: 'Detalles' })
   }
 
-  // Agregamos la columna 'Comentario'
+  // Agregar Comentario siempre
   baseCols.push({ align: 'left', name: 'comments', label: 'Comentario' })
 
   return baseCols
@@ -64,63 +46,71 @@ const columns = computed(() => {
 </script>
 
 <template>
-  <div>
-    <!-- Modal de Información -->
-    <q-dialog v-model="infoDialog">
-      <q-card style="width: 400px">
-        <q-card-section class="row items-center bg-primary text-white">
-          <div class="text-h6">Detalles de Actividad</div>
-          <q-space />
-          <q-btn
-            icon="close"
-            flat
-            round
-            dense
-            v-close-popup
-          />
-        </q-card-section>
+  <q-table
+    bordered
+    flat
+    :loading="loading"
+    :columns="columns"
+    :rows="rows"
+    :pagination="{ rowsPerPage: 0 }"
+    no-data-label="NO HAY RESULTADOS PARA MOSTRAR"
+  >
+    <!-- Slot Dato Real -->
+    <template v-slot:body-cell-qualify="props">
+      <q-td :props="props">
+        <q-input
+          v-if="props.row.activity.goal_type != 'Dominio'"
+          :disable="disable || props.row.closed == 1"
+          type="number"
+          borderless
+          filled
+          v-model="props.row.score"
+          style="max-width: 125px"
+        />
+        <q-select
+          v-else
+          :disable="disable || props.row.closed == 1"
+          dense
+          outlined
+          :options="[
+            { color: 'text-black', label: 'Ninguno', value: 'ninguno' },
+            { color: 'text-red', label: 'Presentada', value: 'presentada' },
+            { color: 'text-orange', label: 'En proceso', value: 'en proceso' },
+            { color: 'text-green', label: 'Dominada', value: 'dominada' }
+          ]"
+          v-model="props.row.score"
+          emit-value
+          map-options
+          style="max-width: 125px"
+        />
+      </q-td>
+    </template>
 
-        <q-card-section class="q-gutter-y-sm">
-          <div><strong>Intensidad:</strong> {{ selectedRow?.activity.intensity || 'N/A' }}</div>
-          <div><strong>Frecuencia:</strong> {{ selectedRow?.activity.frequency || 'N/A' }}</div>
-          <div><strong>Duración:</strong> {{ selectedRow?.activity.duration || 'N/A' }}</div>
-        </q-card-section>
-      </q-card>
-    </q-dialog>
+    <!-- Slot Comentarios (Verificado para permitir escritura) -->
+    <template v-slot:body-cell-comments="props">
+      <q-td :props="props">
+        <q-input
+          v-model="props.row.comments"
+          dense
+          outlined
+          :disable="disable || props.row.closed == 1"
+          placeholder="Añadir comentario..."
+        />
+      </q-td>
+    </template>
 
-    <q-table
-      bordered
-      flat
-      :loading="loading"
-      :columns="columns"
-      :rows="rows"
-      :pagination="{ rowsPerPage: 0 }"
-      no-data-label="NO HAY RESULTADOS PARA MOSTRAR"
-    >
-      <template v-slot:body-cell-comments="props">
-        <q-td :props="props">
-          <q-input
-            v-model="props.row.comments"
-            dense
-            outlined
-            :disable="disable || props.row.closed == 1"
-            placeholder="Añadir comentario..."
-            style="min-width: 150px"
-          />
-        </q-td>
-      </template>
-      <template v-slot:body-cell-info="props">
-        <q-td :props="props">
-          <q-btn
-            flat
-            round
-            dense
-            color="warning"
-            icon="sym_o_priority_high"
-            @click="openInfo(props.row)"
-          />
-        </q-td>
-      </template>
-    </q-table>
-  </div>
+    <!-- Slot Info -->
+    <template v-slot:body-cell-info="props">
+      <q-td :props="props">
+        <q-btn
+          flat
+          round
+          dense
+          color="warning"
+          icon="sym_o_priority_high"
+          @click="openInfo(props.row)"
+        />
+      </q-td>
+    </template>
+  </q-table>
 </template>

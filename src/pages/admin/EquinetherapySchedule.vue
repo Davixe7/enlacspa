@@ -11,6 +11,16 @@ const selectedDate = ref(date.formatDate(Date.now(), 'YYYY-MM-DD'))
 const schedules = ref([])
 const candidateId = ref(null)
 
+const formattedStartTime = computed(() => {
+  if (!selectedRow.value) return ''
+  return date.formatDate(`2024-01-01 ${selectedRow.value.start_time}`, 'HH:mm A')
+})
+
+const formattedEndTime = computed(() => {
+  if (!selectedRow.value) return ''
+  return date.formatDate(`2024-01-01 ${selectedRow.value.end_time}`, 'HH:mm A')
+})
+
 const slotTemplate = {
   candidate_id: null,
   date: null,
@@ -176,11 +186,11 @@ onMounted(async () => {
               </tr>
               <tr>
                 <th>Hora inicio:</th>
-                <td class="text-right">{{ selectedRow.start_time }}</td>
+                <td class="text-right">{{ formattedStartTime }}</td>
               </tr>
               <tr>
                 <th>Hora fin:</th>
-                <td class="text-right">{{ selectedRow.end_time }}</td>
+                <td class="text-right">{{ formattedEndTime }}</td>
               </tr>
             </table>
 

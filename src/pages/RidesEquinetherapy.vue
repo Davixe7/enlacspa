@@ -2,12 +2,25 @@
 import { onMounted, ref } from 'vue'
 import { api } from 'src/boot/axios'
 import notify from 'src/utils/notify'
+import { date } from 'quasar'
 
 const searchQuery = ref('')
 const loading = ref(false)
 const commentDialog = ref(false)
 const selectedRow = ref(null)
 const commentText = ref('')
+
+function formatAmPm(time) {
+  if (!time) return '-'
+  return date.formatDate(`2026-01-01 ${time}`, 'hh:mm A')
+}
+
+function formatRange(start, end) {
+  if (!start || !end) return '-'
+  const s = date.formatDate(`2026-01-01 ${start}`, 'hh:mm A')
+  const e = date.formatDate(`2026-01-01 ${end}`, 'hh:mm A')
+  return `${s} - ${e}`
+}
 
 function openCommentDialog(row) {
   selectedRow.value = row
@@ -18,7 +31,7 @@ function openCommentDialog(row) {
 async function saveComment() {
   if (!selectedRow.value) return
   try {
-    ; (
+    ;(
       await api.post(`rides/${selectedRow.value.id}`, {
         ...selectedRow.value,
         _method: 'PUT'
@@ -45,7 +58,12 @@ const columns = ref([
     field: (row) => row.candidate.full_name,
     align: 'left'
   },
-  { name: 'schedule', label: 'Horario', field: 'schedule', align: 'left' },
+  {
+    name: 'schedule',
+    label: 'Horario',
+    field: (row) => formatRange(row.start_time, row.end_time),
+    align: 'left'
+  },
   { name: 'departure_time', label: 'Ida', field: 'departure_time', align: 'left' },
   { name: 'return_time', label: 'Regreso', field: 'return_time', align: 'left' },
   { name: 'comment' }
@@ -89,45 +107,90 @@ async function saveRide(row) {
       <div class="subtitle q-mb-lg">Captura Ida o Regreso según corresponda:</div>
     </div>
     <div class="q-ml-auto flex">
-      <q-input outlined v-model="searchQuery" debounce="500" clearable>
+      <q-input
+        outlined
+        v-model="searchQuery"
+        debounce="500"
+        clearable
+      >
         <template v-slot:prepend> <q-icon name="search" /></template>
       </q-input>
     </div>
   </div>
-  <q-table bordered flat hide-bottom :rows="rows" :columns="columns" :pagination="{ rowsPerPage: 0 }" :loading="loading"
-    :filter="searchQuery">
+  <q-table
+    bordered
+    flat
+    hide-bottom
+    :rows="rows"
+    :columns="columns"
+    :pagination="{ rowsPerPage: 0 }"
+    :loading="loading"
+    :filter="searchQuery"
+  >
     <template v-slot:loading>
       <div class="flex q-my-lg justify-center">
         <div>
-          <q-spinner size="30px" color="primary" class="q-mr-md"></q-spinner>
+          <q-spinner
+            size="30px"
+            color="primary"
+            class="q-mr-md"
+          ></q-spinner>
           Cargando...
         </div>
       </div>
     </template>
 
     <template v-slot:body-cell-departure_time="props">
-      <q-td>
-        <q-input filled v-model="props.row.departure_time" readonly :disable="!!props.row.departure_time">
+      <q-td class="text-h6 text-positive">
+        <q-input
+          color="positive"
+          filled
+          :model-value="formatAmPm(props.row.departure_time)"
+          readonly
+          :disable="!!props.row.departure_time"
+          input-class="text-h6 text-weight-bold text-positive"
+        >
           <template v-slot:append>
-            <q-icon name="access_time" class="cursor-pointer">
-              <q-popup-proxy transition-show="scale" transition-hide="scale">
-                <q-time v-model="props.row.departure_time" @update:model-value="(val) => saveRide(props.row)" />
-              </q-popup-proxy>
-            </q-icon>
+            <q-icon
+              name="access_time"
+              class="cursor-pointer text-positive"
+            />
+            <q-popup-proxy>
+              <q-time
+                v-model="props.row.departure_time"
+                with-seconds="false"
+                format24h="false"
+                @update:model-value="(val) => saveRide(props.row)"
+              />
+            </q-popup-proxy>
           </template>
         </q-input>
       </q-td>
     </template>
 
     <template v-slot:body-cell-return_time="props">
-      <q-td>
-        <q-input filled v-model="props.row.return_time" readonly :disable="!!props.row.return_time">
+      <q-td class="text-h6 text-negative">
+        <q-input
+          filled
+          color="negative"
+          :model-value="formatAmPm(props.row.return_time)"
+          readonly
+          :disable="!!props.row.return_time"
+          input-class="text-h6 text-weight-bold text-negative"
+        >
           <template v-slot:append>
-            <q-icon name="access_time" class="cursor-pointer">
-              <q-popup-proxy transition-show="scale" transition-hide="scale">
-                <q-time v-model="props.row.return_time" @update:model-value="(val) => saveRide(props.row)" />
-              </q-popup-proxy>
-            </q-icon>
+            <q-icon
+              name="access_time"
+              class="cursor-pointer text-negative"
+            />
+            <q-popup-proxy>
+              <q-time
+                v-model="props.row.return_time"
+                with-seconds="false"
+                format24h="false"
+                @update:model-value="(val) => saveRide(props.row)"
+              />
+            </q-popup-proxy>
           </template>
         </q-input>
       </q-td>
@@ -135,7 +198,11 @@ async function saveRide(row) {
 
     <template v-slot:body-cell-comment="props">
       <q-td>
-        <q-btn color="primary" @click="openCommentDialog(props.row)" label="Comentario" />
+        <q-btn
+          color="primary"
+          @click="openCommentDialog(props.row)"
+          label="Comentario"
+        />
       </q-td>
     </template>
   </q-table>
@@ -144,11 +211,25 @@ async function saveRide(row) {
     <q-card class="comment-card">
       <q-card-section>
         <div class="page-subtitle q-mb-md">Observaciones del traslado</div>
-        <q-input outlined v-model="selectedRow.comments" label="Comentario" type="textarea" autogrow
-          class="q-mb-md comment-textarea" />
+        <q-input
+          outlined
+          v-model="selectedRow.comments"
+          label="Comentario"
+          type="textarea"
+          autogrow
+          class="q-mb-md comment-textarea"
+        />
         <div class="flex justify-end">
-          <q-btn flat label="Cancelar" v-close-popup />
-          <q-btn color="primary" label="Guardar" @click="saveComment" />
+          <q-btn
+            flat
+            label="Cancelar"
+            v-close-popup
+          />
+          <q-btn
+            color="primary"
+            label="Guardar"
+            @click="saveComment"
+          />
         </div>
       </q-card-section>
     </q-card>
@@ -170,5 +251,22 @@ async function saveRide(row) {
   font-size: 1.2rem;
   font-weight: 500;
   color: #111827;
+}
+
+/* Aumentar tamaño de letra en toda la tabla */
+.q-table th {
+  font-size: 1.1rem !important;
+  padding: 20px !important;
+}
+
+.q-table td {
+  font-size: 1.2rem !important;
+  padding: 20px !important;
+}
+
+/* Aumentar el tamaño del botón de comentario */
+.q-btn {
+  font-size: 1rem !important;
+  padding: 10px 20px !important;
 }
 </style>

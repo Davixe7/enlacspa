@@ -8,10 +8,8 @@ const rows = ref([])
 
 watch(
   () => props.date,
-  (newDate) => {
-    if (newDate !== props.date) {
-      fetchScores()
-    }
+  () => {
+    fetchScores()
   }
 )
 
@@ -42,12 +40,14 @@ function getBadgeColor(score) {
   return colors[score] || 'primary'
 }
 
+// 1. Agregamos la columna 'comments' al array de columnas
 const columns = [
   { align: 'left', name: 'activity_name', label: 'Actividad', field: 'activity_name' },
   { align: 'left', name: 'measurement_unit', label: 'Unidad', field: 'measurement_unit' },
   { align: 'left', name: 'goal_type', label: 'Tipo de Meta', field: 'goal_type' },
   { align: 'left', name: 'daily_goal', label: 'Meta diaria', field: 'daily_goal' },
-  { align: 'center', name: 'score', label: 'Dato Real', field: 'score' }
+  { align: 'center', name: 'score', label: 'Dato Real', field: 'score' },
+  { align: 'left', name: 'comments', label: 'Comentarios', field: 'comments' } // <--- Nueva columna
 ]
 
 onMounted(() => {
@@ -67,7 +67,10 @@ onMounted(() => {
         :rows="row.activities"
         :columns="columns"
         class="q-mb-xl"
+        flat
+        bordered
       >
+        <!-- Slot para mostrar el dato real con colores -->
         <template v-slot:body-cell-score="props">
           <q-td class="text-center">
             <q-badge
@@ -79,6 +82,15 @@ onMounted(() => {
               {{ props.row.score.charAt(0).toUpperCase() + props.row.score.slice(1) }}
             </q-badge>
             <span v-else>-</span>
+          </q-td>
+        </template>
+
+        <!-- 2. Slot para los comentarios para que se vean bien -->
+        <template v-slot:body-cell-comments="props">
+          <q-td>
+            <div class="text-caption text-grey-8">
+              {{ props.row.comments || 'Sin comentarios' }}
+            </div>
           </q-td>
         </template>
       </q-table>
