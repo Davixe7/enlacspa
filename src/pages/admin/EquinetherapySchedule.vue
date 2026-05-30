@@ -21,6 +21,11 @@ const formattedEndTime = computed(() => {
   return date.formatDate(`2024-01-01 ${selectedRow.value.end_time}`, 'HH:mm A')
 })
 
+const formatTime = (time) => {
+  if (!time) return '--:--'
+  return date.formatDate(`2024-01-01 ${time}`, 'HH:mm A')
+}
+
 const slotTemplate = {
   candidate_id: null,
   date: null,
@@ -155,9 +160,9 @@ onMounted(async () => {
                   @click="setSchedule(row)"
                 />
               </td>
-              <td></td>
-              <td></td>
-              <td></td>
+              <td>{{ row.id ? formatTime(row.departure_time) : '-' }}</td>
+              <td>{{ row.id ? formatTime(row.return_time) : '-' }}</td>
+              <td>{{ row.id ? row.comments || 'Sin comentarios' : '-' }}</td>
             </tr>
           </tbody>
         </q-markup-table>

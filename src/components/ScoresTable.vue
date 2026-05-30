@@ -19,7 +19,6 @@ const openInfo = (row) => {
 }
 
 const columns = computed(() => {
-  // Columnas fijas sin metas
   const baseCols = [
     {
       align: 'left',
@@ -33,13 +32,25 @@ const columns = computed(() => {
   // Agregar Dato Real siempre
   baseCols.push({ align: 'left', name: 'qualify', label: 'Dato Real' })
 
-  // Solo mostrar Detalles si NO es Académico (ID 2)
+  // Solo mostrar Metas y Detalles si NO es Académico (ID 2)
   if (String(props.categoryId) !== '2') {
+    baseCols.push({
+      align: 'center',
+      name: 'daily_goal',
+      label: 'Meta Diaria',
+      field: (row) => row.activity.daily_goal || '-'
+    })
+    baseCols.push({
+      align: 'center',
+      name: 'final_goal',
+      label: 'Meta Final',
+      field: (row) => row.activity.final_goal || '-'
+    })
     baseCols.push({ align: 'center', name: 'info', label: 'Detalles' })
   }
 
   // Agregar Comentario siempre
-  baseCols.push({ align: 'left', name: 'comments', label: 'Comentario' })
+  baseCols.push({ align: 'left', name: 'comments', label: 'Comentarios' })
 
   return baseCols
 })
@@ -73,16 +84,32 @@ const columns = computed(() => {
           dense
           outlined
           :options="[
-            { color: 'text-black', label: 'Ninguno', value: 'ninguno' },
-            { color: 'text-red', label: 'Presentada', value: 'presentada' },
+            { color: 'text-red', label: 'Ninguno', value: 'ninguno' },
+            { color: 'text-orange', label: 'Presentada', value: 'presentada' },
             { color: 'text-orange', label: 'En proceso', value: 'en proceso' },
             { color: 'text-green', label: 'Dominada', value: 'dominada' }
           ]"
           v-model="props.row.score"
           emit-value
           map-options
-          style="max-width: 125px"
-        />
+          style="max-width: 140px"
+        >
+          <!-- Slot para aplicar el color al texto seleccionado -->
+          <template v-slot:selected-item="scope">
+            <span :class="scope.opt.color">
+              {{ scope.opt.label }}
+            </span>
+          </template>
+
+          <!-- Slot para aplicar el color en el menú desplegable -->
+          <template v-slot:option="scope">
+            <q-item v-bind="scope.itemProps">
+              <q-item-section>
+                <q-item-label :class="scope.opt.color">{{ scope.opt.label }}</q-item-label>
+              </q-item-section>
+            </q-item>
+          </template>
+        </q-select>
       </q-td>
     </template>
 
@@ -113,4 +140,23 @@ const columns = computed(() => {
       </q-td>
     </template>
   </q-table>
+  <q-dialog v-model="infoDialog">
+    <q-card style="width: 500px">
+      <q-card-section class="text-h6">Detalles de la Actividad</q-card-section>
+      <q-card-section v-if="selectedRow">
+        <p><strong>Actividad:</strong> {{ selectedRow.activity.name }}</p>
+        <p><strong>Intensidad:</strong> {{ selectedRow.activity.intensity }}</p>
+        <p><strong>Frecuencia:</strong> {{ selectedRow.activity.frequency }}</p>
+        <p><strong>Duración:</strong> {{ selectedRow.activity.duration }}</p>
+      </q-card-section>
+      <q-card-actions align="right">
+        <q-btn
+          flat
+          label="Cerrar"
+          color="primary"
+          v-close-popup
+        />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
 </template>
