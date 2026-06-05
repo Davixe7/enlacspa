@@ -147,15 +147,40 @@ async function save() {
     isOpen.value = false
   } catch (error) {
     if (error.response?.status === 422) {
-      const serverErrors = error.response.data.errors
+      const serverErrors = error.response.data.errors || {}
+
+      // Mapeo seguro de errores
       Object.keys(serverErrors).forEach((key) => {
-        errors.value[key] = serverErrors[key][0]
+        const errorVal = serverErrors[key]
+        // Si es un array, tomamos el primer elemento. Si ya es un string, lo dejamos pasar completo.
+        errors.value[key] = Array.isArray(errorVal) ? errorVal[0] : errorVal
       })
+
+      notify.negative('Te falta información por capturar o revisar en las pestañas')
+      focusTabWithError(Object.keys(serverErrors))
     } else {
-      notify.negative('Ocurrió un error al guardar el Kardex')
+      // Por si llega a fallar la base de datos de nuevo, capturamos el mensaje real aquí
+      const dbMessage = error.response?.data?.message || 'Ocurrió un error al guardar el Kardex'
+      notify.negative(dbMessage)
     }
   } finally {
     loading.value = false
+  }
+}
+
+// Función auxiliar para redirigir al usuario a la pestaña rota
+function focusTabWithError(errorKeys) {
+  // Campos obligatorios por pestaña según tu formulario actual
+  const personalFields = ['first_name', 'last_name', 'cellphone', 'sector']
+  const workFields = ['contact_restrictions']
+
+  // Si hay un error en la primera pestaña, priorizamos llevarlo ahí
+  if (errorKeys.some((key) => personalFields.includes(key))) {
+    activeTab.value = 'personal'
+  }
+  // Si los datos personales están bien pero falta el estatus/restricciones laborales, lo movemos a la 3
+  else if (errorKeys.some((key) => workFields.includes(key))) {
+    activeTab.value = 'work'
   }
 }
 
@@ -606,6 +631,7 @@ defineExpose({ open })
                         v-model="form.contact_restrictions"
                         :error="!!errors.contact_restrictions"
                         :error-message="errors.contact_restrictions"
+                        @update:model-value="errors.contact_restrictions = null"
                         hide-bottom-space
                       />
                     </td>

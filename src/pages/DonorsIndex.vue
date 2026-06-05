@@ -226,8 +226,15 @@ onMounted(() => {
 
   <!-- Barra de Filtros Avanzada -->
   <div class="row q-col-gutter-md q-mb-lg justify-start">
-    <div class="col-12 col-md-7 row q-col-gutter-sm items-center">
-      <div class="col-12 col-sm-4">
+    <div class="col-12 col-md-9 row q-col-gutter-sm items-stretch">
+      <!-- Filtro: Donante -->
+      <div class="col-12 col-sm-4 flex flex-column justify-end">
+        <div
+          class="text-caption text-weight-bold text-grey-8 q-mb-xs"
+          style="line-height: 1"
+        >
+          Donante
+        </div>
         <q-input
           v-model="filterName"
           outlined
@@ -237,6 +244,7 @@ onMounted(() => {
           clearable
           debounce="400"
           hide-bottom-space
+          class="full-width"
         >
           <template v-slot:append>
             <q-icon name="sym_o_search" />
@@ -244,7 +252,14 @@ onMounted(() => {
         </q-input>
       </div>
 
-      <div class="col-12 col-sm-4">
+      <!-- Filtro: Tipo de Actividad -->
+      <div class="col-12 col-sm-4 flex flex-column justify-end">
+        <div
+          class="text-caption text-weight-bold text-grey-8 q-mb-xs"
+          style="line-height: 1"
+        >
+          Tipo de Actividad
+        </div>
         <q-select
           outlined
           dense
@@ -258,10 +273,18 @@ onMounted(() => {
           input-debounce="0"
           clearable
           hide-bottom-space
+          class="full-width"
         />
       </div>
 
-      <div class="col-12 col-sm-4">
+      <!-- Filtro: Mes de Cumpleaños -->
+      <div class="col-12 col-sm-4 flex flex-column justify-end">
+        <div
+          class="text-caption text-weight-bold text-grey-8 q-mb-xs"
+          style="line-height: 1"
+        >
+          Mes de Cumpleaños
+        </div>
         <q-select
           outlined
           dense
@@ -277,6 +300,7 @@ onMounted(() => {
           input-debounce="0"
           clearable
           hide-bottom-space
+          class="full-width"
         />
       </div>
     </div>

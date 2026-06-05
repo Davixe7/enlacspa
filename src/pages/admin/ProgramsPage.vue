@@ -41,18 +41,27 @@ function addProgram() {
 async function saveProgram() {
   try {
     loading.value = true
-    let route = row.value.id ? `/programs/${row.value.id}` : 'programs'
+    errors.value = {}
+
+    let route = row.value.id ? `/programs/${row.value.id}` : '/programs'
     let data = row.value.id ? { ...row.value, _method: 'PUT' } : { ...row.value }
-    await api.post(route, data)
+
+    const response = await api.post(route, data)
 
     if (!row.value.id) {
-      rows.value.unshift(row.value)
+      rows.value.unshift(response.data.data)
+    } else {
+      const index = rows.value.findIndex((p) => p.id === row.value.id)
+      if (index !== -1) rows.value[index] = response.data.data
     }
 
     notify.positive('Guardado con éxito')
     dialog.value = false
   } catch (error) {
-    console.log(error)
+    console.error(error)
+    if (error.response && error.response.status === 422) {
+      errors.value = error.response.data.errors
+    }
     notify.negative('No se pudo actualizar')
   } finally {
     loading.value = false
@@ -145,6 +154,7 @@ onMounted(async () => {
                     outlined
                     v-model="row.valid_since"
                     hide-bottom-space
+                    :limit-to-past="false"
                     :error="!!errors['valid_since']"
                     :error-message="errors['valid_since']"
                   />
