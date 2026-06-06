@@ -82,9 +82,18 @@ async function loadDonorData() {
 }
 
 // Formateador de fechas legible para bitácoras e historiales (con hora)
+// En tu DonorShow.vue
 function formatDate(isoString) {
   if (!isoString) return 'N/A'
-  return date.formatDate(isoString, 'DD/MM/YYYY hh:mm A')
+
+  // Si el string contiene una 'T', tomamos solo la fecha para evitar el ajuste horario
+  const dateOnly = isoString.split('T')[0]
+  const [year, month, day] = dateOnly.split('-')
+
+  // Creamos el objeto Date con los componentes exactos
+  const d = new Date(parseInt(year), parseInt(month) - 1, parseInt(day))
+
+  return date.formatDate(d, 'DD/MM/YYYY')
 }
 
 // Helper para formatear fechas de nacimiento puras evitando desfasamiento de zona horaria (UTC)

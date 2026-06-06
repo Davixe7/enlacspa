@@ -8,6 +8,7 @@ const isOpen = ref(false)
 const loading = ref(false)
 const users = ref([]) // Lista para el select
 const donorId = ref(null)
+const errors = ref({})
 
 const form = ref(getCleanForm())
 
@@ -35,34 +36,32 @@ onMounted(async () => {
 })
 
 function open(id, rowData = null) {
+  errors.value = {} // Limpiar errores al abrir
   donorId.value = id
   if (rowData) {
-    // 1. Clonamos rowData para no mutar el original
     const data = { ...rowData }
-
-    // 2. Si la relación 'responsible' existe, aseguramos que el ID se asigne al campo
-    // Esto es vital para que el q-select (v-model="form.enlac_user_id") lo reconozca
+    if (data.visit_date) {
+      data.visit_date = data.visit_date.split('T')[0]
+    }
     if (data.responsible && data.responsible.id) {
       data.enlac_user_id = data.responsible.id
     }
-
     form.value = data
   } else {
     form.value = getCleanForm()
     form.value.donor_id = id
   }
-
   isOpen.value = true
 }
 
 async function save() {
   try {
     loading.value = true
+    errors.value = {} // Limpiar errores previos
 
-    // Creamos un objeto limpio para enviar solo lo necesario
     const payload = { ...form.value }
-    delete payload.responsible // Eliminamos la relación cargada para evitar errores en el Request
-    delete payload.created_at // Limpiamos campos de sistema
+    delete payload.responsible
+    delete payload.created_at
     delete payload.updated_at
 
     if (payload.id) {
@@ -74,9 +73,17 @@ async function save() {
     notify.positive('Visita guardada correctamente')
     emit('saved')
     isOpen.value = false
-  } catch (error) {
-    console.log(error)
-    notify.negative('Error al guardar la visita')
+  } catch (err) {
+    // Usamos 'err' para evitar conflictos
+    console.error(err)
+
+    // Verificamos si la respuesta existe y si tiene errores de validación
+    if (err.response && err.response.status === 422) {
+      errors.value = err.response.data.errors || {}
+      notify.negative('Por favor, corrige los campos marcados en rojo')
+    } else {
+      notify.negative('Error al guardar la visita')
+    }
   } finally {
     loading.value = false
   }
@@ -133,6 +140,12 @@ defineExpose({ open })
                     :options="users"
                     emit-value
                     map-options
+                    :error="!!errors.enlac_user_id"
+                    :error-message="
+                      Array.isArray(errors.enlac_user_id)
+                        ? errors.enlac_user_id[0]
+                        : errors.enlac_user_id
+                    "
                   />
                 </td>
               </tr>
@@ -153,6 +166,8 @@ defineExpose({ open })
                     outlined
                     dense
                     v-model="form.reason"
+                    :error="!!errors.reason"
+                    :error-message="Array.isArray(errors.reason) ? errors.reason[0] : errors.reason"
                   />
                 </td>
               </tr>
