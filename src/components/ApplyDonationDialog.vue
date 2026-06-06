@@ -706,7 +706,7 @@ defineExpose({ open })
                 <td class="text-bold">Tipo de Cambio</td>
                 <td>
                   <div class="row q-col-gutter-xs items-center">
-                    <!-- Input del Tipo de cambio (Se llena solo al cambiar a DLLS) -->
+                    <!-- Input del Tipo de cambio (Se llena al cambiar a DLLS) -->
                     <q-input
                       v-model.number="form.exchange_rate"
                       outlined
