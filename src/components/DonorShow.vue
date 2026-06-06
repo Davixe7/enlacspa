@@ -138,6 +138,27 @@ async function deleteVisit(id) {
   }
 }
 
+async function deleteGratitude(id) {
+  try {
+    const confirmed = confirm(
+      '¿Estás seguro de eliminar este agradecimiento? Esta acción no se puede deshacer.'
+    )
+    if (!confirmed) return
+
+    await api.delete(`/donor-gratitudes/${id}`)
+
+    // Refrescamos los datos
+    await loadDonorData()
+
+    notify.positive('Agradecimiento eliminado con éxito')
+  } catch (e) {
+    console.error(e)
+    notify.negative(
+      'Error al eliminar el agradecimiento: ' + (e.response?.data?.message || e.message)
+    )
+  }
+}
+
 onMounted(loadDonorData)
 </script>
 
@@ -760,7 +781,16 @@ onMounted(loadDonorData)
                   dense
                   icon="sym_o_edit"
                   color="secondary"
+                  class="q-mr-xs"
                   @click="openGratitude(donor.id, gratitude)"
+                />
+                <q-btn
+                  flat
+                  round
+                  dense
+                  icon="sym_o_delete"
+                  color="negative"
+                  @click="deleteGratitude(gratitude.id)"
                 />
               </td>
             </tr>
