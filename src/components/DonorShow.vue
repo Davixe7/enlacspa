@@ -76,12 +76,21 @@ onMounted(loadDonorData)
     v-if="donor"
     class="q-pa-lg"
   >
-    <!-- Header -->
-    <div class="text-h4 q-mb-xl text-weight-bold text-dark">
-      {{ donor.first_name }} {{ donor.last_name }}
+    <div class="row items-center q-mb-xl">
+      <q-btn
+        flat
+        round
+        dense
+        icon="arrow_back"
+        color="grey-8"
+        class="q-mr-md"
+        @click="$router.push('/donors')"
+      />
+      <div class="text-h4 text-weight-bold text-dark">
+        {{ donor.first_name }} {{ donor.last_name }}
+      </div>
     </div>
 
-    <!-- Ficha de Datos Personales -->
     <q-card
       flat
       bordered
@@ -93,7 +102,6 @@ onMounted(loadDonorData)
 
       <q-card-section class="q-pa-lg">
         <div class="row q-col-gutter-xl">
-          <!-- Sección Identidad -->
           <div class="col-12 col-md-4">
             <div class="text-subtitle2 text-primary text-weight-bold q-mb-md">Identidad</div>
             <q-list dense>
@@ -120,7 +128,6 @@ onMounted(loadDonorData)
             </q-list>
           </div>
 
-          <!-- Sección Contacto y Ubicación -->
           <div class="col-12 col-md-4">
             <div class="text-subtitle2 text-primary text-weight-bold q-mb-md">
               Contacto y Domicilio
@@ -181,7 +188,6 @@ onMounted(loadDonorData)
             </q-list>
           </div>
 
-          <!-- Sección Profesional y Estatus -->
           <div class="col-12 col-md-4">
             <div class="text-subtitle2 text-primary text-weight-bold q-mb-md">
               Profesional y Estatus
@@ -210,7 +216,6 @@ onMounted(loadDonorData)
                   style="width: 100px"
                   >Estatus:</q-item-section
                 >
-                <!-- Aquí corregimos el tamaño del badge -->
                 <q-item-section side>
                   <q-badge
                     :color="donor.is_active ? 'positive' : 'negative'"
@@ -235,7 +240,6 @@ onMounted(loadDonorData)
           </div>
         </div>
 
-        <!-- Cónyuge (Sección mantenida igual por estética) -->
         <div class="row q-mt-lg">
           <div class="col-12">
             <div class="text-subtitle2 text-primary text-weight-bold q-mb-sm">
@@ -260,7 +264,6 @@ onMounted(loadDonorData)
           </div>
         </div>
 
-        <!-- Notas y Restricciones -->
         <div class="row q-mt-lg">
           <div class="col-12">
             <div class="text-body2 text-dark q-mb-sm">
@@ -271,7 +274,6 @@ onMounted(loadDonorData)
               <strong>Notas:</strong> {{ donor.notes || 'Sin notas registradas' }}
             </div>
 
-            <!-- Barra de Trazabilidad -->
             <q-separator class="q-mb-md" />
             <div class="row q-gutter-sm items-center q-pt-sm">
               <span class="text-subtitle2 text-weight-bold text-secondary q-mr-sm"
@@ -316,7 +318,6 @@ onMounted(loadDonorData)
       </q-card-section>
     </q-card>
 
-    <!-- Sección Fiscal Independiente en DonorShow -->
     <q-card
       flat
       bordered
@@ -379,7 +380,6 @@ onMounted(loadDonorData)
       </q-card-section>
     </q-card>
 
-    <!-- Bitácora de Visitas -->
     <q-card
       flat
       bordered
@@ -430,7 +430,6 @@ onMounted(loadDonorData)
       </q-card-section>
     </q-card>
 
-    <!-- Bitácora de Gratitudes -->
     <q-card
       flat
       bordered
@@ -485,7 +484,6 @@ onMounted(loadDonorData)
       </q-card-section>
     </q-card>
 
-    <!-- Bitácora de Envío de Tarjetas, Videos y Otros -->
     <q-card
       flat
       bordered
@@ -538,7 +536,6 @@ onMounted(loadDonorData)
       </q-card-section>
     </q-card>
 
-    <!-- Historial de Donativos -->
     <q-card
       flat
       bordered
@@ -547,8 +544,6 @@ onMounted(loadDonorData)
       <q-card-section class="row items-center q-py-md bg-grey-1">
         <div class="text-h6 text-grey-9 text-weight-medium">Historial de Donativos</div>
         <q-space />
-        <!-- Descomenta este botón si manejas modal para agregar donativos -->
-        <!-- <q-btn color="primary" label="(+) Registrar Donativo" unelevated @click="openDonativeModal(donor.id)" /> -->
       </q-card-section>
 
       <q-card-section class="q-pa-none">
@@ -569,15 +564,10 @@ onMounted(loadDonorData)
               v-for="donative in donor.donations"
               :key="donative.id"
             >
-              <!-- No. Folio -->
               <td class="text-weight-medium text-primary">
                 {{ donative.folio_number }}
               </td>
-
-              <!-- Fecha de Pago -->
               <td>{{ formatDate(donative.payment_date) }}</td>
-
-              <!-- Tipo de Actividad -->
               <td>
                 <q-badge
                   color="blue-grey-6"
@@ -586,19 +576,13 @@ onMounted(loadDonorData)
                   {{ donative.activity_type }}
                 </q-badge>
               </td>
-
-              <!-- Concepto / Nombre Actividad -->
               <td
                 style="max-width: 250px"
                 class="ellipsis"
               >
                 {{ donative.concept || 'N/A' }}
               </td>
-
-              <!-- Forma de Pago -->
               <td>{{ donative.payment_method }}</td>
-
-              <!-- No. Recibo Deducible -->
               <td>
                 <q-badge :color="donative.has_tax_receipt ? 'positive' : 'grey-5'">
                   {{
@@ -608,14 +592,11 @@ onMounted(loadDonorData)
                   }}
                 </q-badge>
               </td>
-
-              <!-- Monto -->
               <td class="text-right text-weight-bold">
                 $ {{ donative.amount }} <small class="text-grey-6">{{ donative.currency }}</small>
               </td>
             </tr>
 
-            <!-- State por si no hay registros -->
             <tr v-if="!donor.donations || donor.donations.length === 0">
               <td
                 colspan="7"
@@ -671,7 +652,6 @@ onMounted(loadDonorData)
       </q-card-section>
     </q-card>
 
-    <!-- Modales -->
     <DonorVisitModal
       ref="visitModalRef"
       @saved="loadDonorData"
