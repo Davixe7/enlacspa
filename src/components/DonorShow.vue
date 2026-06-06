@@ -53,6 +53,26 @@ async function handleFiscalAccept({ data, closeModal, setErrors }) {
   }
 }
 
+async function deleteFiscal(id) {
+  try {
+    const confirmed = confirm(
+      '¿Estás seguro de eliminar este registro fiscal? Esta acción no se puede deshacer.'
+    )
+
+    if (!confirmed) return
+
+    await api.delete(`/fiscal-records/${id}`)
+
+    // Refrescamos los datos para quitar el registro de la vista
+    await loadDonorData()
+
+    notify.positive('Registro eliminado con éxito')
+  } catch (e) {
+    console.error(e)
+    notify.negative('Error al eliminar el registro: ' + (e.response?.data?.message || e.message))
+  }
+}
+
 const visitModalRef = ref(null)
 const gratitudeModalRef = ref(null)
 
