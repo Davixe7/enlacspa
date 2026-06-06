@@ -7,6 +7,7 @@ import DonorVisitModal from 'components/DonorVisitModal.vue'
 import DonorGratitudeModal from 'components/DonorGratitudeModal.vue'
 import DonorShipmentModal from 'components/DonorShipmentModal.vue'
 import DonorFiscalRecordModal from 'components/DonorFiscalRecordModal.vue'
+import { date } from 'quasar'
 
 const route = useRoute()
 const donor = ref(null)
@@ -54,13 +55,8 @@ async function loadDonorData() {
 function formatDate(isoString) {
   if (!isoString) return 'N/A'
 
-  // Si la fecha ya viene como 2026-05-25, el Date constructor puede ser engañoso por la zona horaria
-  // Si el backend envía 'YYYY-MM-DD', puedes usar este split rápido:
-  const [year, month, day] = isoString.split('T')[0].split('-')
-
-  if (!year || !month || !day) return isoString
-
-  return `${day}/${month}/${year}`
+  // date.extractDate e format de Quasar entienden perfectamente el formato ISO de Laravel
+  return date.formatDate(isoString, 'DD/MM/YYYY hh:mm A')
 }
 
 // Funciones para abrir modales
