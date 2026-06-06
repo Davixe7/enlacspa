@@ -92,9 +92,15 @@ const columns = [
 
 function formatPaymentDate(isoString) {
   if (!isoString) return 'N/A'
-  const date = new Date(isoString)
-  if (isNaN(date.getTime())) return isoString
-  return date.toLocaleDateString('es-MX', { year: 'numeric', month: '2-digit', day: '2-digit' })
+
+  const datePart = isoString.split('T')[0]
+  const parts = datePart.split('-')
+
+  if (parts.length !== 3) return isoString
+
+  // Construimos la cadena en formato legible DD/MM/AAAA sin usar zonas horarias
+  const [year, month, day] = parts
+  return `${day}/${month}/${year}`
 }
 
 async function fetchDonationsReport() {
