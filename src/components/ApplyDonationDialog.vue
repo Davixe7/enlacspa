@@ -309,6 +309,38 @@ function resetForm() {
   errors.value = {}
 }
 
+// Función para traer el tipo de cambio actual desde internet de forma automática
+async function autoFetchExchangeRate() {
+  try {
+    const response = await fetch('https://open.er-api.com/v6/latest/USD')
+    const data = await response.json()
+    if (data && data.rates && data.rates.MXN) {
+      form.value.exchange_rate = parseFloat(data.rates.MXN.toFixed(2))
+    }
+  } catch (error) {
+    console.error('No se pudo precargar el tipo de cambio automático:', error)
+    // Si falla internet, dejamos el valor por defecto en 1 para evitar errores
+  }
+}
+
+// Detecta cambios en Monto, Tipo de Cambio y Moneda
+watch(
+  [() => form.value.amount, () => form.value.exchange_rate, () => form.value.currency],
+  ([amount, rate, currency], [, , oldCurrency]) => {
+    // Si el usuario acaba de cambiar la moneda de MXN a DLLS, disparamos la consulta automática
+    if (currency === 'DLLS' && oldCurrency !== 'DLLS') {
+      autoFetchExchangeRate()
+    }
+
+    // Realizamos el cálculo de la equivalencia en pesos
+    if (currency === 'DLLS') {
+      form.value.equivalent_amount_mxn = (Number(amount || 0) * Number(rate || 1)).toFixed(2)
+    } else {
+      form.value.equivalent_amount_mxn = Number(amount || 0).toFixed(2)
+    }
+  }
+)
+
 defineExpose({ open })
 </script>
 
@@ -673,7 +705,8 @@ defineExpose({ open })
               <tr v-if="form.currency === 'DLLS'">
                 <td class="text-bold">Tipo de Cambio</td>
                 <td>
-                  <div class="row q-col-gutter-xs">
+                  <div class="row q-col-gutter-xs items-center">
+                    <!-- Input del Tipo de cambio (Se llena solo al cambiar a DLLS) -->
                     <q-input
                       v-model.number="form.exchange_rate"
                       outlined
@@ -683,14 +716,16 @@ defineExpose({ open })
                       class="col-6"
                       hide-bottom-space
                     />
+
+                    <!-- Input de Equivalencia en Pesos -->
                     <q-input
                       :model-value="form.equivalent_amount_mxn"
                       outlined
                       dense
                       readonly
-                      label="Equiv. Pesos"
+                      prefix="Equiv. Pesos: $"
                       bg-color="orange-1"
-                      class="col-6"
+                      class="col-6 text-weight-bold text-orange-9"
                       hide-bottom-space
                     />
                   </div>
