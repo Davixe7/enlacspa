@@ -159,6 +159,25 @@ async function deleteGratitude(id) {
   }
 }
 
+async function deleteShipment(id) {
+  try {
+    const confirmed = confirm(
+      '¿Estás seguro de eliminar este registro de envío? Esta acción no se puede deshacer.'
+    )
+    if (!confirmed) return
+
+    await api.delete(`/donor-shipments/${id}`)
+
+    // Refrescamos los datos para actualizar la vista
+    await loadDonorData()
+
+    notify.positive('Envío eliminado con éxito')
+  } catch (e) {
+    console.error(e)
+    notify.negative('Error al eliminar el envío: ' + (e.response?.data?.message || e.message))
+  }
+}
+
 onMounted(loadDonorData)
 </script>
 
@@ -843,7 +862,16 @@ onMounted(loadDonorData)
                   dense
                   icon="sym_o_edit"
                   color="secondary"
+                  class="q-mr-xs"
                   @click="openShipmentModal(donor.id, shipment)"
+                />
+                <q-btn
+                  flat
+                  round
+                  dense
+                  icon="sym_o_delete"
+                  color="negative"
+                  @click="deleteShipment(shipment.id)"
                 />
               </td>
             </tr>
