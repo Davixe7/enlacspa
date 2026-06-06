@@ -7,12 +7,24 @@ import notify from 'src/utils/notify'
 
 const loading = ref(false)
 const errors = ref({})
-const row = ref(null)
+const row = ref({ name: '', price: 0, is_active: 1 })
 const rows = ref([])
 const columns = ref([
   { align: 'left', name: 'order', label: '#', field: 'order' },
   { align: 'left', name: 'name', label: 'Nombre del programa', field: 'name' },
   { align: 'left', name: 'price', label: 'Precio Vigente', field: (row) => money(row.price) },
+  {
+    align: 'left',
+    name: 'valid_since',
+    label: 'Vigente desde',
+    field: (row) => {
+      if (!row.valid_since) return 'N/A'
+      // Formateamos para mostrar DD/MM/YYYY
+      const dateOnly = row.valid_since.split('T')[0]
+      const [year, month, day] = dateOnly.split('-')
+      return `${day}/${month}/${year}`
+    }
+  },
   {
     align: 'right',
     name: 'status',
@@ -25,7 +37,18 @@ const columns = ref([
 const dialog = ref(false)
 
 function editProgram(newRow) {
-  row.value = newRow
+  const data = { ...newRow }
+
+  // Limpiamos la fecha
+  if (data.valid_since) {
+    data.valid_since = data.valid_since.split('T')[0]
+  }
+
+  // FORZAR A ENTERO: Esto evita el estado indeterminado
+  data.is_active = data.is_active ? 1 : 0
+
+  row.value = data
+
   dialog.value = true
 }
 
