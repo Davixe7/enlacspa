@@ -119,6 +119,25 @@ const openGratitude = (donorId, rowData = null) => {
   gratitudeModalRef.value.open(donorId, rowData)
 }
 
+async function deleteVisit(id) {
+  try {
+    const confirmed = confirm(
+      '¿Estás seguro de eliminar esta visita? Esta acción no se puede deshacer.'
+    )
+    if (!confirmed) return
+
+    await api.delete(`/donor-visits/${id}`)
+
+    // Refrescamos los datos del donante para que la tabla se actualice sola
+    await loadDonorData()
+
+    notify.positive('Visita eliminada con éxito')
+  } catch (e) {
+    console.error(e)
+    notify.negative('Error al eliminar la visita: ' + (e.response?.data?.message || e.message))
+  }
+}
+
 onMounted(loadDonorData)
 </script>
 
@@ -677,7 +696,16 @@ onMounted(loadDonorData)
                   dense
                   icon="sym_o_edit"
                   color="secondary"
+                  class="q-mr-xs"
                   @click="openVisit(donor.id, visit)"
+                />
+                <q-btn
+                  flat
+                  round
+                  dense
+                  icon="sym_o_delete"
+                  color="negative"
+                  @click="deleteVisit(visit.id)"
                 />
               </td>
             </tr>
