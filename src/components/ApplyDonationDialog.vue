@@ -110,7 +110,11 @@ async function filterBeneficiaries(val, update, abort) {
     const dataFetched = response.data.data || []
 
     update(() => {
-      beneficiaryOptions.value = dataFetched
+      // Mapeamos los resultados para asegurarnos de que usen 'label'
+      beneficiaryOptions.value = dataFetched.map((item) => ({
+        id: item.value, // Homologamos el 'value' del backend como el 'id' que usa el formulario
+        label: item.label // El 'label' ya viene ordenado correctamente desde el CONCAT_WS del Controlador
+      }))
     })
   } catch (e) {
     console.error('Error al filtrar beneficiarios:', e)
@@ -546,7 +550,7 @@ defineExpose({ open })
                       dense
                       placeholder="Escriba el nombre del beneficiario..."
                       :options="beneficiaryOptions"
-                      option-value="value"
+                      option-value="id"
                       option-label="label"
                       emit-value
                       map-options
