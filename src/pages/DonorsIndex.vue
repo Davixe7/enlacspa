@@ -44,7 +44,12 @@ const columns = ref([
     name: 'birth_date',
     label: 'FECHA DE CUMPLEAÑOS',
     field: 'birth_date',
-    sortable: true
+    sortable: true,
+    format: (val) => {
+      if (!val) return '-'
+      const [year, month, day] = val.split('T')[0].split('-')
+      return `${day}/${month}/${year}`
+    }
   },
   { align: 'left', name: 'sector', label: 'SECTOR', field: 'sector', sortable: true },
   { align: 'center', name: 'is_active', label: 'ESTATUS' },
