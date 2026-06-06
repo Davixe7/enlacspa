@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router'
 import notify from 'src/utils/notify'
 import DonorKardexModal from 'components/DonorKardexModal.vue'
 import ApplyDonationDialog from 'components/ApplyDonationDialog.vue'
+import { exportXlsFile } from 'src/utils/exportXls'
 
 const $router = useRouter()
 
@@ -126,12 +127,31 @@ async function toggleStatus(row) {
   }
 }
 
-function exportData() {
+async function exportData() {
   if (rows.value.length === 0) {
     notify.warning('No hay datos disponibles para exportar')
     return
   }
-  notify.info('Preparando la descarga del reporte...')
+
+  try {
+    loading.value = true
+    notify.info('Preparando la descarga del reporte...')
+
+    await exportXlsFile(
+      '/donors/export',
+      {
+        search: filterName.value,
+        activity_type: selectedActivityId.value,
+        birth_month: selectedMonth.value ? selectedMonth.value.value : null
+      },
+      'Reporte_Donantes.xlsx'
+    )
+  } catch (error) {
+    console.error(error)
+    notify.negative('Error al exportar el archivo Excel')
+  } finally {
+    loading.value = false
+  }
 }
 
 function openDonationsReport() {
