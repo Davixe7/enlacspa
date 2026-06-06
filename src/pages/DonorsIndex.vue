@@ -228,7 +228,7 @@ onMounted(() => {
   <div class="row q-col-gutter-md q-mb-lg justify-start">
     <div class="col-12 col-md-9 row q-col-gutter-sm items-stretch">
       <!-- Filtro: Donante -->
-      <div class="col-12 col-sm-4 flex flex-column justify-end">
+      <div class="col-12 col-sm-4">
         <div
           class="text-caption text-weight-bold text-grey-8 q-mb-xs"
           style="line-height: 1"
@@ -253,7 +253,7 @@ onMounted(() => {
       </div>
 
       <!-- Filtro: Tipo de Actividad -->
-      <div class="col-12 col-sm-4 flex flex-column justify-end">
+      <div class="col-12 col-sm-4">
         <div
           class="text-caption text-weight-bold text-grey-8 q-mb-xs"
           style="line-height: 1"
@@ -278,7 +278,7 @@ onMounted(() => {
       </div>
 
       <!-- Filtro: Mes de Cumpleaños -->
-      <div class="col-12 col-sm-4 flex flex-column justify-end">
+      <div class="col-12 col-sm-4">
         <div
           class="text-caption text-weight-bold text-grey-8 q-mb-xs"
           style="line-height: 1"
