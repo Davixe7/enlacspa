@@ -23,6 +23,7 @@ onMounted(async () => {
   response.map((item) => (appointmentTypes.value[item.id] = { label: item.name, value: item.id }))
   appointmentTypes.value[0] = { label: 'Evaluación', value: 0 }
   appointments.value = (await api.get(`appointments/?candidate_id=${props.candidateId}`)).data.data
+  console.log(appointments.value)
 })
 
 function setAppointment(target) {
@@ -79,6 +80,104 @@ const pendingAppointments = computed(() => {
   return appointments.value.filter((appointment) => new Date(appointment.date) > new Date())
 })
 
+const medicalRecord = ref({
+  id_medical_record: null,
+  candidate_id: null,
+  date_medical_record: null,
+  hereditary_family_history: null,
+  non_pathological_personal_history: null,
+  perinatal_history: null,
+  andrological_gynecological_obstetric_history: null,
+  medical_history: null,
+  psychiatric_mental_status: null,
+  nervous_system: null,
+  respiratory_system: null,
+  cardiovascular_system: null,
+  digestive_system: null,
+  genitourinary_system: null,
+  musculoskeletal_system: null,
+  endocrine_system: null,
+  sensory_system: null,
+  integumentary_system: null,
+  weight: null,
+  height: null,
+  head_circumference: null,
+  heart_rate: null,
+  initial_weight: null,
+  weight_age: null,
+  height_age: null,
+  weight_height: null,
+  waist_cm: null,
+  hip_cm: null,
+  chest_cm: null,
+  brain_perimeter_cm: null,
+  brachial_circumference_cm: null,
+  wrist_circumference_cm: null,
+  calf_circumference_cm: null,
+  other: null,
+  imc: null,
+  respiratory_rate: null,
+  temperature: null,
+  general_inspection: null,
+  head: null,
+  mental_status: null,
+  hair: null,
+  neck: null,
+  thorax: null,
+  abdomen: null,
+  genitalia: null,
+  anorectal: null,
+  spine: null,
+  upper_lower_limbs: null,
+  peripheral_vascular_system: null,
+  skin_appendages: null,
+  areas_dryness_excessive_sweating: null,
+  diagnostic_impression: null,
+  treatment: null,
+  case_analysis: null,
+  created_at: null,
+  updated_at: null,
+  status: null,
+  subjetive: null,
+  objective: null,
+  assessment: null,
+  plan: null,
+  appointment_id: null,
+  type_id: null,
+  appointment_type: null
+})
+
+async function fetchMedicalRecord() {
+  try {
+    loading.value = true
+    medicalRecord.value = (
+      await api.get(`beneficiaries/${appointment.value.id}/medical-records`)
+    ).data.data
+    // console.log(medicalRecord.value)
+  } catch (error) {
+    console.log(error)
+  } finally {
+    loading.value = false
+  }
+}
+async function watchRecord(target) {
+  loading.value = true
+  appointment.value = target
+  await fetchMedicalRecord()
+  console.log(medicalRecord.value)
+  if (
+    medicalRecord.value.appointment_type === null ||
+    medicalRecord.value.appointment_type === ''
+  ) {
+    notify.negative('No cuenta con información')
+    return
+  }
+  let page = medicalRecord.value.appointment_type == 1 ? 'soap' : 'historia-clinica'
+  window.location.href = `#/${page}/${props.candidateId}?type_id=${medicalRecord.value.type_id}&id=${medicalRecord.value.appointment_id}&appointment_type=${medicalRecord.value.appointment_type}&ro=1`
+
+  loading.value = false
+  // console.log(target)
+}
 function updateAppointments(appointment) {
   dialog.value = false
   appointments.value.push(appointment)
@@ -124,13 +223,23 @@ function updateAppointments(appointment) {
     :hide-bottom="pastAppointments.length > 0"
   >
     <template v-slot:body-cell-actions="props">
-      <q-td class="text-right">
+      <q-td
+        class="text-right"
+        colspan="2"
+      >
         <q-btn
           icon="sym_o_comment"
           flat
           round
           dense
           @click="setAppointment(props.row)"
+        />
+        <q-btn
+          icon="sym_o_visibility"
+          flat
+          round
+          dense
+          @click="watchRecord(props.row)"
         />
       </q-td>
     </template>
