@@ -53,9 +53,9 @@ const deferredDate = computed(() => {
   return dateISOparsed < today
 })
 
-const isClosable = computed(() => {
+/* const isClosable = computed(() => {
   return scores.value.some((score) => score.id)
-})
+}) */
 
 const categoryStore = useCategoryStore()
 const rows = ref([])
@@ -249,14 +249,14 @@ onMounted(async () => {
         v-if="scores && scores.length && !dayClosed"
         class="flex justify-end q-gutter-x-md q-mt-md"
       >
-        <q-btn
+        <!--   <q-btn
           v-if="isClosable"
           :disable="deferredDate || dayClosed"
           color="secondary"
           label="Cerrar dia"
           @click="storeScores(1)"
           :loading="savingScores"
-        />
+        /> -->
         <q-btn
           :disable="deferredDate || dayClosed"
           color="primary"
