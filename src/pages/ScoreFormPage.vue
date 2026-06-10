@@ -155,7 +155,7 @@ onMounted(async () => {
 
   <div class="row">
     <!-- Todo contenido ahora vuelve a estar dentro del col-md-8 -->
-    <div class="col-md-8 q-mx-auto q-gutter-y-md">
+    <div class="col-md-12 q-mx-auto q-gutter-y-md">
       <div class="flex">
         <div class="page-title q-mb-none">
           Calificar actividades {{ category ? `- ${category.label}` : '' }}
