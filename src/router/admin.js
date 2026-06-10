@@ -10,6 +10,25 @@ export default [
     component: () => import('src/pages/admin/UsersPage.vue')
   },
   {
+    path: '/calendario',
+    meta: { label: 'Calendario' },
+    component: () => import('src/pages/admin/CalendarPage.vue')
+  },
+  {
+    path: '/historia-clinica/:candidateId',
+    name: 'HistoriaClinica',
+    component: () => import('src/pages/MedicalRecordForm.vue'),
+    meta: { label: 'Historia Clínica' },
+    props: true
+  },
+  {
+    path: '/soap/:candidateId',
+    name: 'SOAP',
+    meta: { label: 'SOAP' },
+    component: () => import('src/pages/SoapForm.vue'),
+    props: true
+  },
+  {
     path: '/horarios-equinoterapia',
     meta: { label: 'Horarios de Equinoterapia' },
     component: () => import('src/pages/admin/EquinetherapySchedule.vue')
