@@ -17,6 +17,20 @@ const category = ref(false)
 const loading = ref(false)
 const savingScores = ref(false)
 
+const groups = ref([])
+const groupId = ref(null)
+async function fetchGroups() {
+  try {
+    loading.value = true
+    let response = (await api.get(`groups/?plan_category_id=${category.value.id}`)).data.data
+    response.push({ name: 'Seleccionar grupo', id: null })
+    groups.value = response
+  } catch (error) {
+    notify.negative('Error al cargar los grupos')
+  } finally {
+    loading.value = false
+  }
+}
 const searchType = ref('user')
 const searchQuery = ref('')
 const optionId = ref(null)
@@ -63,11 +77,14 @@ const scores = ref([])
 
 async function fetchScores() {
   loading.value = true
-  rows.value = (
-    await api.get(
-      `activity_daily_scores/?category_id=${category.value.id}&mode=${searchType.value}`
-    )
-  ).data.data
+  let params = {
+    category_id: category.value.id,
+    mode: searchType.value
+  }
+  if (groupId.value) {
+    params.group_id = groupId.value
+  }
+  rows.value = (await api.get('activity_daily_scores', { params })).data.data
   loading.value = false
 }
 
@@ -123,6 +140,7 @@ const issuesDialog = ref(false)
 
 onMounted(async () => {
   category.value = await categoryStore.getCategoryByName(props.categoryName)
+  await fetchGroups()
   await fetchScores()
 })
 </script>
@@ -165,6 +183,18 @@ onMounted(async () => {
           class="q-ml-auto"
         />
       </div>
+
+      <q-select
+        :options="groups"
+        v-model="groupId"
+        :option-value="'id'"
+        :option-label="'name'"
+        outlined
+        clearable
+        emit-value
+        map-options
+        @update:model-value="fetchScores()"
+      />
 
       <div class="flex q-gutter-x-md">
         <q-radio
@@ -249,14 +279,14 @@ onMounted(async () => {
         v-if="scores && scores.length && !dayClosed"
         class="flex justify-end q-gutter-x-md q-mt-md"
       >
-        <q-btn
+        <!-- <q-btn
           v-if="isClosable"
           :disable="deferredDate || dayClosed"
           color="secondary"
           label="Cerrar dia"
           @click="storeScores(1)"
           :loading="savingScores"
-        />
+        /> -->
         <q-btn
           :disable="deferredDate || dayClosed"
           color="primary"
