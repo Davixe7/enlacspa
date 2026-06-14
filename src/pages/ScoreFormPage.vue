@@ -26,6 +26,7 @@ async function fetchGroups() {
     response.push({ name: 'Seleccionar grupo', id: null })
     groups.value = response
   } catch (error) {
+    console.log(error)
     notify.negative('Error al cargar los grupos')
   } finally {
     loading.value = false
@@ -67,9 +68,9 @@ const deferredDate = computed(() => {
   return dateISOparsed < today
 })
 
-const isClosable = computed(() => {
+/* const isClosable = computed(() => {
   return scores.value.some((score) => score.id)
-})
+}) */
 
 const categoryStore = useCategoryStore()
 const rows = ref([])

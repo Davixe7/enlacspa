@@ -45,7 +45,12 @@ async function saveProgram() {
         ? { ...priceUpdate.value, _method: 'PUT' }
         : { ...priceUpdate.value }
       let isValid = priceUpdate.value.price && priceUpdate.value.valid_since
+      if (!isValid) {
+        notify.negative('Precio y fecha de validez son obligatorios')
+        return
+      }
       let response = (await api.post(route, data)).data.data
+      console.log(response)
     }
 
     emits('updated', response.data.data)
