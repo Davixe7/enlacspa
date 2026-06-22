@@ -45,9 +45,7 @@ const paymentConfig = ref({ ...template })
 async function saveData() {
   try {
     loading.value = true
-    let route = paymentConfig.value.id
-      ? `/payment_configs/${paymentConfig.value.id}`
-      : '/payment_configs'
+    let route = paymentConfig.value.id ? `/sponsorships/${paymentConfig.value.id}` : '/sponsorships'
 
     let formData = new FormData()
 
@@ -102,8 +100,8 @@ onMounted(async () => {
   }
 
   let route = props.paymentConfigId
-    ? `/payment_configs/${props.paymentConfigId}`
-    : `/payment_configs/?candidate_id=${props.candidateId}&sponsor_id=${props.sponsorId}`
+    ? `/sponsorships/${props.paymentConfigId}`
+    : `/sponsorships/?candidate_id=${props.candidateId}&sponsor_id=${props.sponsorId}`
 
   paymentConfig.value = (await api.get(route)).data.data
 

@@ -6,48 +6,49 @@ const loading = ref(false)
 const search = ref('')
 const rows = ref([])
 const columns = ref([
-  { name: 'id', label: 'Folio', field: 'id', align: 'left', sortable: true },
-  { name: 'name', label: 'Beneficiario', field: 'full_name', align: 'left', sortable: true },
-  { name: 'program', label: 'Programa', field: (row) => row.program.name, align: 'left' },
-  { name: 'parents', label: 'Cuota Padres (mes)', align: 'left' },
-  { name: 'sponsors', label: 'Aportación de Padrinos (mes)', align: 'left' },
-  { name: 'enlac', label: 'Cuota ENLAC (mes)', field: (row) => row.enlacs_amount, align: 'left' }
+  { field: 'sheet', label: 'Folio', align: 'left', sortable: true },
+  { field: 'candidateName', label: 'Beneficiario', align: 'left' },
+  { field: 'programName', label: 'Programa', align: 'left' },
+  { field: 'parents', label: 'Cuota Padres (mes)', align: 'left', name: 'parents' },
+  { field: 'sponsors', label: 'Aportación de Padrinos (mes)', align: 'left', name: 'sponsors' },
+  { field: 'enlac', label: 'Cuota ENLAC (mes)', align: 'left' }
 ])
 
 const fecha = new Date()
 const mesActual = fecha.getMonth() + 1 // 1–12
 const anioActual = fecha.getFullYear()
-
-// Si es antes de agosto, el ciclo inició el año anterior
-const inicioCiclo = mesActual < 8 ? anioActual - 1 : anioActual
+const inicioCiclo = mesActual >= 8 ? anioActual : anioActual - 1
 
 // Nombres de los meses (usamos índice 1–12)
-const nombresMeses = [
-  '',
-  'Enero',
-  'Febrero',
-  'Marzo',
-  'Abril',
-  'Mayo',
-  'Junio',
-  'Julio',
-  'Agosto',
-  'Septiembre',
-  'Octubre',
-  'Noviembre',
-  'Diciembre'
+const calendarMonths = [
+  {},
+  { label: 'Agosto', month: 1 },
+  { label: 'Septiembre', month: 2 },
+  { label: 'Octubre', month: 3 },
+  { label: 'Noviembre', month: 4 },
+  { label: 'Diciembre', month: 5 },
+  { label: 'Enero', month: 6 },
+  { label: 'Febrero', month: 7 },
+  { label: 'Marzo', month: 8 },
+  { label: 'Abril', month: 9 },
+  { label: 'Mayo', month: 10 },
+  { label: 'Junio', month: 11 },
+  { label: 'Julio', month: 12 }
 ]
+
+function toSchoolMonth(calendarMonth) {
+  return calendarMonth >= 8 ? calendarMonth - 7 : calendarMonth + 5
+}
 
 // Computamos los meses válidos del ciclo hasta el mes actual
 const mesesDisponibles = computed(() => {
   const opciones = []
 
   // Agosto a diciembre del año de inicio
-  for (let i = 8; i < 20; i++) {
-    let labelIndex = i > 12 ? i - 12 : i
-    let inicioCicloIndex = i > 12 ? inicioCiclo + 1 : inicioCiclo
+  for (let i = 1; i <= 12; i++) {
+    let monthYear = i <= 5 ? inicioCiclo : inicioCiclo + 1
     opciones.push({
-      label: `${inicioCicloIndex} - ${nombresMeses[labelIndex]}`,
+      label: `${monthYear} - ${calendarMonths[i].label}`,
       value: { year: inicioCiclo, month: i }
     })
   }
@@ -77,20 +78,23 @@ const results = computed(() => {
   let results = [...rows.value]
 
   if (parentStatusFilter.value) {
-    results = results.filter((row) => row.parent_status == parentStatusFilter.value)
+    results = results.filter((row) => row.parentStatus == parentStatusFilter.value)
   }
 
   if (sponsorStatusFilter.value) {
-    results = results.filter((row) => row.sponsr_status == sponsorStatusFilter.value)
+    results = results.filter((row) => row.sponsorStatus == sponsorStatusFilter.value)
   }
 
   return results
 })
 
 onMounted(async () => {
+  console.log(mesActual)
+  console.log(toSchoolMonth(mesActual))
+
   month.value = {
-    value: { month: mesActual, year: anioActual },
-    label: nombresMeses[mesActual]
+    value: { month: toSchoolMonth(mesActual), year: inicioCiclo },
+    label: calendarMonths[toSchoolMonth(mesActual)].label
   }
   fetchFinancial()
 })
@@ -111,8 +115,8 @@ onMounted(async () => {
       map-options
       clearable
       :options="[
-        { label: 'Solvente', value: 'green-2' },
-        { label: 'Pendiente', value: 'red-2' },
+        { label: 'Solvente', value: 'green-3' },
+        { label: 'Pendiente', value: 'red-3' },
         { label: 'Todos', value: null }
       ]"
     />
@@ -127,8 +131,8 @@ onMounted(async () => {
       map-options
       clearable
       :options="[
-        { label: 'Solvente', value: 'green-2' },
-        { label: 'Pendiente', value: 'red-2' },
+        { label: 'Solvente', value: 'green-3' },
+        { label: 'Pendiente', value: 'red-3' },
         { label: 'Todos', value: null }
       ]"
     />
@@ -158,51 +162,21 @@ onMounted(async () => {
   </div>
 
   <q-table
-    :loading="loading"
-    bordered
-    hide-bottom
-    :filter="search"
     :rows="results"
     :columns="columns"
     :pagination="{ rowsPerPage: -1 }"
+    :filter="search"
   >
-    <template v-slot:body-cell-name="props">
-      <q-td>
-        <router-link :to="{ name: 'financial.control', params: { candidateId: props.row.id } }">
-          {{ props.row.full_name }}
-        </router-link>
-      </q-td>
-    </template>
     <template v-slot:body-cell-parents="props">
-      <q-td :class="[`bg-${props.row.parent_status}`]">
-        {{ `${props.row.parent_paid} / ${props.row.parent_amount}` }}
-        <div v-if="props.row.last_parent_payment_date">
-          <small>
-            {{ props.row.last_parent_payment_date }}
-          </small>
-        </div>
+      <q-td :class="`bg-${props.row.parentStatus}`">
+        {{ props.row.parents }}
       </q-td>
     </template>
 
     <template v-slot:body-cell-sponsors="props">
-      <q-td :class="[`bg-${props.row.sponsr_status}`]">
-        {{ `${props.row.sponsr_paid} / ${props.row.sponsr_amount}` }}
-        <div v-if="props.row.last_sponsr_payment_date">
-          <small>
-            {{ props.row.last_sponsr_payment_date }}
-          </small>
-        </div>
+      <q-td :class="`bg-${props.row.sponsorStatus}`">
+        {{ props.row.sponsors }}
       </q-td>
-    </template>
-
-    <template v-slot:loading>
-      <div class="q-pa-md text-center text-weight-medium">
-        <q-spinner
-          color="primary"
-          class="q-mr-sm"
-        />
-        <span style="font-size: 18px"> Cargando... </span>
-      </div>
     </template>
   </q-table>
 </template>

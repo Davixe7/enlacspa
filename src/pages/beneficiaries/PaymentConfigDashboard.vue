@@ -23,7 +23,7 @@ onMounted(async () => {
     ? (await api.get(`beneficiaries/${props.candidateId}`)).data.data
     : {}
 
-  rows.value = (await api.get(`payment_configs/?candidate_id=${props.candidateId}`)).data.data
+  rows.value = (await api.get(`sponsorships/?candidate_id=${props.candidateId}`)).data.data
   let foundParent = rows.value.find((row) => row.sponsor_id == null)
   parentPaymentConfig.value = foundParent ? foundParent : parentPaymentConfig.value
 })
@@ -32,8 +32,8 @@ async function storeParentPaymentConfig() {
   try {
     loading.value = false
     let route = parentPaymentConfig.value.id
-      ? `/payment_configs/${parentPaymentConfig.value.id}`
-      : 'payment_configs'
+      ? `/sponsorships/${parentPaymentConfig.value.id}`
+      : 'sponsorships'
     let data = parentPaymentConfig.value.id
       ? { ...parentPaymentConfig.value, _method: 'PUT' }
       : { ...parentPaymentConfig.value }
@@ -116,8 +116,9 @@ const amountEnlac = computed(() =>
             outline
             color="primary"
             class="q-mr-sm"
-            :to="{ name: 'beneficiaries.balances.control' }"
-            label="Ver detalles"
+            :tox="{ name: 'beneficiaries.balances.control' }"
+            :to="{ name: `semaforo`, props: { candidateId: props.candidateId } }"
+            :label="`Ver detalles`"
           />
           <q-btn
             color="primary"

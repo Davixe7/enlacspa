@@ -3,6 +3,7 @@ import { onMounted, ref, computed } from 'vue'
 import { api } from 'src/boot/axios'
 import SponsorPicker from 'pages/beneficiaries/SponsorPicker.vue'
 import { useQuasar } from 'quasar'
+import notify from 'src/utils/notify'
 
 const $q = useQuasar()
 const dialog = ref(false)
@@ -16,15 +17,21 @@ const props = defineProps({
   readonly: { type: Boolean, default: false }
 })
 
+onMounted(() => {
+  fetchSponsorships()
+  checkHistory()
+})
+
 const except = computed(() => paymentConfigs.value.map((item) => item.sponsor.id))
 
 // Cargar lista activa
-async function fetchConfigs() {
+async function fetchSponsorships() {
   try {
-    let response = (await api.get(`payment_configs/?candidate_id=${props.candidateId}`)).data.data
+    let response = (await api.get(`sponsorships/?candidate_id=${props.candidateId}`)).data.data
     paymentConfigs.value = response.filter((paymentConfig) => !!paymentConfig.sponsor_id)
   } catch (e) {
-    console.error('Error cargando configs:', e)
+    notify.negative('Error al cargar los patrocinios')
+    console.error('Error cargando patrocinios:', e)
   }
 }
 
@@ -32,7 +39,7 @@ async function fetchConfigs() {
 async function loadHistory() {
   try {
     const { data } = await api.get(
-      `/payment_configs/list/all-history?candidate_id=${props.candidateId}`
+      `/sponsorships/list/all-history?candidate_id=${props.candidateId}`
     )
     historyConfigs.value = data.data
     historyDialog.value = true
@@ -42,22 +49,17 @@ async function loadHistory() {
   }
 }
 
-onMounted(() => {
-  fetchConfigs()
-  checkHistory()
-})
-
 function handleClose() {
   dialog.value = false
-  fetchConfigs()
+  fetchSponsorships()
 }
 
 async function restoreSponsor(id) {
   try {
-    await api.patch(`/payment_configs/${id}/restore`)
+    await api.patch(`/sponsorships/${id}/restore`)
     $q.notify({ type: 'positive', message: 'Patrocinio restaurado con éxito' })
     loadHistory()
-    fetchConfigs()
+    fetchSponsorships()
     checkHistory()
   } catch (e) {
     console.log(e)
@@ -67,7 +69,7 @@ async function restoreSponsor(id) {
 
 async function checkHistory() {
   try {
-    const { data } = await api.get(`/payment_configs/has-history?candidate_id=${props.candidateId}`)
+    const { data } = await api.get(`/sponsorships/has-history?candidate_id=${props.candidateId}`)
     hasHistory.value = data.has_history
   } catch (e) {
     console.log(e)
