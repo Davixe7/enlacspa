@@ -62,10 +62,23 @@ const columns = ref([
     name: 'schedule',
     label: 'Horario',
     field: (row) => formatRange(row.start_time, row.end_time),
-    align: 'left'
+    align: 'center',
+    style: 'font-size: 1.6rem !important; font-weight: bold !important;'
   },
-  { name: 'departure_time', label: 'Ida', field: 'departure_time', align: 'left' },
-  { name: 'return_time', label: 'Regreso', field: 'return_time', align: 'left' },
+  {
+    name: 'departure_time',
+    label: 'Ida',
+    field: 'departure_time',
+    align: 'left',
+    headerStyle: 'font-weight: bold; color: #2e7d32; font-size: 1.1rem;'
+  },
+  {
+    name: 'return_time',
+    label: 'Regreso',
+    field: 'return_time',
+    align: 'left',
+    headerStyle: 'font-weight: bold; color: #c62828; font-size: 1.1rem;'
+  },
   { name: 'comment' }
 ])
 
@@ -141,19 +154,19 @@ async function saveRide(row) {
     </template>
 
     <template v-slot:body-cell-departure_time="props">
-      <q-td class="text-h6 text-positive">
+      <q-td>
         <q-input
           color="positive"
           filled
           :model-value="formatAmPm(props.row.departure_time)"
           readonly
           :disable="!!props.row.departure_time"
-          input-class="text-h6 text-weight-bold text-positive"
+          class="time-input-large col-ida"
         >
           <template v-slot:append>
             <q-icon
               name="access_time"
-              class="cursor-pointer text-positive"
+              class="cursor-pointer text-green-8"
             />
             <q-popup-proxy>
               <q-time
@@ -169,19 +182,19 @@ async function saveRide(row) {
     </template>
 
     <template v-slot:body-cell-return_time="props">
-      <q-td class="text-h6 text-negative">
+      <q-td>
         <q-input
           filled
           color="negative"
           :model-value="formatAmPm(props.row.return_time)"
           readonly
           :disable="!!props.row.return_time"
-          input-class="text-h6 text-weight-bold text-negative"
+          class="time-input-large col-regreso"
         >
           <template v-slot:append>
             <q-icon
               name="access_time"
-              class="cursor-pointer text-negative"
+              class="cursor-pointer text-red-8"
             />
             <q-popup-proxy>
               <q-time
@@ -235,7 +248,25 @@ async function saveRide(row) {
     </q-card>
   </q-dialog>
 </template>
+
 <style>
+/* Tamaño de fuente de la hora y centrado */
+.time-input-large .q-field__native {
+  font-size: 1.6rem !important;
+  font-weight: bold !important;
+  text-align: center;
+}
+
+/* Color verde para Ida */
+.col-ida .q-field__native {
+  color: #2e7d32 !important;
+}
+
+/* Color rojo para Regreso */
+.col-regreso .q-field__native {
+  color: #c62828 !important;
+}
+
 .comment-card {
   width: 600px;
   max-width: 90%;

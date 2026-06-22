@@ -122,11 +122,50 @@ function removeFiscal(index) {
   form.value.fiscal_records.splice(index, 1)
 }
 
-function handleFiscalAccept({ data, index }) {
-  if (index !== null) {
-    form.value.fiscal_records[index] = data
-  } else {
-    form.value.fiscal_records.push(data)
+async function handleFiscalAccept({ data, index, closeModal, setErrors }) {
+  try {
+    let response
+
+    if (!data.donor_id && form.value.id) {
+      data.donor_id = form.value.id
+    }
+
+    if (data.id) {
+      response = await api.put(`/fiscal-records/${data.id}`, data)
+      notify.positive('Registro fiscal actualizado con éxito')
+    } else if (data.donor_id) {
+      response = await api.post('/fiscal-records', data)
+      notify.positive('Registro fiscal creado con éxito')
+    } else {
+      // Donante nuevo (Pasa aquí tras validar de forma segura en el front)
+      if (index !== null) {
+        form.value.fiscal_records[index] = { ...data }
+      } else {
+        form.value.fiscal_records.push({ ...data })
+      }
+      if (closeModal) closeModal()
+      return
+    }
+
+    const savedRecord = response.data?.data || response.data
+    if (index !== null) {
+      form.value.fiscal_records[index] = savedRecord
+    } else {
+      form.value.fiscal_records.push(savedRecord)
+    }
+
+    if (closeModal) closeModal()
+  } catch (error) {
+    if (error.response && error.response.status === 422) {
+      const serverErrors = error.response.data.errors || {}
+      if (typeof setErrors === 'function') {
+        setErrors({ ...serverErrors })
+      }
+      notify.negative('Por favor, verifica los campos obligatorios del registro fiscal.')
+    } else {
+      const msg = error.response?.data?.message || 'Error al procesar el registro fiscal.'
+      notify.negative(msg)
+    }
   }
 }
 

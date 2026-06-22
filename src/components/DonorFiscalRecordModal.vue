@@ -89,6 +89,8 @@ const cfdiUses = [
   'CN01 - Nómina'
 ]
 
+const fiscalFormRef = ref(null)
+
 function open(data = null, index = null) {
   editingIndex.value = index
   serverErrors.value = {} // Limpiar errores previos al abrir
@@ -117,7 +119,21 @@ function closeModal() {
   isOpen.value = false
 }
 
-function submit() {
+/* function submit() {
+  emit('accept', {
+    data: form.value,
+    index: editingIndex.value,
+    closeModal,
+    setErrors: setServerErrors
+  })
+} */
+
+async function submit() {
+  if (fiscalFormRef.value) {
+    const isValid = await fiscalFormRef.value.validate()
+    if (!isValid) return // Si falla la validación visual, frena el cierre de la modal
+  }
+
   emit('accept', {
     data: form.value,
     index: editingIndex.value,
@@ -142,7 +158,10 @@ defineExpose({ open })
     persistent
   >
     <q-card style="width: 750px; max-width: 90vw">
-      <q-form @submit.prevent="submit">
+      <q-form
+        ref="fiscalFormRef"
+        @submit.prevent="submit"
+      >
         <input
           type="hidden"
           v-model="form.donor_id"
@@ -186,6 +205,10 @@ defineExpose({ open })
                     outlined
                     dense
                     v-model="form.commercial_name"
+                    :rules="[
+                      (val) => !!val || 'El nombre comercial es obligatorio',
+                      (val) => val.length <= 255 || 'Máximo 255 caracteres'
+                    ]"
                     :error="!!serverErrors.commercial_name"
                     :error-message="getFieldError('commercial_name')"
                     :hide-bottom-space="!serverErrors.commercial_name"
@@ -200,6 +223,10 @@ defineExpose({ open })
                     outlined
                     dense
                     v-model="form.tax_name"
+                    :rules="[
+                      (val) => !!val || 'La razón o denominación social es obligatoria',
+                      (val) => val.length <= 255 || 'Máximo 255 caracteres'
+                    ]"
                     :error="!!serverErrors.tax_name"
                     :error-message="getFieldError('tax_name')"
                     :hide-bottom-space="!serverErrors.tax_name"
@@ -223,6 +250,12 @@ defineExpose({ open })
                     "
                     maxlength="13"
                     placeholder="Ej: EM120324XX1"
+                    :rules="[
+                      (val) => !!val || 'El RFC es obligatorio',
+                      (val) =>
+                        (val.length >= 12 && val.length <= 13) ||
+                        'El RFC debe tener entre 12 y 13 caracteres'
+                    ]"
                     :error="!!serverErrors.rfc"
                     :error-message="getFieldError('rfc')"
                     :hide-bottom-space="!serverErrors.rfc"
@@ -237,6 +270,7 @@ defineExpose({ open })
                     dense
                     v-model="form.tax_regimen"
                     :options="taxRegimens"
+                    :rules="[(val) => !!val || 'El régimen fiscal es obligatorio']"
                     :error="!!serverErrors.tax_regimen"
                     :error-message="getFieldError('tax_regimen')"
                     :hide-bottom-space="!serverErrors.tax_regimen"
@@ -252,6 +286,7 @@ defineExpose({ open })
                     dense
                     v-model="form.cfdi_use"
                     :options="cfdiUses"
+                    :rules="[(val) => !!val || 'El uso de CFDI es obligatorio']"
                     :error="!!serverErrors.cfdi_use"
                     :error-message="getFieldError('cfdi_use')"
                     :hide-bottom-space="!serverErrors.cfdi_use"
@@ -267,6 +302,11 @@ defineExpose({ open })
                     dense
                     type="email"
                     v-model="form.email"
+                    :rules="[
+                      (val) => !!val || 'El correo electrónico fiscal es obligatorio',
+                      (val) => /.+@.+\..+/.test(val) || 'Ingresa un correo electrónico válido',
+                      (val) => val.length <= 255 || 'Máximo 255 caracteres'
+                    ]"
                     :error="!!serverErrors.email"
                     :error-message="getFieldError('email')"
                     :hide-bottom-space="!serverErrors.email"
@@ -296,6 +336,10 @@ defineExpose({ open })
                     outlined
                     dense
                     v-model="form.street"
+                    :rules="[
+                      (val) => !!val || 'La calle fiscal es obligatoria',
+                      (val) => val.length <= 255 || 'Máximo 255 caracteres'
+                    ]"
                     :error="!!serverErrors.street"
                     :error-message="getFieldError('street')"
                     :hide-bottom-space="!serverErrors.street"
@@ -310,6 +354,10 @@ defineExpose({ open })
                     outlined
                     dense
                     v-model="form.exterior_number"
+                    :rules="[
+                      (val) => !!val || 'El número exterior es obligatorio',
+                      (val) => val.length <= 50 || 'Máximo 50 caracteres'
+                    ]"
                     :error="!!serverErrors.exterior_number"
                     :error-message="getFieldError('exterior_number')"
                     :hide-bottom-space="!serverErrors.exterior_number"
@@ -324,6 +372,10 @@ defineExpose({ open })
                     outlined
                     dense
                     v-model="form.neighborhood"
+                    :rules="[
+                      (val) => !!val || 'La colonia fiscal es obligatoria',
+                      (val) => val.length <= 255 || 'Máximo 255 caracteres'
+                    ]"
                     :error="!!serverErrors.neighborhood"
                     :error-message="getFieldError('neighborhood')"
                     :hide-bottom-space="!serverErrors.neighborhood"
@@ -338,6 +390,10 @@ defineExpose({ open })
                     outlined
                     dense
                     v-model="form.postal_code"
+                    :rules="[
+                      (val) => !!val || 'El código postal es obligatorio',
+                      (val) => val.length <= 10 || 'Máximo 10 caracteres'
+                    ]"
                     :error="!!serverErrors.postal_code"
                     :error-message="getFieldError('postal_code')"
                     :hide-bottom-space="!serverErrors.postal_code"
@@ -352,6 +408,10 @@ defineExpose({ open })
                     outlined
                     dense
                     v-model="form.city"
+                    :rules="[
+                      (val) => !!val || 'La ciudad fiscal es obligatoria',
+                      (val) => val.length <= 255 || 'Máximo 255 caracteres'
+                    ]"
                     :error="!!serverErrors.city"
                     :error-message="getFieldError('city')"
                     :hide-bottom-space="!serverErrors.city"
@@ -366,6 +426,10 @@ defineExpose({ open })
                     outlined
                     dense
                     v-model="form.state"
+                    :rules="[
+                      (val) => !!val || 'El estado fiscal es obligatorio',
+                      (val) => val.length <= 255 || 'Máximo 255 caracteres'
+                    ]"
                     :error="!!serverErrors.state"
                     :error-message="getFieldError('state')"
                     :hide-bottom-space="!serverErrors.state"
@@ -389,6 +453,10 @@ defineExpose({ open })
                     outlined
                     dense
                     v-model="form.billing_contact_name"
+                    :rules="[
+                      (val) => !!val || 'El contacto de cobranza es obligatorio',
+                      (val) => val.length <= 255 || 'Máximo 255 caracteres'
+                    ]"
                     :error="!!serverErrors.billing_contact_name"
                     :error-message="getFieldError('billing_contact_name')"
                     :hide-bottom-space="!serverErrors.billing_contact_name"
@@ -403,6 +471,7 @@ defineExpose({ open })
                     outlined
                     dense
                     v-model="form.billing_job_title"
+                    :rules="[(val) => !val || val.length <= 255 || 'Máximo 255 caracteres']"
                     :error="!!serverErrors.billing_job_title"
                     :error-message="getFieldError('billing_job_title')"
                     :hide-bottom-space="!serverErrors.billing_job_title"
@@ -417,6 +486,7 @@ defineExpose({ open })
                     outlined
                     dense
                     v-model="form.billing_landline"
+                    :rules="[(val) => !val || val.length <= 50 || 'Máximo 50 caracteres']"
                     :error="!!serverErrors.billing_landline"
                     :error-message="getFieldError('billing_landline')"
                     :hide-bottom-space="!serverErrors.billing_landline"
@@ -432,6 +502,7 @@ defineExpose({ open })
                     dense
                     mask="##########"
                     v-model="form.billing_cellphone"
+                    :rules="[(val) => !val || val.length <= 50 || 'Máximo 50 caracteres']"
                     :error="!!serverErrors.billing_cellphone"
                     :error-message="getFieldError('billing_cellphone')"
                     :hide-bottom-space="!serverErrors.billing_cellphone"
@@ -447,6 +518,10 @@ defineExpose({ open })
                     dense
                     type="email"
                     v-model="form.billing_email"
+                    :rules="[
+                      (val) => !val || /.+@.+\..+/.test(val) || 'Ingresa un correo válido',
+                      (val) => !val || val.length <= 255 || 'Máximo 255 caracteres'
+                    ]"
                     :error="!!serverErrors.billing_email"
                     :error-message="getFieldError('billing_email')"
                     :hide-bottom-space="!serverErrors.billing_email"
@@ -487,6 +562,7 @@ defineExpose({ open })
                     dense
                     placeholder="Ej. Lunes o Quincena"
                     v-model="form.payment_day"
+                    :rules="[(val) => !val || val.length <= 255 || 'Máximo 255 caracteres']"
                     :error="!!serverErrors.payment_day"
                     :error-message="getFieldError('payment_day')"
                     :hide-bottom-space="!serverErrors.payment_day"
@@ -510,6 +586,7 @@ defineExpose({ open })
                     outlined
                     dense
                     v-model="form.billing_street"
+                    :rules="[(val) => !val || val.length <= 255 || 'Máximo 255 caracteres']"
                     :error="!!serverErrors.billing_street"
                     :error-message="getFieldError('billing_street')"
                     :hide-bottom-space="!serverErrors.billing_street"
@@ -524,6 +601,7 @@ defineExpose({ open })
                     outlined
                     dense
                     v-model="form.billing_exterior_number"
+                    :rules="[(val) => !val || val.length <= 50 || 'Máximo 50 caracteres']"
                     :error="!!serverErrors.billing_exterior_number"
                     :error-message="getFieldError('billing_exterior_number')"
                     :hide-bottom-space="!serverErrors.billing_exterior_number"
@@ -538,6 +616,7 @@ defineExpose({ open })
                     outlined
                     dense
                     v-model="form.billing_neighborhood"
+                    :rules="[(val) => !val || val.length <= 255 || 'Máximo 255 caracteres']"
                     :error="!!serverErrors.billing_neighborhood"
                     :error-message="getFieldError('billing_neighborhood')"
                     :hide-bottom-space="!serverErrors.billing_neighborhood"
@@ -552,6 +631,7 @@ defineExpose({ open })
                     outlined
                     dense
                     v-model="form.billing_postal_code"
+                    :rules="[(val) => !val || val.length <= 10 || 'Máximo 10 caracteres']"
                     :error="!!serverErrors.billing_postal_code"
                     :error-message="getFieldError('billing_postal_code')"
                     :hide-bottom-space="!serverErrors.billing_postal_code"
