@@ -15,6 +15,13 @@ export default {
   props: true,
   children: [
     {
+      path: 'semaforo',
+      meta: { label: 'Semaforo' },
+      component: () => import('pages/SemaforoPage.vue'),
+      props: true,
+      name: 'semaforo',
+    },
+    {
       path: 'socioeconomico',
       meta: { label: 'Perfil Socio-económico' },
       component: () => import('src/pages/beneficiaries/SocioeconomicPage.vue'),

@@ -14,7 +14,8 @@ const adminLinks = ref([
   { label: 'Carrusel', link: '/carrusel' },
   { label: 'Administración de Programas', link: '/programas' },
   { label: 'Catálogo de Claves Radiomaratón', link: '/radiomaraton-claves' },
-  { label: 'Catálogo de Procuración de Fondos', link: '/procuracion-fondos' }
+  { label: 'Catálogo de Procuración de Fondos', link: '/procuracion-fondos' },
+  { label: 'Cuota de padres', link: '/cuota-de-padres' }
 ])
 </script>
 
