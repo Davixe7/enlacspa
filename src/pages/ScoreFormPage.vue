@@ -68,12 +68,6 @@ const deferredDate = computed(() => {
   return dateISOparsed < today
 })
 
-/* const isClosable = computed(() => {
-/* const isClosable = computed(() => {
-  return scores.value.some((score) => score.id)
-}) */
-}) */
-
 const categoryStore = useCategoryStore()
 const rows = ref([])
 const scores = ref([])
@@ -289,7 +283,6 @@ onMounted(async () => {
           label="Cerrar dia"
           @click="storeScores(1)"
           :loading="savingScores"
-        /> -->
         /> -->
         <q-btn
           :disable="deferredDate || dayClosed"
