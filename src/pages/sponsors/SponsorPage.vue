@@ -5,7 +5,6 @@ import SponsorshipsTable from 'src/pages/sponsors/SponsorshipsTable.vue'
 import { onMounted, ref } from 'vue'
 
 const props = defineProps(['sponsorId'])
-const paymentConfigs = ref([])
 const sponsor = ref({})
 const loading = ref(false)
 
@@ -13,7 +12,6 @@ onMounted(async () => {
   try {
     loading.value = true
     sponsor.value = (await api.get(`/sponsors/${props.sponsorId}`)).data.data
-    paymentConfigs.value = (await api.get(`/payment_configs/?sponsor_id=${props.sponsorId}`)).data.data
   } catch (error) {
     console.log(error)
   } finally {
@@ -28,8 +26,8 @@ onMounted(async () => {
     <q-btn
       color="primary"
       :to="`${props.sponsorId}/editar`"
-      >Editar perfil</q-btn
-    >
+      label="Editar perfil"
+    />
   </div>
   <SponsorProfile :sponsorId="sponsorId" />
 

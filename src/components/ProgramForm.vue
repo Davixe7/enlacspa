@@ -31,7 +31,6 @@ async function saveProgram() {
 
     let route = model.value.id ? `/programs/${model.value.id}` : '/programs'
     let data = model.value.id ? { ...model.value, _method: 'PUT' } : { ...model.value }
-
     const response = await api.post(route, data)
 
     if (!model.value.id) {

@@ -19,6 +19,15 @@ const payment = ref({
 })
 
 const multiple = ref(false)
+watch(
+  () => multiple.value,
+  function (newVal) {
+    console.log(newVal)
+    if (!newVal) {
+      targetMonths.value = [props.month]
+    }
+  }
+)
 
 const localPaymentBlocks = computed(() => {
   return Object.values(props.paymentBlocks[props.month.key])
@@ -210,7 +219,7 @@ onMounted(() => {
                   v-model="payment.amount"
                   :error="!!errors['amount']"
                   :error-message="errors['amount']"
-                  :disable="multiple"
+                  :disable="multiple || !payment.is_partial"
                   hide-bottom-space
                 />
               </td>

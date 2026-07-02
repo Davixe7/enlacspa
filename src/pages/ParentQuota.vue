@@ -1,8 +1,10 @@
 <script setup>
 import { api } from 'src/boot/axios'
-import EnlacDate from 'src/components/EnlacDate.vue'
 import notify from 'src/utils/notify'
 import { onMounted, ref } from 'vue'
+
+import CountDown from 'src/components/CountDown.vue'
+import EnlacDate from 'src/components/EnlacDate.vue'
 
 const errors = ref({})
 const loading = ref(false)
@@ -52,39 +54,42 @@ onMounted(() => {
         >
           Proxima ejecución
         </div>
-        <div
-          class="font-weight-medium"
-          style="font-size: 20px"
-        >
-          364 días 23h 44m 00s
-        </div>
+        <CountDown :target-date="quota.valid_since" />
       </div>
-      <div class="q-ml-auto flex items-center">
-        <q-input
-          outlined
-          v-model="quota.amount"
-          hide-bottom-space
-          :error="!!errors['amount']"
-          :error-message="errors['amount']"
-          type="number"
-          prefix="$"
-          class="q-mr-md"
-        />
-        <EnlacDate
-          outlined
-          v-model="quota.valid_since"
-          hide-bottom-space
-          :limit-to-past="false"
-          :error="!!errors['valid_since']"
-          :error-message="errors['valid_since']"
-          class="q-mr-md"
-        />
-        <q-btn
-          color="primary"
-          label="Guardar cambios"
-          :loading="loading"
-          @click="updateQuota"
-        />
+      <div class="q-ml-auto">
+        <div
+          class="q-mb-xs"
+          style="font-size: 0.9rem; color: #fff"
+        >
+          Proxima ejecución
+        </div>
+        <div class="flex items-center">
+          <q-input
+            outlined
+            v-model="quota.amount"
+            hide-bottom-space
+            :error="!!errors['amount']"
+            :error-message="errors['amount']"
+            type="number"
+            prefix="$"
+            class="q-mr-md"
+          />
+          <EnlacDate
+            outlined
+            v-model="quota.valid_since"
+            hide-bottom-space
+            :limit-to-past="false"
+            :error="!!errors['valid_since']"
+            :error-message="errors['valid_since']"
+            class="q-mr-md"
+          />
+          <q-btn
+            color="primary"
+            label="Guardar cambios"
+            :loading="loading"
+            @click="updateQuota"
+          />
+        </div>
       </div>
     </q-card-section>
   </q-card>

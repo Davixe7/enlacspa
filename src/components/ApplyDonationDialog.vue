@@ -1,10 +1,39 @@
 <script setup>
 import { api } from 'src/boot/axios'
-import { ref, watch } from 'vue'
-import notify from 'src/utils/notify'
+import { onMounted, ref, watch } from 'vue'
 import { date } from 'quasar'
+import notify from 'src/utils/notify'
 
-const dialog = ref(false)
+const emits = defineEmits(['saved'])
+const props = defineProps(['raffleTicketId'])
+const ticket = ref({})
+
+onMounted(() => {
+  //resetForm()
+  loadInitialData()
+  setTicketData()
+})
+
+async function setTicketData() {
+  if (!props.raffleTicketId) {
+    return
+  }
+  form.value.raffle_ticket_id = props.raffleTicketId
+
+  await fetchTicket()
+  form.value.donor_id = ticket.value.donor_id
+  form.value.activity_type = ticket.value.raffle.activity.type
+  form.value.procuration_activity_id = ticket.value.raffle.activity.id
+}
+
+async function fetchTicket() {
+  try {
+    ticket.value = (await api.get(`raffle_tickets/${props.raffleTicketId}`)).data.data
+  } catch (error) {
+    console.log(error)
+  }
+}
+
 const loading = ref(false)
 const errors = ref({})
 
@@ -17,6 +46,7 @@ const fiscalOptions = ref([])
 
 const form = ref({
   donor_id: null,
+  raffle_ticket_id: null,
   fiscal_record_id: null,
   procuration_activity_id: null,
   activity_type: '',
@@ -48,7 +78,7 @@ const activityTypes = [
   'Donativos Varios',
   'Fundaciones',
   'Natación',
-  'Obsequio entre amigos',
+  'Obsequio entre Amigos',
   'Organismos de Gobierno',
   'Programa de Verano',
   'Proyecto Interno',
@@ -63,13 +93,6 @@ const paymentMethods = [
   'Tarjeta Crédito',
   'Oxxo'
 ]
-
-// --- FUNCIONES DE APERTURA Y CARGA ---
-function open() {
-  resetForm()
-  loadInitialData()
-  dialog.value = true
-}
 
 async function loadInitialData() {
   try {
@@ -157,7 +180,7 @@ watch(
 watch(
   () => form.value.activity_type,
   (newType) => {
-    form.value.procuration_activity_id = null
+    //form.value.procuration_activity_id = null
 
     // Limpieza preventiva de campos condicionales
     form.value.piggy_bank_location = ''
@@ -210,17 +233,19 @@ async function save() {
     loading.value = true
     errors.value = {}
 
-    const payload = {
-      ...form.value,
-      donor_id: form.value.donor_id?.origin === 'donante' ? form.value.donor_id.id : null,
-      sponsor_id: form.value.donor_id?.origin === 'sponsor' ? form.value.donor_id.id : null,
-      beneficiary_id: form.value.beneficiary_id?.id || null
-    }
+    const payload = form.value.raffle_ticket_id
+      ? { ...form.value }
+      : {
+          ...form.value,
+          donor_id: form.value.donor_id?.origin === 'donante' ? form.value.donor_id.id : null,
+          sponsor_id: form.value.donor_id?.origin === 'sponsor' ? form.value.donor_id.id : null,
+          beneficiary_id: form.value.beneficiary_id?.id || null
+        }
 
     const response = await api.post('/donations', payload)
     const folio = response.data?.data?.folio_number || ''
     notify.positive(`Donativo aplicado con éxito. Folio: ${folio}`)
-    dialog.value = false
+    emits('saved')
   } catch (error) {
     if (error.response?.status === 422) {
       errors.value = error.response.data.errors
@@ -268,7 +293,6 @@ async function saveAndPrint() {
     window.URL.revokeObjectURL(url)
 
     notify.positive('Donativo registrado y Ticket generado.')
-    dialog.value = false
   } catch (error) {
     console.error('Error al generar PDF:', error)
     notify.negative('Error al guardar o generar el PDF')
@@ -340,460 +364,475 @@ watch(
     }
   }
 )
-
-defineExpose({ open })
 </script>
 
 <template>
-  <q-dialog
-    v-model="dialog"
-    persistent
-  >
-    <q-card style="width: 800px; max-width: 95vw">
-      <q-card-section class="row items-center q-pb-none">
-        <div class="text-h6 text-weight-bold">Nueva Aplicación de Donativo</div>
-        <q-space />
-        <q-btn
-          icon="close"
-          flat
-          round
-          dense
-          v-close-popup
-        />
-      </q-card-section>
+  <q-card style="width: 800px; max-width: 95vw">
+    <q-card-section class="row items-center q-pb-none">
+      <div class="text-h6 text-weight-bold">Nueva Aplicación de Donativo</div>
+      <q-space />
+      <q-btn
+        icon="close"
+        flat
+        round
+        dense
+        v-close-popup
+      />
+    </q-card-section>
 
-      <q-card-section>
-        <q-form @submit.prevent="save">
-          <q-markup-table
-            flat
-            class="donation-form-table"
-          >
-            <tbody>
+    <q-card-section>
+      <q-form @submit.prevent="save">
+        <q-markup-table
+          flat
+          class="donation-form-table"
+        >
+          <tbody>
+            <tr>
+              <td class="text-bold">Donante</td>
+              <td>
+                <q-select
+                  v-if="!form.raffle_ticket_id"
+                  v-model="form.donor_id"
+                  use-input
+                  clearable
+                  input-debounce="300"
+                  outlined
+                  dense
+                  placeholder="Escriba para buscar un donante..."
+                  :options="donorOptions"
+                  option-label="full_name"
+                  @filter="filterDonors"
+                  :error="!!errors.donor_id"
+                  :error-message="errors.donor_id?.[0]"
+                  hide-bottom-space
+                >
+                  <template v-slot:option="scope">
+                    <q-item v-bind="scope.itemProps">
+                      <q-item-section>
+                        <q-item-label>
+                          {{ scope.opt.full_name }}
+                          <q-badge :color="scope.opt.origin === 'donante' ? 'primary' : 'orange'">
+                            {{ scope.opt.origin === 'donante' ? 'Donante' : 'Padrino' }}
+                          </q-badge>
+                        </q-item-label>
+
+                        <!-- Solo mostramos registros fiscales si es Donante -->
+                        <q-item-label
+                          caption
+                          v-if="scope.opt.origin === 'donante' && scope.opt.fiscal_records?.length"
+                        >
+                          Contiene {{ scope.opt.fiscal_records.length }} registro(s) fiscal(es)
+                        </q-item-label>
+                        <q-item-label
+                          caption
+                          v-else-if="scope.opt.origin === 'donante'"
+                          class="text-amber-9"
+                        >
+                          Sin registros fiscales
+                        </q-item-label>
+                      </q-item-section>
+                    </q-item>
+                  </template>
+                  <template v-slot:selected-item="scope">
+                    <span v-if="scope.opt">{{ scope.opt.full_name }}</span>
+                  </template>
+                </q-select>
+                <q-input
+                  v-if="ticket && ticket.buyer"
+                  outlined
+                  hide-bottom-space
+                  v-model="ticket.buyer.first_name"
+                  readonly
+                />
+              </td>
+            </tr>
+
+            <tr>
+              <td class="text-bold">RFC / Razón Social</td>
+              <td>
+                <q-select
+                  v-model="form.fiscal_record_id"
+                  outlined
+                  dense
+                  clearable
+                  :options="fiscalOptions"
+                  option-value="id"
+                  option-label="tax_name"
+                  map-options
+                  emit-value
+                  :disable="!form.donor_id || fiscalOptions.length === 0"
+                  :placeholder="
+                    !form.donor_id
+                      ? 'Primero seleccione un donante...'
+                      : fiscalOptions.length === 0
+                        ? 'Este donante no tiene datos fiscales'
+                        : 'Seleccione una razón social...'
+                  "
+                  :bg-color="!form.donor_id || fiscalOptions.length === 0 ? 'grey-2' : 'white'"
+                  hide-bottom-space
+                >
+                  <template v-slot:option="scope">
+                    <q-item v-bind="scope.itemProps">
+                      <q-item-section>
+                        <q-item-label class="text-weight-medium">{{
+                          scope.opt.commercial_name || scope.opt.tax_name
+                        }}</q-item-label>
+                        <q-item-label caption>RFC: {{ scope.opt.rfc }}</q-item-label>
+                      </q-item-section>
+                    </q-item>
+                  </template>
+                  <template v-slot:selected-item="scope">
+                    <span class="text-ellipsis">
+                      <strong>RFC: {{ scope.opt.rfc }}</strong> —
+                      {{ scope.opt.commercial_name || scope.opt.tax_name }}
+                    </span>
+                  </template>
+                </q-select>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="text-bold">Tipo de Actividad</td>
+              <td>
+                <q-select
+                  v-if="!form.raffle_ticket_id"
+                  v-model="form.activity_type"
+                  outlined
+                  dense
+                  :options="activityTypes"
+                  hide-bottom-space
+                />
+                <q-input
+                  v-else
+                  outlined
+                  hide-bottom-space
+                  v-model="ticket.raffle.activity.type"
+                  readonly
+                />
+              </td>
+            </tr>
+
+            <tr>
+              <td class="text-bold">Actividad Específica</td>
+              <td>
+                <q-select
+                  v-if="!form.raffle_ticket_id"
+                  v-model="form.procuration_activity_id"
+                  outlined
+                  dense
+                  :options="filteredActivities"
+                  option-label="name"
+                  option-value="id"
+                  map-options
+                  emit-value
+                  :disable="!form.activity_type"
+                  placeholder="Seleccione la actividad..."
+                  hide-bottom-space
+                />
+                <q-input
+                  v-else
+                  outlined
+                  hide-bottom-space
+                  v-model="ticket.raffle.activity.name"
+                  readonly
+                />
+              </td>
+            </tr>
+
+            <tr v-if="form.activity_type === 'Alcancía'">
+              <td class="text-bold">Ubicada en</td>
+              <td>
+                <q-input
+                  v-model="form.piggy_bank_location"
+                  outlined
+                  dense
+                  placeholder="Nombre del establecimiento"
+                  hide-bottom-space
+                />
+              </td>
+            </tr>
+
+            <template v-if="form.activity_type === 'Boteo'">
               <tr>
-                <td class="text-bold">Donante</td>
+                <td class="text-bold">Área de Boteo</td>
+                <td>
+                  <q-input
+                    v-model="form.boteo_area"
+                    outlined
+                    dense
+                    placeholder="Escriba el área de recolección"
+                    hide-bottom-space
+                  />
+                </td>
+              </tr>
+              <tr>
+                <td class="text-bold">No. de Bote / 10%</td>
+                <td>
+                  <div class="row q-col-gutter-sm">
+                    <q-input
+                      v-model="form.boteo_can_number"
+                      outlined
+                      dense
+                      placeholder="No. de Bote"
+                      class="col-6"
+                      hide-bottom-space
+                    />
+                    <q-input
+                      v-model="form.boteo_ten_percent"
+                      outlined
+                      dense
+                      placeholder="10% (Autocalculado)"
+                      readonly
+                      class="col-6"
+                      bg-color="grey-2"
+                      hide-bottom-space
+                    />
+                  </div>
+                </td>
+              </tr>
+            </template>
+
+            <tr v-if="form.activity_type === 'Alianza' || form.activity_type === 'Fundaciones'">
+              <td class="text-bold">Proyecto</td>
+              <td>
+                <q-input
+                  v-model="form.project_name"
+                  outlined
+                  dense
+                  placeholder="Nombre del proyecto asignado"
+                  hide-bottom-space
+                />
+              </td>
+            </tr>
+
+            <template
+              v-if="
+                form.activity_type === 'Programa de Verano' || form.activity_type === 'Natación'
+              "
+            >
+              <tr>
+                <td class="text-bold">Beneficiario</td>
                 <td>
                   <q-select
-                    v-model="form.donor_id"
+                    v-model="form.beneficiary_id"
                     use-input
                     clearable
                     input-debounce="300"
                     outlined
                     dense
-                    placeholder="Escriba para buscar un donante..."
-                    :options="donorOptions"
-                    option-label="full_name"
-                    @filter="filterDonors"
-                    :error="!!errors.donor_id"
-                    :error-message="errors.donor_id?.[0]"
+                    placeholder="Escriba el nombre del beneficiario..."
+                    :options="beneficiaryOptions"
+                    option-value="id"
+                    option-label="label"
+                    emit-value
+                    map-options
+                    @filter="filterBeneficiaries"
                     hide-bottom-space
                   >
                     <template v-slot:option="scope">
                       <q-item v-bind="scope.itemProps">
                         <q-item-section>
-                          <q-item-label>
-                            {{ scope.opt.full_name }}
-                            <q-badge :color="scope.opt.origin === 'donante' ? 'primary' : 'orange'">
-                              {{ scope.opt.origin === 'donante' ? 'Donante' : 'Padrino' }}
-                            </q-badge>
-                          </q-item-label>
-
-                          <!-- Solo mostramos registros fiscales si es Donante -->
-                          <q-item-label
-                            caption
-                            v-if="
-                              scope.opt.origin === 'donante' && scope.opt.fiscal_records?.length
-                            "
-                          >
-                            Contiene {{ scope.opt.fiscal_records.length }} registro(s) fiscal(es)
-                          </q-item-label>
-                          <q-item-label
-                            caption
-                            v-else-if="scope.opt.origin === 'donante'"
-                            class="text-amber-9"
-                          >
-                            Sin registros fiscales
-                          </q-item-label>
+                          <q-item-label>{{ scope.opt.label }}</q-item-label>
                         </q-item-section>
                       </q-item>
                     </template>
                     <template v-slot:selected-item="scope">
-                      <span v-if="scope.opt">{{ scope.opt.full_name }}</span>
+                      <span v-if="scope.opt">{{ scope.opt.label }}</span>
                     </template>
                   </q-select>
                 </td>
               </tr>
-
               <tr>
-                <td class="text-bold">RFC / Razón Social</td>
+                <td class="text-bold">Nombre Externo</td>
                 <td>
+                  <q-input
+                    v-model="form.external_name"
+                    outlined
+                    dense
+                    placeholder="Nombre de la persona externa"
+                    hide-bottom-space
+                  />
+                </td>
+              </tr>
+              <tr>
+                <td class="text-bold">Grupo</td>
+                <td>
+                  <q-input
+                    v-model="form.group_name"
+                    outlined
+                    dense
+                    placeholder="Asigne el grupo o clase"
+                    hide-bottom-space
+                  />
+                </td>
+              </tr>
+            </template>
+
+            <tr v-if="form.activity_type === 'Organismos de Gobierno'">
+              <td class="text-bold">Nombre de Institución</td>
+              <td>
+                <q-input
+                  v-model="form.government_institution_name"
+                  outlined
+                  dense
+                  placeholder="Secretaría, Dirección o dependencia estatal"
+                  hide-bottom-space
+                />
+              </td>
+            </tr>
+
+            <tr>
+              <td class="text-bold">Concepto</td>
+              <td>
+                <q-input
+                  v-model="form.concept"
+                  outlined
+                  dense
+                  type="textarea"
+                  rows="2"
+                  hide-bottom-space
+                />
+              </td>
+            </tr>
+            <tr>
+              <td class="text-bold">Fecha / Método</td>
+              <td>
+                <div class="row q-col-gutter-xs">
+                  <q-input
+                    v-model="form.payment_date"
+                    outlined
+                    dense
+                    type="date"
+                    class="col-6"
+                    hide-bottom-space
+                  />
                   <q-select
-                    v-model="form.fiscal_record_id"
+                    v-model="form.payment_method"
                     outlined
                     dense
-                    clearable
-                    :options="fiscalOptions"
-                    option-value="id"
-                    option-label="tax_name"
-                    map-options
-                    emit-value
-                    :disable="!form.donor_id || fiscalOptions.length === 0"
-                    :placeholder="
-                      !form.donor_id
-                        ? 'Primero seleccione un donante...'
-                        : fiscalOptions.length === 0
-                          ? 'Este donante no tiene datos fiscales'
-                          : 'Seleccione una razón social...'
-                    "
-                    :bg-color="!form.donor_id || fiscalOptions.length === 0 ? 'grey-2' : 'white'"
+                    :options="paymentMethods"
+                    class="col-6"
                     hide-bottom-space
-                  >
-                    <template v-slot:option="scope">
-                      <q-item v-bind="scope.itemProps">
-                        <q-item-section>
-                          <q-item-label class="text-weight-medium">{{
-                            scope.opt.commercial_name || scope.opt.tax_name
-                          }}</q-item-label>
-                          <q-item-label caption>RFC: {{ scope.opt.rfc }}</q-item-label>
-                        </q-item-section>
-                      </q-item>
-                    </template>
-                    <template v-slot:selected-item="scope">
-                      <span class="text-ellipsis">
-                        <strong>RFC: {{ scope.opt.rfc }}</strong> —
-                        {{ scope.opt.commercial_name || scope.opt.tax_name }}
-                      </span>
-                    </template>
-                  </q-select>
-                </td>
-              </tr>
-
-              <tr>
-                <td class="text-bold">Tipo de Actividad</td>
-                <td>
+                  />
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="text-bold">Monto / Moneda</td>
+              <td>
+                <div class="row q-col-gutter-xs">
+                  <q-input
+                    v-model.number="form.amount"
+                    outlined
+                    dense
+                    type="number"
+                    step="0.01"
+                    prefix="$"
+                    class="col-6"
+                    hide-bottom-space
+                  />
                   <q-select
-                    v-model="form.activity_type"
+                    v-model="form.currency"
                     outlined
                     dense
-                    :options="activityTypes"
+                    :options="['MXN', 'DLLS']"
+                    class="col-6"
                     hide-bottom-space
                   />
-                </td>
-              </tr>
-
-              <tr>
-                <td class="text-bold">Actividad Específica</td>
-                <td>
-                  <q-select
-                    v-model="form.procuration_activity_id"
-                    outlined
-                    dense
-                    :options="filteredActivities"
-                    option-label="name"
-                    option-value="id"
-                    map-options
-                    emit-value
-                    :disable="!form.activity_type"
-                    placeholder="Seleccione la actividad..."
-                    hide-bottom-space
-                  />
-                </td>
-              </tr>
-
-              <tr v-if="form.activity_type === 'Alcancía'">
-                <td class="text-bold">Ubicada en</td>
-                <td>
+                </div>
+              </td>
+            </tr>
+            <tr v-if="form.currency === 'DLLS'">
+              <td class="text-bold">Tipo de Cambio</td>
+              <td>
+                <div class="row q-col-gutter-xs items-center">
+                  <!-- Input del Tipo de cambio (Se llena al cambiar a DLLS) -->
                   <q-input
-                    v-model="form.piggy_bank_location"
+                    v-model.number="form.exchange_rate"
                     outlined
                     dense
-                    placeholder="Nombre del establecimiento"
+                    type="number"
+                    step="0.01"
+                    class="col-6"
                     hide-bottom-space
                   />
-                </td>
-              </tr>
 
-              <template v-if="form.activity_type === 'Boteo'">
-                <tr>
-                  <td class="text-bold">Área de Boteo</td>
-                  <td>
-                    <q-input
-                      v-model="form.boteo_area"
-                      outlined
-                      dense
-                      placeholder="Escriba el área de recolección"
-                      hide-bottom-space
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td class="text-bold">No. de Bote / 10%</td>
-                  <td>
-                    <div class="row q-col-gutter-sm">
-                      <q-input
-                        v-model="form.boteo_can_number"
-                        outlined
-                        dense
-                        placeholder="No. de Bote"
-                        class="col-6"
-                        hide-bottom-space
-                      />
-                      <q-input
-                        v-model="form.boteo_ten_percent"
-                        outlined
-                        dense
-                        placeholder="10% (Autocalculado)"
-                        readonly
-                        class="col-6"
-                        bg-color="grey-2"
-                        hide-bottom-space
-                      />
-                    </div>
-                  </td>
-                </tr>
-              </template>
-
-              <tr v-if="form.activity_type === 'Alianza' || form.activity_type === 'Fundaciones'">
-                <td class="text-bold">Proyecto</td>
-                <td>
+                  <!-- Input de Equivalencia en Pesos -->
                   <q-input
-                    v-model="form.project_name"
+                    :model-value="form.equivalent_amount_mxn"
                     outlined
                     dense
-                    placeholder="Nombre del proyecto asignado"
+                    readonly
+                    prefix="Equiv. Pesos: $"
+                    bg-color="orange-1"
+                    class="col-6 text-weight-bold text-orange-9"
                     hide-bottom-space
                   />
-                </td>
-              </tr>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="text-bold">Referencia</td>
+              <td>
+                <q-input
+                  v-model="form.reference"
+                  outlined
+                  dense
+                  placeholder="No. de operación o cheque"
+                  hide-bottom-space
+                />
+              </td>
+            </tr>
 
-              <template
-                v-if="
-                  form.activity_type === 'Programa de Verano' || form.activity_type === 'Natación'
-                "
-              >
-                <tr>
-                  <td class="text-bold">Beneficiario</td>
-                  <td>
-                    <q-select
-                      v-model="form.beneficiary_id"
-                      use-input
-                      clearable
-                      input-debounce="300"
-                      outlined
-                      dense
-                      placeholder="Escriba el nombre del beneficiario..."
-                      :options="beneficiaryOptions"
-                      option-value="id"
-                      option-label="label"
-                      emit-value
-                      map-options
-                      @filter="filterBeneficiaries"
-                      hide-bottom-space
-                    >
-                      <template v-slot:option="scope">
-                        <q-item v-bind="scope.itemProps">
-                          <q-item-section>
-                            <q-item-label>{{ scope.opt.label }}</q-item-label>
-                          </q-item-section>
-                        </q-item>
-                      </template>
-                      <template v-slot:selected-item="scope">
-                        <span v-if="scope.opt">{{ scope.opt.label }}</span>
-                      </template>
-                    </q-select>
-                  </td>
-                </tr>
-                <tr>
-                  <td class="text-bold">Nombre Externo</td>
-                  <td>
-                    <q-input
-                      v-model="form.external_name"
-                      outlined
-                      dense
-                      placeholder="Nombre de la persona externa"
-                      hide-bottom-space
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td class="text-bold">Grupo</td>
-                  <td>
-                    <q-input
-                      v-model="form.group_name"
-                      outlined
-                      dense
-                      placeholder="Asigne el grupo o clase"
-                      hide-bottom-space
-                    />
-                  </td>
-                </tr>
-              </template>
+            <tr>
+              <td class="text-bold">¿Deducible?</td>
+              <td class="flex items-center">
+                <q-checkbox
+                  v-model="form.has_tax_receipt"
+                  label="Sí, requiere recibo"
+                />
+                <q-input
+                  v-if="form.has_tax_receipt"
+                  v-model="form.tax_receipt_number"
+                  outlined
+                  dense
+                  placeholder="No. de Recibo"
+                  class="q-ml-md"
+                  hide-bottom-space
+                />
+              </td>
+            </tr>
+          </tbody>
+        </q-markup-table>
 
-              <tr v-if="form.activity_type === 'Organismos de Gobierno'">
-                <td class="text-bold">Nombre de Institución</td>
-                <td>
-                  <q-input
-                    v-model="form.government_institution_name"
-                    outlined
-                    dense
-                    placeholder="Secretaría, Dirección o dependencia estatal"
-                    hide-bottom-space
-                  />
-                </td>
-              </tr>
+        <div class="flex justify-end q-mt-md q-gutter-x-sm">
+          <q-btn
+            flat
+            label="Cancelar"
+            v-close-popup
+          />
 
-              <tr>
-                <td class="text-bold">Concepto</td>
-                <td>
-                  <q-input
-                    v-model="form.concept"
-                    outlined
-                    dense
-                    type="textarea"
-                    rows="2"
-                    hide-bottom-space
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td class="text-bold">Fecha / Método</td>
-                <td>
-                  <div class="row q-col-gutter-xs">
-                    <q-input
-                      v-model="form.payment_date"
-                      outlined
-                      dense
-                      type="date"
-                      class="col-6"
-                      hide-bottom-space
-                    />
-                    <q-select
-                      v-model="form.payment_method"
-                      outlined
-                      dense
-                      :options="paymentMethods"
-                      class="col-6"
-                      hide-bottom-space
-                    />
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td class="text-bold">Monto / Moneda</td>
-                <td>
-                  <div class="row q-col-gutter-xs">
-                    <q-input
-                      v-model.number="form.amount"
-                      outlined
-                      dense
-                      type="number"
-                      step="0.01"
-                      prefix="$"
-                      class="col-6"
-                      hide-bottom-space
-                    />
-                    <q-select
-                      v-model="form.currency"
-                      outlined
-                      dense
-                      :options="['MXN', 'DLLS']"
-                      class="col-6"
-                      hide-bottom-space
-                    />
-                  </div>
-                </td>
-              </tr>
-              <tr v-if="form.currency === 'DLLS'">
-                <td class="text-bold">Tipo de Cambio</td>
-                <td>
-                  <div class="row q-col-gutter-xs items-center">
-                    <!-- Input del Tipo de cambio (Se llena al cambiar a DLLS) -->
-                    <q-input
-                      v-model.number="form.exchange_rate"
-                      outlined
-                      dense
-                      type="number"
-                      step="0.01"
-                      class="col-6"
-                      hide-bottom-space
-                    />
+          <q-btn
+            unelevated
+            icon="print"
+            label="Guardar e Imprimir"
+            color="primary"
+            @click="saveAndPrint"
+            :loading="loading"
+          />
 
-                    <!-- Input de Equivalencia en Pesos -->
-                    <q-input
-                      :model-value="form.equivalent_amount_mxn"
-                      outlined
-                      dense
-                      readonly
-                      prefix="Equiv. Pesos: $"
-                      bg-color="orange-1"
-                      class="col-6 text-weight-bold text-orange-9"
-                      hide-bottom-space
-                    />
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td class="text-bold">Referencia</td>
-                <td>
-                  <q-input
-                    v-model="form.reference"
-                    outlined
-                    dense
-                    placeholder="No. de operación o cheque"
-                    hide-bottom-space
-                  />
-                </td>
-              </tr>
-
-              <tr>
-                <td class="text-bold">¿Deducible?</td>
-                <td class="flex items-center">
-                  <q-checkbox
-                    v-model="form.has_tax_receipt"
-                    label="Sí, requiere recibo"
-                  />
-                  <q-input
-                    v-if="form.has_tax_receipt"
-                    v-model="form.tax_receipt_number"
-                    outlined
-                    dense
-                    placeholder="No. de Recibo"
-                    class="q-ml-md"
-                    hide-bottom-space
-                  />
-                </td>
-              </tr>
-            </tbody>
-          </q-markup-table>
-
-          <div class="flex justify-end q-mt-md q-gutter-x-sm">
-            <q-btn
-              flat
-              label="Cancelar"
-              v-close-popup
-            />
-
-            <q-btn
-              unelevated
-              icon="print"
-              label="Guardar e Imprimir"
-              color="primary"
-              @click="saveAndPrint"
-              :loading="loading"
-            />
-
-            <!-- <q-btn
-              unelevated
-              icon="save"
-              label="Guardar"
-              color="primary"
-              @click="save"
-              :loading="loading"
-            /> -->
-          </div>
-        </q-form>
-      </q-card-section>
-    </q-card>
-  </q-dialog>
+          <q-btn
+            unelevated
+            icon="save"
+            label="Guardar"
+            color="primary"
+            @click="save"
+            :loading="loading"
+          />
+        </div>
+      </q-form>
+    </q-card-section>
+  </q-card>
 </template>
 
 <style lang="scss">

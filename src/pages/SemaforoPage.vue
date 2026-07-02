@@ -105,7 +105,7 @@ function onPaymentSaved() {
           :class="`bg-${month.color}`"
           @click="createPayment(month, key)"
         >
-          {{ month.paid_amount }} / {{ month.goal_amount }}
+          {{ month.paid_amount_format }} / {{ month.goal_amount_format }}
         </td>
       </tr>
     </tbody>

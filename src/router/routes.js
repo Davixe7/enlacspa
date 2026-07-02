@@ -22,6 +22,19 @@ export default [
         component: () => import('pages/BaseHome.vue')
       },
       {
+        path: '/raffles/:raffleId',
+        name: 'raffles.show',
+        meta: { label: 'Obsequio entre amigos' },
+        component: () => import('pages/RafflePage.vue'),
+        props: true
+      },
+      {
+        path: '/raffles',
+        name: 'raffles',
+        meta: { label: 'Obsequio entre amigos' },
+        component: () => import('pages/RafflePage.vue'),
+      },
+      {
         path: 'beneficiarios',
         name: 'beneficiaries.index',
         component: () => import('src/pages/beneficiaries/BeneficiariesPage.vue'),
