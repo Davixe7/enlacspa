@@ -133,6 +133,8 @@ const results = computed(() => {
   if (selectedFilterOption.value == 'total') {
     return rows.value.filter((t) => t.donations_sum_amount >= raffle.value.ticket_price)
   }
+
+  return [...rows.value]
 })
 
 const soldCount = computed(() => {

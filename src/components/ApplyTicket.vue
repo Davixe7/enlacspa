@@ -46,9 +46,11 @@ async function ApplyTicket() {
     loading.value = true
     let route = `raffle_tickets/${localTicket.value.id}`
     let response = (await api.post(route, { ...localTicket.value, _method: 'PUT' })).data.data
+    console.log(response)
     emits('saved')
     notify.positive('Boleto capturado exitosamente')
   } catch (error) {
+    console.log(error)
     notify.negative('Error al aplicar el boleto')
   } finally {
     loading.value = false

@@ -48,6 +48,7 @@ async function assignTickets() {
     loading.value = true
     let route = `raffles/${props.raffleId}/assignTickets`
     let response = (await api.post(route, { ...form.value })).data.data
+    console.log(response)
     notify.positive('Tickets asignados exitosamente')
   } catch (error) {
     console.log(error)

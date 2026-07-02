@@ -301,7 +301,7 @@ async function saveAndPrint() {
   }
 }
 
-function resetForm() {
+/* function resetForm() {
   form.value = {
     donor_id: null,
     fiscal_record_id: null,
@@ -326,12 +326,13 @@ function resetForm() {
     external_name: '',
     group_name: ''
   }
+
   donorOptions.value = []
   beneficiaryOptions.value = []
   fiscalOptions.value = []
   filteredActivities.value = []
   errors.value = {}
-}
+} */
 
 // Función para traer el tipo de cambio actual desde internet de forma automática
 async function autoFetchExchangeRate() {
