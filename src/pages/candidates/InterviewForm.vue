@@ -235,7 +235,14 @@ onMounted(async () => {
       </div>
       <div
         class="col-6 editorContainer"
-        style="position: sticky; top: 144px; height: calc(100vh - 144px)"
+        style="
+          position: sticky;
+          top: 144px;
+          height: calc(100vh - 144px);
+          display: flex;
+          flex-flow: column;
+          min-height: 0;
+        "
       >
         <q-editor
           dense
@@ -243,7 +250,7 @@ onMounted(async () => {
           :disable="Boolean(interview.signed_at)"
           :class="{ 'has-errors': !!errors.content, 'q-field--error': !!errors.content }"
           :error-message="errors.content"
-          style="height: 100%"
+          style="height: 100%; overflow-y: scroll"
         />
       </div>
     </div>

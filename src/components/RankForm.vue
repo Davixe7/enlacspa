@@ -112,7 +112,7 @@ async function storeRank() {
         v-model="localRank.comments"
         :error="!!errors.comments"
         :error-message="errors.comments"
-      ></q-input>
+      />
 
       <div class="q-pt-lg q-pl-none">
         <label
@@ -120,7 +120,10 @@ async function storeRank() {
           style="margin-bottom: 14px; display: block"
           >¿Impacto en Lateridad? (<span class="text--negative">*</span>)
         </label>
-        <div style="margin-left: -10px">
+        <div
+          style="margin-left: -10px"
+          v-if="['F', 'P'].includes(localRank.caracteristic)"
+        >
           <q-radio
             v-model="localRank.laterality_impact"
             val="l"
