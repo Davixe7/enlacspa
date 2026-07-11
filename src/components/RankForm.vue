@@ -1,7 +1,7 @@
 <script setup>
 import Notify from 'src/utils/notify'
 import { api } from 'src/boot/axios'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 
 const emits = defineEmits(['rankUpdated', 'close'])
 const props = defineProps(['rank', 'disableP'])
@@ -47,6 +47,11 @@ async function storeRank() {
   }
   loading.value = false
 }
+
+watch(
+  () => localRank.value.caracteristic,
+  () => (localRank.value.laterality_impact = null)
+)
 </script>
 <template>
   <q-card
@@ -65,7 +70,7 @@ async function storeRank() {
         dense
         icon="close"
         @click="emits('close')"
-      ></q-btn>
+      />
     </q-card-section>
 
     <q-card-section class="q-pt-none">
@@ -120,10 +125,7 @@ async function storeRank() {
           style="margin-bottom: 14px; display: block"
           >¿Impacto en Lateridad? (<span class="text--negative">*</span>)
         </label>
-        <div
-          style="margin-left: -10px"
-          v-if="['F', 'P'].includes(localRank.caracteristic)"
-        >
+        <div style="margin-left: -10px">
           <q-radio
             v-model="localRank.laterality_impact"
             val="l"
@@ -156,15 +158,15 @@ async function storeRank() {
         unelevated
         outline
         color="primary"
-        >Cerrar</q-btn
-      >
+        label="Cerrar"
+      />
       <q-btn
         :loading="loading"
         @click="storeRank"
         unelevated
         color="primary"
-        >Guardar</q-btn
-      >
+        label="Guardar"
+      />
     </q-card-section>
   </q-card>
 </template>
