@@ -26,6 +26,7 @@ export default defineBoot(({ app, router }) => {
         router.push("/login");
       }
       if (error.status == 422) {
+        console.log('VALIDATION ERROR');
         Object.keys(error.response.data.errors).forEach((key) => {
           error.response.data.errors[key] = error.response.data.errors[key][0];
         });

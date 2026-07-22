@@ -93,11 +93,12 @@ const onSave = async () => {
 
     let response = (await api.post(route, data)).data.data
 
-    let index = formData.value.id
-      ? rows.value.indexOf((item) => item.id == formData.value.id)
-      : null
+    let index = rows.value.findIndex((item) => item.id == formData.value.id)
 
-    index ? rows.value.splice(index - 1, 1, response) : rows.value.push(response)
+    console.log('ID: ', formData.value.id)
+    console.log('Index: ', index)
+
+    index == -1 ? rows.value.push(response) : rows.value.splice(index, 1, response)
 
     let message = formData.value.id ? 'Actualizado' : 'Registrado'
     notify.positive(message + ' exitosamente')
@@ -126,10 +127,11 @@ function clearForm() {
   }
 }
 const relationshipOptions = [
+  'Abuelo(a)',
+  'Cónyuge',
   'Madre/Padre',
   'Hijo / Hija',
   'Hermano(a)',
-  'Abuelo(a)',
   'Padrastro/Madrastra',
   'Hermanastro/Hermanastra',
   'Primo(a)',
@@ -154,6 +156,8 @@ watch(monthlyContributionSum, (newVal) => {
 })
 
 function editMember(row) {
+  console.log(rows.value.indexOf(row))
+
   showDialog.value = true
   formData.value = { ...row }
 }
@@ -229,7 +233,6 @@ function editMember(row) {
               <q-input
                 outlined
                 v-model.number="formData.age"
-                type="number"
                 label="Edad"
               />
               <q-select

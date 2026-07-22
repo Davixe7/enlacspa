@@ -1,8 +1,8 @@
 <script setup>
 import { api } from 'src/boot/axios'
 import { onMounted, ref } from 'vue'
-import PaymentConfigForm from 'src/components/PaymentConfigForm.vue'
 import { exportXlsFile } from 'src/utils/exportXls'
+import PaymentConfigForm from 'src/components/PaymentConfigForm.vue'
 
 onMounted(async () => {
   sponsors.value = (await api.get('sponsors')).data.data

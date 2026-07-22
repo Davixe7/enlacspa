@@ -2,6 +2,7 @@
 import { api } from 'src/boot/axios'
 import { onMounted, ref } from 'vue'
 import notify from 'src/utils/notify'
+import RaffleForm from 'src/components/RaffleForm.vue'
 
 const loading = ref(false)
 const configLoading = ref(false)
@@ -107,6 +108,8 @@ async function saveActivity() {
 
 // Abre el panel avanzado y setea los valores correspondientes
 function openConfiguration(activity) {
+  console.log(activity.id)
+
   selectedActivity.value = activity
   errors.value = {}
 
@@ -197,6 +200,14 @@ onMounted(async () => {
   >
     <template v-slot:body-cell-actions="props">
       <q-td class="text-right q-gutter-x-sm">
+        <q-btn
+          v-if="['Obsequio entre Amigos', 'Radiomaratón'].includes(props.row.type)"
+          label="Operar"
+          flat
+          dense
+          color="secondary"
+          :to="{ name: 'raffles', query: { procuration_activity_id: props.row.id } }"
+        />
         <q-btn
           v-if="['Obsequio entre Amigos', 'Radiomaratón'].includes(props.row.type)"
           icon="sym_o_settings"
@@ -317,7 +328,7 @@ onMounted(async () => {
         />
       </q-card-section>
 
-      <q-card-section>
+      <q-card-section v-if="selectedActivity.type != 'Obsequio entre Amigos'">
         <q-form
           class="q-gutter-y-sm"
           @submit.prevent="saveConfiguration"
@@ -370,109 +381,6 @@ onMounted(async () => {
                   </td>
                 </tr>
               </template>
-
-              <template v-if="selectedActivity?.type === 'Obsequio entre Amigos'">
-                <tr>
-                  <td>Número de Boletos</td>
-                  <td>
-                    <q-input
-                      outlined
-                      dense
-                      type="number"
-                      v-model.number="configForm.tickets_count"
-                      placeholder="Numérico"
-                      hide-bottom-space
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td>Precio del Boleto</td>
-                  <td>
-                    <q-input
-                      outlined
-                      dense
-                      type="number"
-                      step="0.01"
-                      prefix="$"
-                      v-model.number="configForm.ticket_price"
-                      placeholder="Monetario"
-                      hide-bottom-space
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td>Fecha de Creación</td>
-                  <td>
-                    <q-input
-                      outlined
-                      dense
-                      type="date"
-                      v-model="configForm.created_date"
-                      hide-bottom-space
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td>Fecha del Evento</td>
-                  <td>
-                    <q-input
-                      outlined
-                      dense
-                      type="date"
-                      v-model="configForm.event_date"
-                      hide-bottom-space
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td>Lugar</td>
-                  <td>
-                    <q-input
-                      outlined
-                      dense
-                      v-model="configForm.place"
-                      placeholder="Campo de texto"
-                      hide-bottom-space
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td>Boleto Ganador</td>
-                  <td>
-                    <q-input
-                      outlined
-                      dense
-                      v-model="configForm.winning_ticket"
-                      placeholder="Campo de texto"
-                      hide-bottom-space
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td>Nombre del Ganador</td>
-                  <td>
-                    <q-input
-                      outlined
-                      dense
-                      v-model="configForm.winner_name"
-                      placeholder="Campo de texto"
-                      hide-bottom-space
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td>Nombre del Vendedor Ganador</td>
-                  <td>
-                    <q-input
-                      outlined
-                      dense
-                      v-model="configForm.seller_winner_name"
-                      placeholder="Campo de texto"
-                      hide-bottom-space
-                    />
-                  </td>
-                </tr>
-              </template>
             </tbody>
           </q-markup-table>
 
@@ -486,6 +394,11 @@ onMounted(async () => {
           </div>
         </q-form>
       </q-card-section>
+
+      <RaffleForm
+        v-if="selectedActivity.id && selectedActivity.type == 'Obsequio entre Amigos'"
+        :procuration-activity-id="selectedActivity.id"
+      />
     </q-card>
   </q-dialog>
 </template>

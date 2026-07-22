@@ -11,7 +11,7 @@ const $router = useRouter()
 
 const loading = ref(false)
 const rows = ref([])
-const donationDialog = ref(null)
+const donationDialog = ref(false)
 
 // Filtros reactivos en el Frontend
 const filterName = ref('')
@@ -85,10 +85,6 @@ const monthsOptions = [
   { label: 'Noviembre', value: '11' },
   { label: 'Diciembre', value: '12' }
 ]
-
-function openDonation() {
-  donationDialog.value.open()
-}
 
 async function fetchInitialData() {
   await fetchDonors()
@@ -196,7 +192,7 @@ onMounted(() => {
         icon="sym_o_add_card"
         color="primary"
         label="Aplicar Donativo"
-        @click="openDonation"
+        @click="donationDialog = true"
       />
       <q-btn
         icon="sym_o_person_add"
@@ -379,7 +375,9 @@ onMounted(() => {
     ref="kardexModalRef"
     @saved="fetchDonors"
   />
-  <ApplyDonationDialog ref="donationDialog" />
+  <q-dialog v-model="donationDialog">
+    <ApplyDonationDialog />
+  </q-dialog>
 </template>
 
 <style scoped>

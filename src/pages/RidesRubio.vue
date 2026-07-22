@@ -18,7 +18,7 @@ function openCommentDialog(row) {
 async function saveComment() {
   if (!selectedRow.value) return
   try {
-    ; (
+    ;(
       await api.post(`rides/${selectedRow.value.id}`, {
         ...selectedRow.value,
         _method: 'PUT'
@@ -55,8 +55,20 @@ const columns = ref([
     label: 'Ubicacion',
     field: (row) => row.candidate.location_detail.transport_location_link
   },
-  { name: 'departure_time', label: 'Ida', field: 'departure_time', align: 'left' },
-  { name: 'return_time', label: 'Regreso', field: 'return_time', align: 'left' },
+  {
+    name: 'departure_time',
+    label: 'Ida',
+    field: 'departure_time',
+    align: 'left',
+    headerStyle: 'font-weight: bold; color: #2e7d32; font-size: 1.1rem;'
+  },
+  {
+    name: 'return_time',
+    label: 'Regreso',
+    field: 'return_time',
+    align: 'left',
+    headerStyle: 'font-weight: bold; color: #c62828; font-size: 1.1rem;'
+  },
   { name: 'comment' }
 ])
 
@@ -99,17 +111,34 @@ async function saveRide(row) {
     </div>
 
     <div class="q-ml-auto flex">
-      <q-input outlined v-model="searchQuery" debounce="500" clearable>
+      <q-input
+        outlined
+        v-model="searchQuery"
+        debounce="500"
+        clearable
+      >
         <template v-slot:prepend> <q-icon name="search" /></template>
       </q-input>
     </div>
   </div>
-  <q-table bordered flat hide-bottom :rows="rows" :columns="columns" :pagination="{ rowsPerPage: 0 }" :loading="loading"
-    :filter="searchQuery">
+  <q-table
+    bordered
+    flat
+    hide-bottom
+    :rows="rows"
+    :columns="columns"
+    :pagination="{ rowsPerPage: 0 }"
+    :loading="loading"
+    :filter="searchQuery"
+  >
     <template v-slot:loading>
       <div class="flex q-my-lg justify-center">
         <div>
-          <q-spinner size="30px" color="primary" class="q-mr-md"></q-spinner>
+          <q-spinner
+            size="30px"
+            color="primary"
+            class="q-mr-md"
+          ></q-spinner>
           Cargando...
         </div>
       </div>
@@ -117,11 +146,26 @@ async function saveRide(row) {
 
     <template v-slot:body-cell-departure_time="props">
       <q-td>
-        <q-input filled v-model="props.row.departure_time" readonly :disable="!!props.row.departure_time">
+        <q-input
+          filled
+          v-model="props.row.departure_time"
+          readonly
+          :disable="!!props.row.departure_time"
+          class="time-input-large col-ida"
+        >
           <template v-slot:append>
-            <q-icon name="access_time" class="cursor-pointer">
-              <q-popup-proxy transition-show="scale" transition-hide="scale">
-                <q-time v-model="props.row.departure_time" @update:model-value="(val) => saveRide(props.row)" />
+            <q-icon
+              name="access_time"
+              class="cursor-pointer text-green-8"
+            >
+              <q-popup-proxy
+                transition-show="scale"
+                transition-hide="scale"
+              >
+                <q-time
+                  v-model="props.row.departure_time"
+                  @update:model-value="(val) => saveRide(props.row)"
+                />
               </q-popup-proxy>
             </q-icon>
           </template>
@@ -131,11 +175,26 @@ async function saveRide(row) {
 
     <template v-slot:body-cell-return_time="props">
       <q-td>
-        <q-input filled v-model="props.row.return_time" readonly :disable="!!props.row.return_time">
+        <q-input
+          filled
+          v-model="props.row.return_time"
+          readonly
+          :disable="!!props.row.return_time"
+          class="time-input-large col-regreso"
+        >
           <template v-slot:append>
-            <q-icon name="access_time" class="cursor-pointer">
-              <q-popup-proxy transition-show="scale" transition-hide="scale">
-                <q-time v-model="props.row.return_time" @update:model-value="(val) => saveRide(props.row)" />
+            <q-icon
+              name="access_time"
+              class="cursor-pointer text-red-8"
+            >
+              <q-popup-proxy
+                transition-show="scale"
+                transition-hide="scale"
+              >
+                <q-time
+                  v-model="props.row.return_time"
+                  @update:model-value="(val) => saveRide(props.row)"
+                />
               </q-popup-proxy>
             </q-icon>
           </template>
@@ -145,8 +204,11 @@ async function saveRide(row) {
 
     <template v-slot:body-cell-link="props">
       <q-td>
-        <a :href="props.row.candidate.location_detail.transport_location_link" target="_blank"
-          rel="noopener noreferrer">
+        <a
+          :href="props.row.candidate.location_detail.transport_location_link"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           Ver en Google Maps
         </a>
       </q-td>
@@ -154,7 +216,11 @@ async function saveRide(row) {
 
     <template v-slot:body-cell-comment="props">
       <q-td>
-        <q-btn color="primary" @click="openCommentDialog(props.row)" label="Comentario" />
+        <q-btn
+          color="primary"
+          @click="openCommentDialog(props.row)"
+          label="Comentario"
+        />
       </q-td>
     </template>
   </q-table>
@@ -163,17 +229,50 @@ async function saveRide(row) {
     <q-card class="comment-card">
       <q-card-section>
         <div class="page-subtitle q-mb-md">Observaciones del traslado</div>
-        <q-input outlined rows="8" v-model="selectedRow.comments" label="Comentario" type="textarea" autogrow
-          class="q-mb-md comment-textarea" />
+        <q-input
+          outlined
+          rows="8"
+          v-model="selectedRow.comments"
+          label="Comentario"
+          type="textarea"
+          autogrow
+          class="q-mb-md comment-textarea"
+        />
         <div class="flex justify-end">
-          <q-btn flat label="Cancelar" v-close-popup />
-          <q-btn color="primary" label="Guardar" @click="saveComment" />
+          <q-btn
+            flat
+            label="Cancelar"
+            v-close-popup
+          />
+          <q-btn
+            color="primary"
+            label="Guardar"
+            @click="saveComment"
+          />
         </div>
       </q-card-section>
     </q-card>
   </q-dialog>
 </template>
+
 <style>
+/* Tamaño de fuente de la hora */
+.time-input-large .q-field__native {
+  font-size: 1.6rem !important;
+  font-weight: bold !important;
+  text-align: center;
+}
+
+/* Color verde para Ida */
+.col-ida .q-field__native {
+  color: #2e7d32 !important;
+}
+
+/* Color rojo para Regreso */
+.col-regreso .q-field__native {
+  color: #c62828 !important;
+}
+
 .comment-card {
   width: 600px;
   max-width: 90%;

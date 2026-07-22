@@ -75,6 +75,10 @@ export default [
   },
   {
     path: 'donors',
-    component: () => import('src/pages/DonorsIndex.vue')
+    component: () => import('src/pages/DonorsIndex.vue'),
+  },
+  {
+    path: 'cuota-de-padres',
+    component: () => import('src/pages/ParentQuota.vue'),
   }
 ]

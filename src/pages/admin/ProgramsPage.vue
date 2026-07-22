@@ -2,11 +2,8 @@
 import { api } from 'src/boot/axios'
 import { onMounted, ref } from 'vue'
 import { money } from 'src/utils/filters'
-import EnlacDate from 'src/components/EnlacDate.vue'
-import notify from 'src/utils/notify'
+import ProgramForm from 'src/components/ProgramForm.vue'
 
-const loading = ref(false)
-const errors = ref({})
 const row = ref({ name: '', price: 0, is_active: 1 })
 const rows = ref([])
 const columns = ref([
@@ -34,6 +31,17 @@ const columns = ref([
   { align: 'right', name: 'actions', label: 'Acciones' }
 ])
 
+function onCreated(program) {
+  rows.value.unshift(program)
+  dialog.value = false
+}
+
+function onUpdated(program) {
+  const index = rows.value.findIndex((p) => p.id === program.id)
+  if (index !== -1) rows.value[index] = program
+  dialog.value = false
+}
+
 const dialog = ref(false)
 
 function editProgram(newRow) {
@@ -54,41 +62,12 @@ function editProgram(newRow) {
 
 function addProgram() {
   row.value = {
+    id: null,
     name: '',
     price: 0,
     is_active: 1
   }
   dialog.value = true
-}
-
-async function saveProgram() {
-  try {
-    loading.value = true
-    errors.value = {}
-
-    let route = row.value.id ? `/programs/${row.value.id}` : '/programs'
-    let data = row.value.id ? { ...row.value, _method: 'PUT' } : { ...row.value }
-
-    const response = await api.post(route, data)
-
-    if (!row.value.id) {
-      rows.value.unshift(response.data.data)
-    } else {
-      const index = rows.value.findIndex((p) => p.id === row.value.id)
-      if (index !== -1) rows.value[index] = response.data.data
-    }
-
-    notify.positive('Guardado con éxito')
-    dialog.value = false
-  } catch (error) {
-    console.error(error)
-    if (error.response && error.response.status === 422) {
-      errors.value = error.response.data.errors
-    }
-    notify.negative('No se pudo actualizar')
-  } finally {
-    loading.value = false
-  }
 }
 
 onMounted(async () => {
@@ -126,87 +105,12 @@ onMounted(async () => {
   </q-table>
 
   <q-dialog v-model="dialog">
-    <q-card style="width: 480px">
-      <q-card-section class="flex items-center q-pb-none">
-        <div class="page-subtitle">{{ `${row.id ? 'Actualizar' : 'Nuevo'}` }} programa</div>
-        <q-btn
-          flat
-          round
-          icon="sym_o_close"
-          @click="dialog = false"
-          class="q-ml-auto"
-        />
-      </q-card-section>
-      <q-card-section>
-        <q-form class="q-gutter-y-md">
-          <q-markup-table
-            flat
-            class="program-form"
-          >
-            <tbody>
-              <tr>
-                <td>Nombre del programa</td>
-                <td>
-                  <q-input
-                    outlined
-                    v-model="row.name"
-                    hide-bottom-space
-                    :error="!!errors['name']"
-                    :error-message="errors['name']"
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td>Precio</td>
-                <td>
-                  <q-input
-                    outlined
-                    v-model="row.price"
-                    hide-bottom-space
-                    :error="!!errors['price']"
-                    :error-message="errors['price']"
-                    type="number"
-                    prefix="$"
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td>A partir del</td>
-                <td>
-                  <EnlacDate
-                    outlined
-                    v-model="row.valid_since"
-                    hide-bottom-space
-                    :limit-to-past="false"
-                    :error="!!errors['valid_since']"
-                    :error-message="errors['valid_since']"
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td>Activo</td>
-                <td>
-                  <q-checkbox
-                    v-model="row.is_active"
-                    :true-value="1"
-                    :false-value="0"
-                  />
-                </td>
-              </tr>
-            </tbody>
-          </q-markup-table>
-
-          <div class="flex justify-end">
-            <q-btn
-              :loading="loading"
-              @click="saveProgram"
-              :label="`${row.id ? 'Actualizar' : 'Agregar'} programa`"
-              color="primary"
-            />
-          </div>
-        </q-form>
-      </q-card-section>
-    </q-card>
+    <ProgramForm
+      v-model="row"
+      @updated="onUpdated"
+      @created="onCreated"
+      @close="dialog = false"
+    />
   </q-dialog>
 </template>
 

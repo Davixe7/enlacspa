@@ -5,6 +5,7 @@ import PaymentConfigForm from 'src/components/PaymentConfigForm.vue'
 import Notify from 'src/utils/notify'
 
 const props = defineProps(['sponsorId'])
+const loading = ref(false)
 const paymentConfigs = ref([])
 const dialog = ref(false)
 const cancelDialog = ref(false)
@@ -60,10 +61,12 @@ const columns = ref([
 
 const fetchPaymentConfigs = async () => {
   try {
-    const { data } = await api.get(`/payment_configs/?sponsor_id=${props.sponsorId}`)
-    paymentConfigs.value = data.data
+    loading.value = true
+    paymentConfigs.value = (await api.get(`/sponsorships/?sponsor_id=${props.sponsorId}`)).data.data
   } catch (e) {
     console.error('Error al cargar configuraciones:', e)
+  } finally {
+    loading.value = false
   }
 }
 
@@ -83,7 +86,7 @@ function openCancelDialog(row) {
 async function confirmCancel() {
   try {
     let data = { cancellation_reason: cancellationReason.value }
-    await api.delete(`/payment_configs/${selectedRow.value.id}`, { data })
+    await api.delete(`/sponsorships/${selectedRow.value.id}`, { data })
 
     Notify.warning(
       'Patrocinio cancelado correctamente. Recuerda hablar con los padres de familia para reponer la aportación de Padrinos.'
