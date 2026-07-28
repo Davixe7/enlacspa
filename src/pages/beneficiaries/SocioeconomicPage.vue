@@ -725,7 +725,7 @@
           stack-label
           outlined
           hide-bottom-space
-          :disable="!form.has_vehicle"
+          :disable="!!form.has_vehicle"
         />
       </div>
     </div>
