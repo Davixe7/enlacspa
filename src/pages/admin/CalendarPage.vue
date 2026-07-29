@@ -14,8 +14,10 @@ function openEventDialog(event) {
 
   dialog.value = true
 }
+
 const selectedDate = ref(new Date().toISOString().slice(0, 10))
 const nowDate = ref(new Date().toISOString().slice(0, 10))
+const today = new Date().toLocaleDateString('mx-MX').replace(/-/g, '/')
 const events = ref([
   {
     id: null,
@@ -29,6 +31,38 @@ const events = ref([
     appointment_type: null
   }
 ])
+function formatShortDate(dateTimeStr) {
+  if (!dateTimeStr) return ''
+
+  // 1. Extrae solo la parte de la fecha ("24/07/2026")
+  const datePart = dateTimeStr.split(' ')[0]
+
+  // 2. Divide en día, mes y año
+  const [day, month, year] = datePart.split('/')
+
+  // 3. Number() remueve los ceros a la izquierda ("07" -> 7)
+  return `${Number(day)}/${Number(month)}/${year}`
+}
+function compararFechas(fecha1, fecha2) {
+  try {
+    fecha1 = formatShortDate(fecha1)
+    let [day1, month1, year1] = fecha1.split('/')
+    let [day2, month2, year2] = fecha2.split('/')
+    let f1_new = `${year1}-${Number(month1)}-${day1}`
+    let f2_new = `${year2}-${Number(month2)}-${day2}`
+    const f1 = new Date(f1_new)
+    const f2 = new Date(f2_new)
+
+    if (f1 >= f2) {
+      return true
+    } else {
+      return false
+    }
+  } catch (error) {
+    console.error('Error al comparar fechas:', error)
+    return false
+  }
+}
 
 function getMonthYear(dateStr) {
   const date = new Date(dateStr)
@@ -214,14 +248,14 @@ onMounted(async () => {
             style="cursor: pointer"
           >
             <div
-              v-if="event.status == 'pending'"
+              v-if="compararFechas(event.date, today)"
               class="sidebar-event-date"
             >
               {{ event.date }}
               <!-- {{ event.start.split(' ')[1] }} -->
             </div>
             <div
-              v-if="event.status == 'pending'"
+              v-if="compararFechas(event.date, today)"
               class="sidebar-event-time"
             >
               {{ event.title }}<br /><span>{{ event.details }}</span

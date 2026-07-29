@@ -16,7 +16,7 @@ const evaluationFields = ref([])
 // Inicializamos el enrutador para leer la URL actual
 const route = useRoute()
 const id = route.query.id
-const typeId = route.query.type_id
+var typeId = route.query.type_id
 const appointment_type = route.query.appointment_type
 const read_only = route.query.ro
 const props = defineProps({
@@ -133,7 +133,8 @@ const medicalRecord = ref({
   subjective: null,
   objective: null,
   assessment: null,
-  plan: null
+  plan: null,
+  gender: null
 })
 //Relationships
 const medications = ref([])
@@ -230,7 +231,7 @@ async function save() {
     // medicalRecord.value = newMedicalRecord
     dialog.value = false
     // Notify.positive(`Seguimiento ${actionLabel} exitosamente`)
-    fetchMedicalRecord()
+    // fetchMedicalRecord()
   } catch (error) {
     errors.value = error.status == 422 && error.formatted ? error.formatted : {}
     // Notify.negative(`No se pudo guardar`)
@@ -398,7 +399,17 @@ const developmentRate = computed(() =>
           </div>
           <div class="form-group">
             <div class="form-label">Sexo</div>
-            <div class="form-value">{{ beneficiario.gender }}</div>
+            <div class="form-value">
+              <q-select
+                :readonly="read_only == 1"
+                :model-value="medicalRecord.gender || 'Masculino'"
+                @update:model-value="(val) => (medicalRecord.gender = val)"
+                :options="['Masculino', 'Femenino']"
+                outlined
+                stack-label
+                hide-bottom-space
+              ></q-select>
+            </div>
           </div>
         </div>
         <div class="form-row">
@@ -466,7 +477,7 @@ const developmentRate = computed(() =>
         style="margin-top: 10px"
       >
         <tbody>
-          <tr>
+          <tr v-if="route.query.type_id != 2">
             <td
               class="text-left"
               style="width: auto"
@@ -626,7 +637,7 @@ const developmentRate = computed(() =>
               />
             </td>
           </tr>
-          <tr v-if="route.query.type_id != 1">
+          <tr v-if="route.query.type_id != 2">
             <td
               class="text-left"
               style="width: auto"
@@ -718,7 +729,7 @@ const developmentRate = computed(() =>
               />
             </td>
           </tr>
-          <tr v-if="route.query.type_id != 1">
+          <tr v-if="route.query.type_id != 2">
             <td
               class="text-left"
               style="width: auto"

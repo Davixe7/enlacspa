@@ -137,7 +137,8 @@ const medicalRecord = ref({
   plan: null,
   appointment_id: null,
   type_id: null,
-  appointment_type: null
+  appointment_type: null,
+  gender: null
 })
 //Relationships
 const medications = ref([])
@@ -409,7 +410,17 @@ const developmentRate = computed(() =>
           </div>
           <div class="form-group">
             <div class="form-label">Sexo</div>
-            <div class="form-value">{{ beneficiario.gender }}</div>
+            <div class="form-value">
+              <q-select
+                :readonly="read_only == 1"
+                :model-value="medicalRecord.gender || 'Masculino'"
+                @update:model-value="(val) => (medicalRecord.gender = val)"
+                :options="['Masculino', 'Femenino']"
+                outlined
+                stack-label
+                hide-bottom-space
+              ></q-select>
+            </div>
           </div>
         </div>
         <div class="form-row">

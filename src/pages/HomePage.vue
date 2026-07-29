@@ -35,7 +35,10 @@
             class="module-card"
             :style="{ background: module.color }"
           >
-            <router-link :to="module.path">
+            <div
+              @click="navigateTo(module)"
+              style="cursor: pointer"
+            >
               <q-card-section style="padding: 36px">
                 <q-img
                   :src="`/${module.icon}.png`"
@@ -46,7 +49,7 @@
                   {{ module.label }}
                 </div>
               </q-card-section>
-            </router-link>
+            </div>
           </q-card>
         </div>
       </div>
@@ -57,9 +60,44 @@
 <script setup>
 import { api } from 'src/boot/axios'
 import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+const user = ref(null) // Variable para almacenar la información del usuario
+const navigateTo = (module) => {
+  if (module.external) {
+    // Si es externo, abre la URL fuera de tu sistema
+    // '_blank' abre en pestaña nueva. Usa '_self' si quieres que sea en la misma pestaña.
+    window.open(module.path, '_blank', 'noopener,noreferrer')
+  } else {
+    // Si es interno, navega usando Vue Router
+    router.push(module.path)
+  }
+}
+const fetchUser = async () => {
+  user.value = (await api.get('user')).data.data
+  console.log('Usuario actual:', user.value) // Muestra la información del usuario en la consola
+  if (user.value.is_admin || user.value.work_area_id === 6 || user.value.work_area_id === 11) {
+    /**
+     * Si el usuario es administrador o pertenece a las áreas de trabajo 6:Administración o 11: Recursos Humanos, actualiza la ruta del módulo "Personal ENLAC" con el ID del usuario codificado en base64.
+     * Esto permite que el módulo "Personal ENLAC" tenga una URL personalizada para cada usuario, asegurando que solo los usuarios autorizados puedan acceder a la información correspondiente.
+     */
+    updatePersonalModulePath()
+  }
+}
+const updatePersonalModulePath = () => {
+  const moduloPersonal = modules.value.find((m) => m.label === 'Personal ENLAC')
+  if (moduloPersonal) {
+    const base64_id = btoa(user.value.id) // Codifica el ID del usuario en base64
+    moduloPersonal.path = 'https://sistemaenlac.com/personal_enlac?key=' + base64_id
+    moduloPersonal.external = true // Asegura que el módulo se abra en una nueva pestaña
+  }
+}
+
 onMounted(async () => {
   slides.value = (await api.get('dashboard-slides')).data.data
   slide.value = slides.value.length ? slides.value[0].id : null
+  fetchUser()
 })
 const slides = ref([])
 const slide = ref(null)
@@ -110,7 +148,8 @@ const modules = ref([
     label: 'Personal ENLAC',
     color: '#A3B8FF',
     icon: 'personal',
-    path: '/'
+    path: ``,
+    external: false // Inicialmente no es externo, se actualizará después de obtener el usuario
   }
 ])
 </script>
