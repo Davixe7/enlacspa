@@ -215,16 +215,16 @@ async function save() {
   medicalRecord.value.type_id = typeId
   medicalRecord.value.appointment_type = appointment_type
   medicalRecord.value.candidate_id = props.candidateId
-  let route =
-    medicalRecord.value.id_medical_record != 0
-      ? `medical-records/${medicalRecord.value.id_medical_record}/update`
-      : 'medical-records'
-  let data =
-    medicalRecord.value.id_medical_record != 0
-      ? { ...medicalRecord.value, _method: 'PUT' }
-      : { ...medicalRecord.value }
+  // let route =
+  //   medicalRecord.value.id_medical_record != 0
+  //     ? `medical-records/${medicalRecord.value.id_medical_record}/update`
+  //     : 'medical-records'
+  // let data =
+  //   medicalRecord.value.id_medical_record != 0
+  //     ? { ...medicalRecord.value, _method: 'PUT' }
+  //     : { ...medicalRecord.value }
   // let actionLabel = medicalRecord.value.id_medical_record != 0 ? 'actualizado' : 'creado'
-  try {
+  /*try {
     ;(await api.post(route, data)).data.data
     // console.log("new " + newMedicalRecord);
 
@@ -235,7 +235,7 @@ async function save() {
   } catch (error) {
     errors.value = error.status == 422 && error.formatted ? error.formatted : {}
     // Notify.negative(`No se pudo guardar`)
-  }
+  }*/
   loading.value = false
   isProccesing.value = false
 }
